@@ -28,6 +28,13 @@ import androidx.compose.material.icons.rounded.Timer
 import androidx.compose.material.icons.rounded.Today
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
@@ -48,6 +55,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
@@ -189,7 +197,21 @@ fun AppRoot(
     // The inset = the bar's MEASURED height (incl. system-bar padding) + air while the bar shows; on full-screen pages just the system bar.
     val inset = if (showBar) (if (barPx > 0) with(LocalDensity.current) { barPx.toDp() } + 16.dp else 108.dp) else 16.dp + navBottom
 
-    Box(Modifier.fillMaxSize()) {
+    // The bar slides away while she scrolls down and returns on a scroll up, at the end of a list, on a tap at the bottom edge, or on a tab change.
+    var scrolledAway by remember { mutableStateOf(false) }
+    LaunchedEffect(route) { scrolledAway = false }
+    val barScroll = remember {
+        object : NestedScrollConnection {
+            override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
+                when {
+                    consumed.y < -6f -> scrolledAway = true       // finger moves up = content scrolls down
+                    consumed.y > 6f || available.y < -6f -> scrolledAway = false // scroll up, or hit the end of the list
+                }
+                return Offset.Zero
+            }
+        }
+    }
+    Box(Modifier.fillMaxSize().nestedScroll(barScroll)) {
         CompositionLocalProvider(LocalBottomBarInset provides inset) {
             NavHost(
                 nav,
@@ -262,8 +284,12 @@ fun AppRoot(
                 composable(Dest.PROFILE) { ProfileScreen(headlinesVm, authVm, studyByDate, onBack = { nav.popBackStack() }) }
             }
         }
+        if (showBar && scrolledAway) Box(
+            Modifier.align(Alignment.BottomCenter).fillMaxWidth().navigationBarsPadding().height(28.dp)
+                .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { scrolledAway = false },
+        )
         AnimatedVisibility(
-            visible = showBar,
+            visible = showBar && !scrolledAway,
             modifier = Modifier.align(Alignment.BottomCenter),
             enter = if (reduceMotion) EnterTransition.None else fadeIn(tween(200)) + slideInVertically(tween(240)) { it / 2 },
             exit = if (reduceMotion) ExitTransition.None else fadeOut(tween(140)) + slideOutVertically(tween(180)) { it / 2 },
