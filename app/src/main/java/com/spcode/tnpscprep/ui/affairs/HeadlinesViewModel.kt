@@ -39,6 +39,10 @@ class HeadlinesViewModel(
     /** Small flows for the Settings switch (so Settings doesn't recompose with the whole list). */
     val enabled: StateFlow<Boolean> = settings.newsEnabled
     val lastRefreshMs: StateFlow<Long> = settings.lastNewsRefreshMs
+    val themeMode: StateFlow<String> = settings.themeMode
+    val userName: StateFlow<String> = settings.userName
+    fun setThemeMode(v: String) = settings.setThemeMode(v)
+    fun setUserName(v: String) = settings.setUserName(v)
 
     private val list = combine(
         _filter.flatMapLatest { news.observeSince(it.range.days) }, affairs.observeStates(), _filter,

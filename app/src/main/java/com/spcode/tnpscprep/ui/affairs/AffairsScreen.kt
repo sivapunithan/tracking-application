@@ -48,6 +48,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.spcode.tnpscprep.R
 import com.spcode.tnpscprep.domain.AffairCategory
 import com.spcode.tnpscprep.domain.RevisionLevel
+import com.spcode.tnpscprep.ui.design.LocalBottomBarInset
 import com.spcode.tnpscprep.ui.localized
 import java.time.Instant
 import java.time.LocalDate
@@ -77,7 +78,7 @@ fun AffairsScreen(vm: AffairsViewModel) {
 
     LazyColumn(
         Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 16.dp + LocalBottomBarInset.current),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item {

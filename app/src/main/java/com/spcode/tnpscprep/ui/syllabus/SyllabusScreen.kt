@@ -52,6 +52,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.spcode.tnpscprep.R
 import com.spcode.tnpscprep.domain.Exam
 import com.spcode.tnpscprep.domain.RevisionLevel
+import com.spcode.tnpscprep.ui.design.LocalBottomBarInset
+import com.spcode.tnpscprep.ui.design.ScreenTitle
 import com.spcode.tnpscprep.ui.localized
 
 /** [twoPane] = list + detail side by side (tablet/wide); otherwise list -> detail with Back (phone). */
@@ -120,7 +122,8 @@ fun SyllabusScreen(viewModel: SyllabusViewModel, twoPane: Boolean) {
 
 @Composable
 private fun Header(filter: ExamFilter, onFilter: (ExamFilter) -> Unit) {
-    Column(Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
+    Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+        ScreenTitle(stringResource(R.string.syllabus_title))
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             ExamFilter.entries.forEach { f ->
                 FilterChip(
@@ -143,7 +146,7 @@ private fun Header(filter: ExamFilter, onFilter: (ExamFilter) -> Unit) {
 private fun SubjectList(
     subjects: List<SubjectUi>, selectedId: String?, onSelect: (String) -> Unit, modifier: Modifier,
 ) {
-    LazyColumn(modifier, contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    LazyColumn(modifier, contentPadding = PaddingValues(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 16.dp + LocalBottomBarInset.current), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         items(subjects, key = { it.id }) { s ->
             val selected = s.id == selectedId
             Card(
@@ -181,7 +184,7 @@ private fun SubjectList(
 private fun SubjectDetail(
     subject: SubjectUi, vm: SyllabusViewModel, onOpenNote: (String) -> Unit, showBack: Boolean, onBack: () -> Unit, modifier: Modifier,
 ) {
-    LazyColumn(modifier, contentPadding = PaddingValues(bottom = 24.dp)) {
+    LazyColumn(modifier, contentPadding = PaddingValues(bottom = 24.dp + LocalBottomBarInset.current)) {
         item {
             Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
                 if (showBack) TextButton(onClick = onBack) { Text(stringResource(R.string.back)) }

@@ -42,6 +42,8 @@ data class TodayProgress(
     val due: List<DueItem>,
     val subjects: List<SubjectProgress> = emptyList(),
     val starred: List<StarredItem> = emptyList(),
+    /** Whole days since she last touched ANY topic (read, revised, levelled up); null = never. */
+    val daysSinceTopicActivity: Int? = null,
 )
 
 /**
@@ -73,6 +75,9 @@ fun buildTodayProgress(
         subjects = subjects.mapNotNull { s ->
             val ts = allTopics.filter { it.subjectId == s.id }
             if (ts.isEmpty()) null else SubjectProgress(s.id, s.nameEn, s.nameTa, RevisionLevel.percent(ts.map { it.level }), ts.size)
+        },
+        daysSinceTopicActivity = studied.maxOfOrNull { it.lastUpdated }?.let { last ->
+            java.time.temporal.ChronoUnit.DAYS.between(java.time.Instant.ofEpochMilli(last).atZone(zone).toLocalDate(), today).toInt().coerceAtLeast(0)
         },
         starred = starred.map {
             val subj = subjectById[it.subjectId]

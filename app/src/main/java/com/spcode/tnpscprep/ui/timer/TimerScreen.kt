@@ -35,6 +35,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.spcode.tnpscprep.R
 import com.spcode.tnpscprep.domain.Phase
 import com.spcode.tnpscprep.domain.TimerLimits
+import com.spcode.tnpscprep.ui.design.LocalBottomBarInset
+import com.spcode.tnpscprep.ui.design.ScreenTitle
 import com.spcode.tnpscprep.ui.localized
 import java.util.Locale
 
@@ -44,9 +46,10 @@ fun TimerScreen(vm: TimerViewModel) {
     val ui by vm.ui.collectAsStateWithLifecycle()
 
     Column(
-        Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
+        Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 16.dp + LocalBottomBarInset.current),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
+        ScreenTitle(stringResource(R.string.timer_title))
         // --- clock ---
         Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
             Text(

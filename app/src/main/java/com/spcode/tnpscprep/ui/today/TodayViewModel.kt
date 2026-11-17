@@ -35,6 +35,7 @@ data class TodayUiState(
     val todayMinutes: Int = 0,
     val goalMinutes: Int = 60,
     val streak: Int = 0,
+    val daysSinceStudy: Int? = null,
 )
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -73,6 +74,8 @@ class TodayViewModel(
         Pair(buildDayStats(totals, goal, day), goal)
     }
 
+    val userName: StateFlow<String> = settings.userName
+
     val ui: StateFlow<TodayUiState> = combine(target, combine(progress, affairDue) { p, a -> p.copy(due = mergeDue(p.due, a)) }, stats, settings.examEpochDay, dayFlow) { t, p, (st, goal), examDay, day ->
         val date = if (examDay == SettingsStore.NO_DATE) null else LocalDate.ofEpochDay(examDay)
         TodayUiState(
@@ -83,6 +86,8 @@ class TodayViewModel(
             todayMinutes = st.todayMinutes,
             goalMinutes = goal,
             streak = st.streak,
+            // Studying = a timer session OR touching a topic: either keeps her "active" for the mood.
+            daysSinceStudy = listOfNotNull(st.daysSinceStudy, p.daysSinceTopicActivity).minOrNull(),
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), TodayUiState())
 

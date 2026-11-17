@@ -29,12 +29,15 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.spcode.tnpscprep.R
 import com.spcode.tnpscprep.domain.AffairCategory
+import com.spcode.tnpscprep.ui.design.LocalBottomBarInset
+import com.spcode.tnpscprep.ui.design.ScreenTitle
 
 /** The Current affairs tab: our curated pack, or the auto-fetched headlines. */
 @Composable
 fun AffairsTab(affairsVm: AffairsViewModel, headlinesVm: HeadlinesViewModel) {
     var mode by rememberSaveable { mutableIntStateOf(0) }
     Column(Modifier.fillMaxSize()) {
+        ScreenTitle(stringResource(R.string.tab_affairs), Modifier.padding(horizontal = 16.dp))
         Row(Modifier.padding(horizontal = 16.dp, vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             FilterChip(selected = mode == 0, onClick = { mode = 0 }, label = { Text(stringResource(R.string.news_tab_curated)) })
             FilterChip(selected = mode == 1, onClick = { mode = 1 }, label = { Text(stringResource(R.string.news_tab_headlines)) })
@@ -50,7 +53,7 @@ fun HeadlinesScreen(vm: HeadlinesViewModel) {
 
     LazyColumn(
         Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 16.dp),
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 16.dp + LocalBottomBarInset.current),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item {

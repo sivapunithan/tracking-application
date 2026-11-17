@@ -9,6 +9,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -16,6 +18,7 @@ import com.spcode.tnpscprep.ui.AppRoot
 import com.spcode.tnpscprep.ui.affairs.AffairsViewModel
 import com.spcode.tnpscprep.ui.affairs.HeadlinesViewModel
 import com.spcode.tnpscprep.ui.syllabus.SyllabusViewModel
+import com.spcode.tnpscprep.ui.theme.ThemeMode
 import com.spcode.tnpscprep.ui.theme.TnpscTheme
 import com.spcode.tnpscprep.ui.timer.TimerViewModel
 import com.spcode.tnpscprep.ui.today.TodayViewModel
@@ -30,7 +33,8 @@ class MainActivity : AppCompatActivity() {
         setContent {
             // Compact = phones in portrait (<600dp). Medium/Expanded = tablets, big phones in landscape.
             val widthClass = calculateWindowSizeClass(this).widthSizeClass
-            TnpscTheme {
+            val themeMode by c.settingsStore.themeMode.collectAsStateWithLifecycle()
+            TnpscTheme(ThemeMode.fromName(themeMode)) {
                 Surface(color = MaterialTheme.colorScheme.background) {
                     val syllabusVm = viewModel<SyllabusViewModel>(
                         factory = viewModelFactory { initializer { SyllabusViewModel(c.syllabusRepository) } },

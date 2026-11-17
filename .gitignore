@@ -10,3 +10,7 @@ keystore.properties
 *.jks
 *.keystore
 release/
+
+# Personal artwork (a real person's likeness): keep OUT of the public repo
+design-src/
+app/src/main/res/drawable-nodpi/mood_*

@@ -175,3 +175,14 @@ reference, write own notes with page refs.
 - Tests: FeedParser against REAL trimmed feed samples (app/src/test/resources/feeds), FeedPolicy (look-alike hosts), pipeline, relevance. kxml2 is a TEST-only
   dependency (Android has the pull parser built in).
 - Not verified: the Latest headlines UI in Tamil; behaviour over many days (retention, feed breakage); release (R8) build on a device.
+
+## Avatar reactions (increment 10, in progress)
+- Owner's FINAL reaction set (domain/Mood): LAUGH, CHEER, PROUD, WORRIED, CRY, ANGRY, CELEBRATE. Rules in `domain/MoodEngine` (angry >= 7 days away, cry 3-6,
+  worried 2 days / 8+ overdue / evening goal unmet, celebrate streak >= 14, laugh >= 7, cheer goal met + streak >= 3, proud default). Unit tested.
+- Pictures are `mood_<name>.webp` in res/drawable-nodpi, GIT-IGNORED on purpose (a real person's likeness; the GitHub repo is PUBLIC). The app looks them up by
+  name at runtime and shows an initial badge if one is missing, so a clean checkout still builds. ALL SEVEN pictures exist (laugh, cheer, proud, worried, cry, angry, celebrate). The tall ones (cry/angry/celebrate, 512 x ~660-700) are shown as their TOP square (ContentScale.Crop + TopCenter); `MoodAvatar.poseFor` holds per-picture effect positions (eyes, face centre, steam, sparkle) in fractions of that square: recalibrate there if a picture is replaced.
+- Effects are drawn in code over the transparent picture (ui/mood/MoodAvatar): angry = pulsing RED face flush + steam; cry = BLUE tears + water puddle;
+  celebrate/cheer/laugh = bounce + confetti; proud = sparkle; worried = sweat drop. Settings > Preview reactions shows all of them.
+- Source art + prompts live in the git-ignored `design-src/` (portrait cut-out, sliced moods, prompt file).
+- Open owner decisions: "login" = local profile (recommended) vs real accounts; make the GitHub repo private?
+- Slicing lesson: split a sheet by the characters' OWN outlines (connected components on the whole sheet), never at fixed column lines: a raised fist crossed the line once and left a stray hand in a neighbour. Outer hair gaps are cleared; eyes/teeth are protected by only clearing enclosed white at the left/right edges.

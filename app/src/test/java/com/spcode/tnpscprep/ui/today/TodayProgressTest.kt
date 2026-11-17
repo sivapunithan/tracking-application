@@ -80,4 +80,13 @@ class TodayProgressTest {
         assertEquals(2, item.level)
         assertEquals("remember articles 12-35", item.note)
     }
+
+    @Test fun days_since_topic_activity_uses_the_most_recent_touch() {
+        val p = buildTodayProgress(listOf(studied("a", 1, 9), studied("b", 1, 4)), emptyList(), subjects, today, zone)
+        assertEquals(4, p.daysSinceTopicActivity)
+    }
+
+    @Test fun no_topics_touched_means_no_activity_yet() {
+        assertEquals(null, buildTodayProgress(emptyList(), emptyList(), subjects, today, zone).daysSinceTopicActivity)
+    }
 }

@@ -39,6 +39,17 @@ class SettingsStore(context: Context) {
     fun setNewsEnabled(v: Boolean) { prefs.edit().putBoolean(K_NEWS, v).apply(); _newsEnabled.value = v }
     fun setLastNewsRefresh(ms: Long) { prefs.edit().putLong(K_NEWS_LAST, ms).apply(); _newsLast.value = ms }
 
+    private val _theme = MutableStateFlow(prefs.getString(K_THEME, "LIGHT") ?: "LIGHT")
+    private val _name = MutableStateFlow(prefs.getString(K_NAME, "") ?: "")
+
+    /** "LIGHT" (default), "DARK" or "SYSTEM". Kept as text so data/ doesn't depend on ui/. */
+    val themeMode: StateFlow<String> = _theme.asStateFlow()
+    /** Optional first name for the greeting on the Today screen. Stays on the phone. */
+    val userName: StateFlow<String> = _name.asStateFlow()
+
+    fun setThemeMode(v: String) { prefs.edit().putString(K_THEME, v).apply(); _theme.value = v }
+    fun setUserName(v: String) { val t = v.trim().take(30); prefs.edit().putString(K_NAME, t).apply(); _name.value = t }
+
     val focusMinutes: StateFlow<Int> = _focus.asStateFlow()
     val breakMinutes: StateFlow<Int> = _break.asStateFlow()
     val dailyGoalMinutes: StateFlow<Int> = _goal.asStateFlow()
@@ -58,6 +69,8 @@ class SettingsStore(context: Context) {
         private const val K_BREAK = "break_min"
         private const val K_GOAL = "daily_goal_min"
         private const val K_TARGET = "target_exam"
+        private const val K_THEME = "theme_mode"
+        private const val K_NAME = "user_name"
         private const val K_NEWS = "news_enabled"
         private const val K_NEWS_LAST = "news_last_refresh"
         private const val K_EXAM_DAY = "exam_epoch_day"
