@@ -60,7 +60,7 @@ import com.spcode.tnpscprep.ui.theme.LocalIsDark
 
 /** The one card that says what to do next (rule order: domain/TodayGuide). Mood pictures are the empty-state art. */
 @Composable
-fun NextActionCard(action: NextAction, firstDue: DueItem?, nextTopicName: String?, onAction: () -> Unit) {
+fun NextActionCard(action: NextAction, firstDue: DueItem?, nextTopicName: String?, streak: Int, todayMinutes: Int, goalMinutes: Int, onAction: () -> Unit) {
     val dark = LocalIsDark.current
     val brush = Brush.linearGradient(if (dark) listOf(Color(0xFF9B0F26), Color(0xFF4A0A14)) else listOf(Color(0xFFC8102E), Color(0xFF7A0019)))
     val title: String
@@ -80,21 +80,25 @@ fun NextActionCard(action: NextAction, firstDue: DueItem?, nextTopicName: String
         NextAction.NewTopic -> { title = stringResource(R.string.na_topic_title); body = nextTopicName.orEmpty(); cta = stringResource(R.string.na_topic_cta); art = "PROUD" }
         NextAction.AllCaughtUp -> { title = stringResource(R.string.na_done_title); body = stringResource(R.string.na_done_body); cta = null; art = "CELEBRATE" }
     }
-    Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(28.dp)).background(brush).padding(20.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text(stringResource(R.string.na_label), style = MaterialTheme.typography.labelLarge, color = Color.White.copy(alpha = 0.8f))
-                Text(title, style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold), color = Color.White, maxLines = 3)
-                if (body.isNotBlank()) Text(body, style = MaterialTheme.typography.bodyMedium, color = Color.White.copy(alpha = 0.9f), maxLines = 3)
-                if (cta != null) {
-                    Spacer(Modifier.height(4.dp))
-                    Box(
-                        Modifier.clip(RoundedCornerShape(50)).background(Color.White).pressScale(onClick = onAction).padding(horizontal = 18.dp, vertical = 10.dp),
-                    ) { Text(cta, style = MaterialTheme.typography.labelLarge, color = Color(0xFF7A0019)) }
+    // One quiet facts line (no score, no pressure): the streak when there is one, and today's study minutes against her goal.
+    val facts = listOfNotNull(
+        if (streak > 0) stringResource(R.string.tile_streak, streak) else null,
+        if (goalMinutes > 0) stringResource(R.string.na_ctx_today, todayMinutes, goalMinutes) else null,
+    ).joinToString("  ·  ")
+    Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(28.dp)).background(brush)) {
+        // The picture is big and sits in the bottom-right corner, behind the text column's reserved space.
+        Box(Modifier.align(Alignment.BottomEnd).padding(end = 6.dp, bottom = 0.dp)) { DiaryMood(art, 112.dp) }
+        Column(Modifier.fillMaxWidth().heightIn(min = 124.dp).padding(start = 20.dp, top = 16.dp, bottom = 16.dp, end = 122.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(stringResource(R.string.na_label).uppercase(), style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.2.sp), color = Color.White.copy(alpha = 0.75f))
+            Text(title, style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold), color = Color.White, maxLines = 2)
+            if (body.isNotBlank()) Text(body, style = MaterialTheme.typography.bodySmall, color = Color.White.copy(alpha = 0.9f), maxLines = 2)
+            if (facts.isNotBlank()) Text(facts, style = MaterialTheme.typography.labelMedium, color = Color.White.copy(alpha = 0.7f), maxLines = 2, modifier = Modifier.padding(top = 2.dp))
+            if (cta != null) {
+                Spacer(Modifier.height(6.dp))
+                Box(Modifier.clip(RoundedCornerShape(50)).background(Color.White).pressScale(onClick = onAction).padding(horizontal = 16.dp, vertical = 8.dp)) {
+                    Text(cta, style = MaterialTheme.typography.labelLarge, color = Color(0xFF7A0019))
                 }
             }
-            Spacer(Modifier.width(12.dp))
-            DiaryMood(art, 72.dp)
         }
     }
 }

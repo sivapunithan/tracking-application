@@ -417,3 +417,7 @@ reference, write own notes with page refs.
 - `AppRoot`: a NestedScrollConnection on the root Box. Scrolling down (child consumed y < -6) hides the bar + its fade; any scroll up, reaching the end of a list, a tap on a 28dp strip at the bottom edge, or a route/tab change shows it. List padding (`LocalBottomBarInset`) is unchanged while hidden so nothing jumps. Still always hidden on Focus, Profile, Wrap-up and the diary editor. Seen on the phone on Today (hide, show on scroll up, fast flick); Study/Care/Journal not checked. One earlier capture right after launch still showed the bar after a fast swipe and I did not find why.
 
 - Today's header avatar (top right, opens Profile) is now always the thumbs-up (PROUD) picture, like the Profile header; the initial/graduation-cap badge only shows if the picture is missing. Seen on the phone.
+
+## Today: greeting font + red card restructure
+- Greeting ("Good morning") uses bundled **Playfair Display Bold** (`res/font/playfair_display.ttf`, the OFL variable font pinned to weight 700, +300 KB; licence in `design/licenses/PlayfairDisplay-OFL.txt`). Only the greeting uses it; Tamil glyphs fall back to the phone's Tamil font (not yet seen in Tamil).
+- Next best step card: small caps label, 2-line bold title, 2-line body, a quiet facts line (streak when > 0 + "x of goal min today", `na_ctx_today`), smaller button, 112dp picture in the bottom-right corner. Rule order and actions unchanged. Seen on the phone (English, set-exam-date state only; other states not seen).

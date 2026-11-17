@@ -60,6 +60,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.initializer
 import com.spcode.tnpscprep.R
@@ -202,7 +203,7 @@ fun TodayScreen(vm: TodayViewModel, onOpenProfile: () -> Unit, onOpenDiary: (Str
         if (wrapState == com.spcode.tnpscprep.domain.WrapupCardState.INVITE) item(key = "wrapup") { com.spcode.tnpscprep.ui.wrapup.WrapupCardView(wrapState, onOpenWrapup, lastSeven, plannedTomorrow.map { it.title }.take(3)) }
 
         item {
-            NextActionCard(action, ui.progress.due.firstOrNull(), extras.nextTopic?.let { localized(it.nameEn, it.nameTa) }) {
+            NextActionCard(action, ui.progress.due.firstOrNull(), extras.nextTopic?.let { localized(it.nameEn, it.nameTa) }, ui.streak, ui.todayMinutes, ui.goalMinutes) {
                 when (action) {
                     com.spcode.tnpscprep.domain.NextAction.SetExamDate -> sheet = "date"
                     is com.spcode.tnpscprep.domain.NextAction.Revise -> ui.progress.due.firstOrNull()?.let { sheet = "due:" + it.topicId }
@@ -309,6 +310,11 @@ fun TodayScreen(vm: TodayViewModel, onOpenProfile: () -> Unit, onOpenDiary: (Str
     }
 }
 
+@OptIn(androidx.compose.ui.text.ExperimentalTextApi::class)
+private val GreetingFont = androidx.compose.ui.text.font.FontFamily(
+    androidx.compose.ui.text.font.Font(R.font.playfair_display, FontWeight.Bold, variationSettings = androidx.compose.ui.text.font.FontVariation.Settings(androidx.compose.ui.text.font.FontVariation.weight(700))),
+)
+
 @Composable
 private fun Header(name: String, ui: TodayUiState, onProfile: () -> Unit, onExamDate: () -> Unit) {
     val hour = remember { LocalTime.now().hour }
@@ -328,7 +334,12 @@ private fun Header(name: String, ui: TodayUiState, onProfile: () -> Unit, onExam
     val profileDesc = stringResource(R.string.profile_open)
     Row(Modifier.fillMaxWidth().padding(top = 4.dp), verticalAlignment = Alignment.CenterVertically) {
         Column(Modifier.weight(1f)) {
-            Text(greeting, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            // Playfair Display Bold (bundled, OFL; the variable font is pinned to weight 700). Tamil glyphs fall back to the phone's Tamil font.
+            Text(
+                greeting,
+                style = MaterialTheme.typography.titleMedium.copy(fontFamily = GreetingFont, fontWeight = FontWeight.Bold, letterSpacing = 0.2.sp),
+                color = MaterialTheme.colorScheme.primary,
+            )
             Text(
                 if (name.isBlank()) stringResource(R.string.welcome_back) else stringResource(R.string.hello_name, com.spcode.tnpscprep.ui.properName(name)),
                 style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),

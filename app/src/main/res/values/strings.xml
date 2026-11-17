@@ -553,4 +553,5 @@
     <string name="bkn_later">Later</string>
     <string name="bkn_off">Don\'t remind me</string>
     <string name="bk_remind_switch">Remind me to back up</string>
+    <string name="na_ctx_today">%1$d of %2$d min today</string>
 </resources>
