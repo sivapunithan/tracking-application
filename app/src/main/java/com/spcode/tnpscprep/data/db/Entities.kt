@@ -159,3 +159,20 @@ data class AffairStateEntity(
     val level: Int,
     val lastUpdated: Long,
 )
+
+// ---- AUTO-FETCHED HEADLINES (optional, needs internet) ----
+
+/** Only headline + date + link are kept (never article text). State (star / revised) lives in ca_state under "news-<id>". */
+@Entity(tableName = "news_item", indices = [Index("publishedAt")])
+data class NewsItemEntity(
+    @PrimaryKey val id: String,
+    val feedId: String,
+    val source: String,
+    val title: String,
+    val url: String,
+    /** epoch millis */
+    val publishedAt: Long,
+    val category: String,
+    val language: String,
+    val fetchedAt: Long,
+)

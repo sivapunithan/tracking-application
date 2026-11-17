@@ -40,3 +40,18 @@ class AffairDueTest {
         assertEquals(listOf("a", "t1"), merged.map { it.topicId })
     }
 }
+
+class NewsDueTest {
+    private val zone = ZoneId.of("Asia/Kolkata")
+    private val today = LocalDate.of(2026, 11, 17)
+
+    @Test fun a_revised_headline_comes_back_on_the_same_schedule() {
+        val published = today.minusDays(40).atTime(9, 0).atZone(zone).toInstant().toEpochMilli()
+        val revisedAt = today.minusDays(3).atTime(9, 0).atZone(zone).toInstant().toEpochMilli()
+        val n = com.spcode.tnpscprep.data.db.NewsItemEntity("x", "f", "The Hindu", "Some headline", "https://e.org/x", published, "TN", "en", published)
+        val ui = com.spcode.tnpscprep.ui.affairs.newsToUi(n, com.spcode.tnpscprep.data.db.AffairStateEntity("news-x", false, 1, revisedAt), zone)
+        val due = buildAffairDue(listOf(ui), today, zone)
+        assertEquals("news-x", due.single().topicId)
+        assertEquals(0, due.single().daysOverdue)
+    }
+}

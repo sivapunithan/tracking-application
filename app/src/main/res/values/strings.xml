@@ -96,4 +96,24 @@
     <string name="cat_science">Science and defence</string>
     <string name="cat_sports">Sports</string>
     <string name="cat_awards">Awards and honours</string>
+    <string name="news_tab_curated">Curated</string>
+    <string name="news_tab_headlines">Latest headlines</string>
+    <string name="news_disclaimer">Auto-fetched headlines from public news websites (The Hindu, The Indian Express, BBC Tamil), filtered by keywords for exam relevance. Only the headline, date and link are kept. We have not checked them: tap Open source to read at the source.</string>
+    <string name="news_never">Not fetched yet</string>
+    <string name="news_last_updated">Updated %1$s</string>
+    <string name="news_refresh">Refresh</string>
+    <string name="news_refreshing">Refreshing…</string>
+    <string name="news_sources_failed">%1$d of %2$d sources could not be reached</string>
+    <string name="news_off_title">Latest headlines are switched off</string>
+    <string name="news_off_body">Turn this on to fetch headlines from the internet. No personal information is sent.</string>
+    <string name="news_turn_on">Turn on</string>
+    <string name="news_empty">No matching headlines yet. Tap Refresh while you are online.</string>
+    <string name="range_7d">7 days</string>
+    <string name="range_30d">30 days</string>
+    <string name="range_all">6 months</string>
+    <string name="news_autofetched">Auto-fetched</string>
+    <string name="settings_news_title">Latest headlines (uses the internet)</string>
+    <string name="settings_news_switch">Fetch latest headlines</string>
+    <string name="settings_news_note">When on, the app downloads public news feeds (The Hindu, The Indian Express, BBC Tamil) when you open it, at most once every 6 hours. It sends no personal information, has no account and no tracking, and keeps only headline, date and link for about 6 months. Turn this off to stop all network use.</string>
+    <string name="settings_news_last">Last fetched: %1$s</string>
 </resources>

@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Deliberately NO <uses-permission> entries: the app is fully offline (no INTERNET). -->
+    <!-- The ONLY permission. Used solely by the optional "Latest headlines" feature (HttpFeedSource);
+         it can be switched off in Settings, and all traffic is https to the hosts listed in assets/feeds.json. -->
+    <uses-permission android:name="android.permission.INTERNET" />
     <application
         android:name=".TnpscApp"
         android:allowBackup="false"
         android:localeConfig="@xml/locales_config"
+        android:networkSecurityConfig="@xml/network_security_config"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"

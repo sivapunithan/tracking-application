@@ -2,14 +2,20 @@ package com.spcode.tnpscprep
 
 import android.content.Context
 import androidx.room.Room
+import com.spcode.tnpscprep.data.NewsRepository
 import com.spcode.tnpscprep.data.db.AppDatabase
 import com.spcode.tnpscprep.data.db.MIGRATION_1_2
 import com.spcode.tnpscprep.data.db.MIGRATION_2_3
+import com.spcode.tnpscprep.data.db.MIGRATION_3_4
+import com.spcode.tnpscprep.data.news.FeedListDto
+import com.spcode.tnpscprep.data.news.FeedPolicy
+import com.spcode.tnpscprep.data.news.HttpFeedSource
 import com.spcode.tnpscprep.data.seed.AffairSeeder
 import com.spcode.tnpscprep.data.seed.RoomAffairStore
 import com.spcode.tnpscprep.data.seed.RoomSyllabusStore
 import com.spcode.tnpscprep.data.seed.SeedResult
 import com.spcode.tnpscprep.data.seed.SyllabusSeeder
+import kotlinx.serialization.json.Json
 
 /**
  * Manual dependency container (what Spring's @Configuration does, minus the framework).
@@ -20,7 +26,7 @@ class AppContainer(context: Context) {
 
     val database: AppDatabase by lazy {
         Room.databaseBuilder(appContext, AppDatabase::class.java, "tnpscprep.db")
-            .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+            .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
             .build()
     }
 
@@ -30,6 +36,14 @@ class AppContainer(context: Context) {
     val settingsStore by lazy { com.spcode.tnpscprep.data.SettingsStore(appContext) }
 
     val affairRepository by lazy { com.spcode.tnpscprep.data.AffairRepository(database) }
+
+    /** Feeds come from assets/feeds.json; the host of each feed url is the network allow-list. */
+    val newsRepository by lazy {
+        val feeds = Json { ignoreUnknownKeys = true }
+            .decodeFromString<FeedListDto>(appContext.assets.open("feeds.json").bufferedReader().use { it.readText() }).feeds
+        val hosts = feeds.mapNotNull { FeedPolicy.hostOf(it.url) }.toSet()
+        NewsRepository(database, HttpFeedSource(hosts), feeds, settingsStore)
+    }
 
     private val seeder by lazy { SyllabusSeeder(RoomSyllabusStore(database)) }
     private val affairSeeder by lazy { AffairSeeder(RoomAffairStore(database)) }

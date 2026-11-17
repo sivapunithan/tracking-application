@@ -2,6 +2,7 @@ package com.spcode.tnpscprep.data.db
 
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
@@ -104,4 +105,21 @@ interface AffairDao {
     @Query("SELECT value FROM app_meta WHERE `key` = :key") suspend fun getMeta(key: String): String?
     @Query("SELECT value FROM app_meta WHERE `key` = :key") fun observeMeta(key: String): Flow<String?>
     @Upsert suspend fun putMeta(meta: AppMetaEntity)
+}
+
+@Dao
+interface NewsDao {
+    // IGNORE: an article we already have keeps its original row (and its fetch time).
+    @Insert(onConflict = OnConflictStrategy.IGNORE) suspend fun insertAll(items: List<NewsItemEntity>)
+
+    @Query("SELECT * FROM news_item WHERE publishedAt >= :since ORDER BY publishedAt DESC LIMIT 1500")
+    fun observeSince(since: Long): Flow<List<NewsItemEntity>>
+
+    /** Headlines she has revised at least once: needed for the Today "due for revision" list. */
+    @Query("SELECT n.* FROM news_item n JOIN ca_state s ON s.itemId = 'news-' || n.id WHERE s.level > 0")
+    fun observeRevised(): Flow<List<NewsItemEntity>>
+
+    /** Retention: delete old headlines, but NEVER one she starred or revised. */
+    @Query("DELETE FROM news_item WHERE publishedAt < :cutoff AND ('news-' || id) NOT IN (SELECT itemId FROM ca_state)")
+    suspend fun prune(cutoff: Long): Int
 }

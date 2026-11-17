@@ -2,7 +2,7 @@
 
 ## PURPOSE (clarified by the owner, overrides earlier guesses)
 The app is for **REVISION + a progress TRACKER + real CURRENT AFFAIRS**. It is NOT primarily a question bank / mock-test app
-(quizzes are optional, last). Offline is fine: no INTERNET permission.
+(quizzes are optional, last). Offline is fine; from v1.1.0 ONE optional feature (Latest headlines) uses the internet (see 'Increment 9').
 **Handover constraint: the owner will NOT maintain the app after development.** Therefore:
 - Ship it self-contained and clearly documented (signed release APK, README with install steps in English + Tamil, this file).
 - Anything time-sensitive (current affairs) must carry a visible "data up to <date>" label so it can never mislead silently.
@@ -156,3 +156,22 @@ reference, write own notes with page refs.
 - NOT yet verified: that the R8-shrunk release build runs correctly on a device (kotlinx.serialization / Room under R8). The debug build is what
   was tested. Debug and release have different signatures, so installing release over debug requires uninstalling debug (wipes its data).
 - Known gaps for a next maintainer: no backup/export of progress (allowBackup=false), real tablet untested, Tamil strings + CA data need human review.
+
+## Increment 9: Latest headlines (v1.1.0) - the ONLY feature that uses the internet
+- Owner decision (17 Nov 2026): allow INTERNET for current affairs, scoped to this feature. Manifest has the INTERNET permission and a
+  network security config with cleartext disabled. `SettingsStore.newsEnabled` (default ON) is the master switch: when off, NO requests are made.
+- Why feeds: there is no free exam-curated current-affairs API; public news RSS gives headline+date+link only, and each feed holds just 1-7 days,
+  so history accumulates on the phone (rolling ~6 months, `NewsPipeline.RETENTION_DAYS`=183) and the curated pack covers earlier months.
+- Sources (assets/feeds.json; edit to change): The Hindu (National, TN, Economy, International, Science, Sport), Indian Express (India), BBC Tamil.
+  Probed and rejected: PIB RSS (Hindi only, no dates), Dinamani (404), DD News (unreachable), AIR (redirect/no data), Google News RSS (ToS grey, 7-day window).
+- Safety: HttpFeedSource = https only, host allow-list from feeds.json checked on every redirect hop, 10s/15s timeouts, 2 MB cap, generic User-Agent, no cookies.
+  FeedParser rejects DOCTYPE/ENTITY (no XXE/billion-laughs), neutralises unknown entities, skips unexpected tags. Stored: title (tags stripped, <=220 chars),
+  https link, date, source, category. NEVER article text. Links only open in the browser (no WebView).
+- Relevance = keyword heuristic in `domain/NewsRelevance` (weights, +1 bonus for specialised feeds, deny-lists for entertainment/markets/street crime).
+  Real-data check: ~143 of ~480 offered items kept; a few false positives remain. Specialised feeds' hint wins the category (except a clear TN mention).
+- Refresh: on app start (TnpscApp) and when the Current affairs tab opens; skipped if <6h since last success; manual Refresh bypasses the 6h pause. Each feed is isolated.
+  No WorkManager (ColorOS kills background work). Prune never deletes a headline she starred or revised (checks ca_state "news-<id>").
+- Schema v4: `news_item` + MIGRATION_3_4. Star/revised for headlines reuse `ca_state` with ids "news-<hash16>"; revised headlines join the Today due list.
+- Tests: FeedParser against REAL trimmed feed samples (app/src/test/resources/feeds), FeedPolicy (look-alike hosts), pipeline, relevance. kxml2 is a TEST-only
+  dependency (Android has the pull parser built in).
+- Not verified: the Latest headlines UI in Tamil; behaviour over many days (retention, feed breakage); release (R8) build on a device.

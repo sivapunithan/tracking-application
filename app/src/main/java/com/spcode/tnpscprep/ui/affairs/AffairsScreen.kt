@@ -169,7 +169,7 @@ fun AffairsScreen(vm: AffairsViewModel) {
 }
 
 @Composable
-private fun AffairCard(a: AffairUi, onBookmark: () -> Unit, onRevise: () -> Unit, onOpen: () -> Unit, onDelete: () -> Unit) {
+internal fun AffairCard(a: AffairUi, onBookmark: () -> Unit, onRevise: () -> Unit, onOpen: () -> Unit, onDelete: () -> Unit) {
     val levelName = stringArrayResource(R.array.revision_levels)[RevisionLevel.clamp(a.level)]
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -187,9 +187,15 @@ private fun AffairCard(a: AffairUi, onBookmark: () -> Unit, onRevise: () -> Unit
                 ) { Text(if (a.bookmarked) "★" else "☆", style = MaterialTheme.typography.titleLarge) }
             }
             Text(localized(a.titleEn, a.titleTa), style = MaterialTheme.typography.titleMedium)
-            Text(localized(a.summaryEn, a.summaryTa), style = MaterialTheme.typography.bodyMedium)
+            if (a.summaryEn.isNotBlank()) Text(localized(a.summaryEn, a.summaryTa), style = MaterialTheme.typography.bodyMedium)
             if (a.isUser) {
                 Text(stringResource(R.string.ca_my_entry), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            } else if (a.isNews) {
+                Text(
+                    stringResource(R.string.news_autofetched) + "  ·  " + a.sourceName,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             } else {
                 Text(
                     stringResource(if (a.verified) R.string.ca_verified else R.string.ca_unverified) + "  ·  " + a.sourceName,

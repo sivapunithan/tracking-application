@@ -27,3 +27,11 @@ val MIGRATION_2_3 = object : Migration(2, 3) {
         db.execSQL("CREATE TABLE IF NOT EXISTS `ca_state` (`itemId` TEXT NOT NULL, `bookmarked` INTEGER NOT NULL, `level` INTEGER NOT NULL, `lastUpdated` INTEGER NOT NULL, PRIMARY KEY(`itemId`))")
     }
 }
+
+
+val MIGRATION_3_4 = object : Migration(3, 4) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("CREATE TABLE IF NOT EXISTS `news_item` (`id` TEXT NOT NULL, `feedId` TEXT NOT NULL, `source` TEXT NOT NULL, `title` TEXT NOT NULL, `url` TEXT NOT NULL, `publishedAt` INTEGER NOT NULL, `category` TEXT NOT NULL, `language` TEXT NOT NULL, `fetchedAt` INTEGER NOT NULL, PRIMARY KEY(`id`))")
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_news_item_publishedAt` ON `news_item` (`publishedAt`)")
+    }
+}

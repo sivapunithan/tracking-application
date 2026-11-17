@@ -32,7 +32,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.spcode.tnpscprep.R
-import com.spcode.tnpscprep.ui.affairs.AffairsScreen
+import com.spcode.tnpscprep.ui.affairs.AffairsTab
+import com.spcode.tnpscprep.ui.affairs.HeadlinesViewModel
 import com.spcode.tnpscprep.ui.affairs.AffairsViewModel
 import com.spcode.tnpscprep.ui.settings.SettingsScreen
 import com.spcode.tnpscprep.ui.syllabus.SyllabusScreen
@@ -64,7 +65,8 @@ private val TABS = listOf(
  */
 @Composable
 fun AppRoot(
-    todayVm: TodayViewModel, syllabusVm: SyllabusViewModel, affairsVm: AffairsViewModel, timerVm: TimerViewModel, twoPane: Boolean,
+    todayVm: TodayViewModel, syllabusVm: SyllabusViewModel, affairsVm: AffairsViewModel, headlinesVm: HeadlinesViewModel,
+    timerVm: TimerViewModel, twoPane: Boolean,
 ) {
     val nav = rememberNavController()
     val route = nav.currentBackStackEntryAsState().value?.destination?.route ?: Routes.TODAY
@@ -103,9 +105,9 @@ fun AppRoot(
         NavHost(nav, startDestination = Routes.TODAY, modifier = Modifier.weight(1f)) {
             composable(Routes.TODAY) { TodayScreen(todayVm) }
             composable(Routes.SYLLABUS) { SyllabusScreen(syllabusVm, twoPane) }
-            composable(Routes.AFFAIRS) { AffairsScreen(affairsVm) }
+            composable(Routes.AFFAIRS) { AffairsTab(affairsVm, headlinesVm) }
             composable(Routes.TIMER) { TimerScreen(timerVm) }
-            composable(Routes.SETTINGS) { SettingsScreen() }
+            composable(Routes.SETTINGS) { SettingsScreen(headlinesVm) }
         }
     }
 }

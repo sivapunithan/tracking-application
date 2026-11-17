@@ -28,6 +28,17 @@ class SettingsStore(context: Context) {
     fun setTargetExam(v: String) { prefs.edit().putString(K_TARGET, v).apply(); _targetExam.value = v }
     fun setExamEpochDay(v: Long) { prefs.edit().putLong(K_EXAM_DAY, v).apply(); _examDay.value = v }
 
+    private val _newsEnabled = MutableStateFlow(prefs.getBoolean(K_NEWS, true))
+    private val _newsLast = MutableStateFlow(prefs.getLong(K_NEWS_LAST, 0L))
+
+    /** Master switch for the only feature that uses the internet. When off, the app makes NO network requests. */
+    val newsEnabled: StateFlow<Boolean> = _newsEnabled.asStateFlow()
+    /** Epoch millis of the last successful headline refresh; 0 = never. */
+    val lastNewsRefreshMs: StateFlow<Long> = _newsLast.asStateFlow()
+
+    fun setNewsEnabled(v: Boolean) { prefs.edit().putBoolean(K_NEWS, v).apply(); _newsEnabled.value = v }
+    fun setLastNewsRefresh(ms: Long) { prefs.edit().putLong(K_NEWS_LAST, ms).apply(); _newsLast.value = ms }
+
     val focusMinutes: StateFlow<Int> = _focus.asStateFlow()
     val breakMinutes: StateFlow<Int> = _break.asStateFlow()
     val dailyGoalMinutes: StateFlow<Int> = _goal.asStateFlow()
@@ -47,6 +58,8 @@ class SettingsStore(context: Context) {
         private const val K_BREAK = "break_min"
         private const val K_GOAL = "daily_goal_min"
         private const val K_TARGET = "target_exam"
+        private const val K_NEWS = "news_enabled"
+        private const val K_NEWS_LAST = "news_last_refresh"
         private const val K_EXAM_DAY = "exam_epoch_day"
     }
 }

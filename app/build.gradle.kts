@@ -22,8 +22,8 @@ android {
         applicationId = "com.spcode.tnpscprep"
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 2
+        versionName = "1.1.0"
     }
 
     signingConfigs {
@@ -74,4 +74,7 @@ dependencies {
     ksp(libs.androidx.room.compiler)
     implementation(libs.kotlinx.serialization.json)
     testImplementation(libs.junit)
+    // The XML pull parser is built into Android; JVM unit tests need a real implementation on the classpath.
+    testImplementation("net.sf.kxml:kxml2:2.3.0")
+    testImplementation("xmlpull:xmlpull:1.1.3.1")
 }

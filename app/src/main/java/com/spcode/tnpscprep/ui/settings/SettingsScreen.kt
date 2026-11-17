@@ -13,9 +13,13 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import android.text.format.DateUtils
+import com.spcode.tnpscprep.ui.affairs.HeadlinesViewModel
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -27,8 +31,10 @@ import androidx.compose.ui.unit.dp
 import com.spcode.tnpscprep.R
 
 @Composable
-fun SettingsScreen() {
+fun SettingsScreen(headlines: HeadlinesViewModel) {
     var selected by remember { mutableStateOf(AppLocale.current()) }
+    val newsOn by headlines.enabled.collectAsStateWithLifecycle()
+    val lastMs by headlines.lastRefreshMs.collectAsStateWithLifecycle()
 
     Column(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(stringResource(R.string.language_label), style = MaterialTheme.typography.titleMedium)
@@ -67,6 +73,20 @@ fun SettingsScreen() {
         Text(
             stringResource(R.string.language_note),
             style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(Modifier.height(16.dp))
+        Text(stringResource(R.string.settings_news_title), style = MaterialTheme.typography.titleMedium)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(stringResource(R.string.settings_news_switch), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+            Switch(checked = newsOn, onCheckedChange = headlines::setEnabled)
+        }
+        Text(
+            stringResource(R.string.settings_news_note) + if (lastMs > 0) "\n" + stringResource(
+                R.string.settings_news_last,
+                DateUtils.getRelativeTimeSpanString(lastMs, System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS).toString(),
+            ) else "",
+            style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Spacer(Modifier.height(16.dp))

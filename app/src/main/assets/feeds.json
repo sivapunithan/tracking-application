@@ -1,0 +1,13 @@
+{
+  "_notice": "Public news feeds the optional 'Latest headlines' section reads. Only the headline, date and link are stored; articles are opened in the browser. To add or change a source edit this file (https only; the host of every feed url becomes the allow-list).",
+  "feeds": [
+    { "id": "hindu-national", "name": "The Hindu - National", "url": "https://www.thehindu.com/news/national/feeder/default.rss", "language": "en", "categoryHint": "INDIA", "minScore": 2, "maxItems": 60 },
+    { "id": "hindu-tn", "name": "The Hindu - Tamil Nadu", "url": "https://www.thehindu.com/news/national/tamil-nadu/feeder/default.rss", "language": "en", "categoryHint": "TN", "minScore": 2, "maxItems": 60 },
+    { "id": "hindu-economy", "name": "The Hindu - Economy", "url": "https://www.thehindu.com/business/Economy/feeder/default.rss", "language": "en", "categoryHint": "ECONOMY", "minScore": 2, "maxItems": 60 },
+    { "id": "hindu-international", "name": "The Hindu - International", "url": "https://www.thehindu.com/news/international/feeder/default.rss", "language": "en", "categoryHint": "WORLD", "minScore": 2, "maxItems": 60 },
+    { "id": "hindu-science", "name": "The Hindu - Science", "url": "https://www.thehindu.com/sci-tech/science/feeder/default.rss", "language": "en", "categoryHint": "SCIENCE", "minScore": 2, "maxItems": 60 },
+    { "id": "hindu-sport", "name": "The Hindu - Sport", "url": "https://www.thehindu.com/sport/feeder/default.rss", "language": "en", "categoryHint": "SPORTS", "minScore": 2, "maxItems": 60 },
+    { "id": "indian-express-india", "name": "The Indian Express - India", "url": "https://indianexpress.com/section/india/feed/", "language": "en", "categoryHint": "INDIA", "minScore": 2, "maxItems": 100 },
+    { "id": "bbc-tamil", "name": "BBC News Tamil", "url": "https://feeds.bbci.co.uk/tamil/rss.xml", "language": "ta", "categoryHint": "INDIA", "minScore": 2, "maxItems": 30 }
+  ]
+}

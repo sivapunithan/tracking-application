@@ -14,6 +14,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.spcode.tnpscprep.ui.AppRoot
 import com.spcode.tnpscprep.ui.affairs.AffairsViewModel
+import com.spcode.tnpscprep.ui.affairs.HeadlinesViewModel
 import com.spcode.tnpscprep.ui.syllabus.SyllabusViewModel
 import com.spcode.tnpscprep.ui.theme.TnpscTheme
 import com.spcode.tnpscprep.ui.timer.TimerViewModel
@@ -41,13 +42,18 @@ class MainActivity : AppCompatActivity() {
                     )
                     val todayVm = viewModel<TodayViewModel>(
                         factory = viewModelFactory {
-                            initializer { TodayViewModel(c.syllabusRepository, c.affairRepository, c.sessionRepository, c.settingsStore) }
+                            initializer { TodayViewModel(c.syllabusRepository, c.affairRepository, c.newsRepository, c.sessionRepository, c.settingsStore) }
                         },
                     )
                     val affairsVm = viewModel<AffairsViewModel>(
                         factory = viewModelFactory { initializer { AffairsViewModel(c.affairRepository) } },
                     )
-                    AppRoot(todayVm, syllabusVm, affairsVm, timerVm, twoPane = widthClass != WindowWidthSizeClass.Compact)
+                    val headlinesVm = viewModel<HeadlinesViewModel>(
+                        factory = viewModelFactory {
+                            initializer { HeadlinesViewModel(c.newsRepository, c.affairRepository, c.settingsStore) }
+                        },
+                    )
+                    AppRoot(todayVm, syllabusVm, affairsVm, headlinesVm, timerVm, twoPane = widthClass != WindowWidthSizeClass.Compact)
                 }
             }
         }

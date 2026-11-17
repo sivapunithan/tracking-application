@@ -25,6 +25,10 @@ class TnpscApp : Application() {
             runCatching { container.seedAffairs() }
                 .onSuccess { Log.i("TnpscApp", "Current affairs seed: $it") }
                 .onFailure { Log.e("TnpscApp", "Current affairs seed failed", it) }
+            // Optional headlines: does nothing when the user switched it off or fetched in the last 6 hours.
+            runCatching { container.newsRepository.refresh(force = false) }
+                .onSuccess { r -> Log.i("TnpscApp", "News refresh: " + (r?.joinToString { "${it.feedId}=${it.error ?: it.kept}" } ?: "skipped")) }
+                .onFailure { Log.e("TnpscApp", "News refresh failed", it) }
         }
     }
 }

@@ -96,4 +96,24 @@
     <string name="cat_science">அறிவியலும் பாதுகாப்பும்</string>
     <string name="cat_sports">விளையாட்டு</string>
     <string name="cat_awards">விருதுகளும் கௌரவங்களும்</string>
+    <string name="news_tab_curated">தொகுக்கப்பட்டவை</string>
+    <string name="news_tab_headlines">சமீபத்திய தலைப்புச் செய்திகள்</string>
+    <string name="news_disclaimer">பொது செய்தித் தளங்களிலிருந்து (தி இந்து, இந்தியன் எக்ஸ்பிரஸ், பிபிசி தமிழ்) தானாகப் பெறப்பட்ட தலைப்புச் செய்திகள்; தேர்வுக்குப் பொருத்தமானவை என்று தேடல் சொற்களால் வடிகட்டப்பட்டவை. தலைப்பு, தேதி, இணைப்பு மட்டுமே வைக்கப்படும். நாங்கள் சரிபார்க்கவில்லை: மூலத்தில் படிக்க "மூலத்தைத் திற" என்பதை அழுத்தவும்.</string>
+    <string name="news_never">இன்னும் பெறப்படவில்லை</string>
+    <string name="news_last_updated">புதுப்பிக்கப்பட்டது: %1$s</string>
+    <string name="news_refresh">புதுப்பி</string>
+    <string name="news_refreshing">புதுப்பிக்கிறது…</string>
+    <string name="news_sources_failed">%2$d மூலங்களில் %1$d-ஐ அடைய முடியவில்லை</string>
+    <string name="news_off_title">சமீபத்திய தலைப்புச் செய்திகள் நிறுத்தப்பட்டுள்ளன</string>
+    <string name="news_off_body">இணையத்திலிருந்து தலைப்புச் செய்திகளைப் பெற இதை இயக்கவும். தனிப்பட்ட தகவல் எதுவும் அனுப்பப்படாது.</string>
+    <string name="news_turn_on">இயக்கு</string>
+    <string name="news_empty">பொருந்தும் தலைப்புச் செய்திகள் இன்னும் இல்லை. இணையத்தில் இருக்கும்போது "புதுப்பி" என்பதை அழுத்தவும்.</string>
+    <string name="range_7d">7 நாள்கள்</string>
+    <string name="range_30d">30 நாள்கள்</string>
+    <string name="range_all">6 மாதங்கள்</string>
+    <string name="news_autofetched">தானாகப் பெறப்பட்டது</string>
+    <string name="settings_news_title">சமீபத்திய தலைப்புச் செய்திகள் (இணையம் பயன்படும்)</string>
+    <string name="settings_news_switch">சமீபத்திய தலைப்புச் செய்திகளைப் பெறு</string>
+    <string name="settings_news_note">இயக்கத்தில் இருந்தால், செயலியைத் திறக்கும்போது பொது செய்தி ஊட்டங்களை (தி இந்து, இந்தியன் எக்ஸ்பிரஸ், பிபிசி தமிழ்) பதிவிறக்கும்; 6 மணி நேரத்துக்கு ஒருமுறைக்கு மேல் அல்ல. தனிப்பட்ட தகவல் எதுவும் அனுப்பாது; கணக்கு, கண்காணிப்பு எதுவும் இல்லை; தலைப்பு, தேதி, இணைப்பை மட்டும் சுமார் 6 மாதங்கள் வைத்திருக்கும். எல்லா இணையப் பயன்பாட்டையும் நிறுத்த இதை அணைக்கவும்.</string>
+    <string name="settings_news_last">கடைசியாகப் பெற்றது: %1$s</string>
 </resources>
