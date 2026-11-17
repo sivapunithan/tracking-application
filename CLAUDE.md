@@ -146,4 +146,4 @@ reference, write own notes with page refs.
 - Known gaps in v1: full Padma list, Nobel prizes other than Peace, state budgets, TN ministers list, Sept-Nov is thin (the source article had few entries).
 - UI shows "Compiled up to <dataUpTo>" and a disclaimer so stale/unverified data can never mislead silently. Source links open the browser
   (no INTERNET permission needed). Own entries can be added/deleted in the app: this keeps the section alive with no developer.
-- Not done yet: CA items are NOT in the Today due-for-revision list (they have a level but the schedule isn't wired in). `tools/` holds provenance scripts.
+- CA items you have revised (level >= 1) now appear in the Today due list on the same 3/7/21/60-day schedule (a bookmark alone is never due). `tools/` holds provenance scripts.

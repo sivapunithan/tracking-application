@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.spcode.tnpscprep.R
 import com.spcode.tnpscprep.domain.RevisionLevel
+import com.spcode.tnpscprep.ui.affairs.categoryLabelRes
 import com.spcode.tnpscprep.ui.localized
 import com.spcode.tnpscprep.ui.syllabus.ExamFilter
 import java.time.Instant
@@ -148,7 +149,9 @@ fun TodayScreen(vm: TodayViewModel) {
                         Column(Modifier.weight(1f)) {
                             Text(localized(d.nameEn, d.nameTa), style = MaterialTheme.typography.bodyLarge)
                             Text(
-                                localized(d.subjectEn, d.subjectTa),
+                                if (d.affairCategory != null) {
+                                    stringResource(R.string.tab_affairs) + "  ·  " + stringResource(categoryLabelRes(d.affairCategory))
+                                } else localized(d.subjectEn, d.subjectTa),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
@@ -159,7 +162,7 @@ fun TodayScreen(vm: TodayViewModel) {
                                 color = if (d.daysOverdue > 0) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
                             )
                         }
-                        Button(onClick = { vm.markRevised(d.topicId) }) { Text(stringResource(R.string.revised)) }
+                        Button(onClick = { vm.markRevised(d) }) { Text(stringResource(R.string.revised)) }
                     }
                 }
             }

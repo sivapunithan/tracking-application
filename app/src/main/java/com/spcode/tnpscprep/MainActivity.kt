@@ -41,7 +41,7 @@ class MainActivity : AppCompatActivity() {
                     )
                     val todayVm = viewModel<TodayViewModel>(
                         factory = viewModelFactory {
-                            initializer { TodayViewModel(c.syllabusRepository, c.sessionRepository, c.settingsStore) }
+                            initializer { TodayViewModel(c.syllabusRepository, c.affairRepository, c.sessionRepository, c.settingsStore) }
                         },
                     )
                     val affairsVm = viewModel<AffairsViewModel>(

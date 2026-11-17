@@ -4,9 +4,11 @@ import com.spcode.tnpscprep.data.db.StarredTopic
 import com.spcode.tnpscprep.data.db.StudiedTopic
 import com.spcode.tnpscprep.data.db.SubjectEntity
 import com.spcode.tnpscprep.data.db.TopicWithLevel
+import com.spcode.tnpscprep.domain.AffairCategory
 import com.spcode.tnpscprep.domain.RevisionLevel
 import com.spcode.tnpscprep.domain.RevisionSchedule
 import java.time.LocalDate
+import com.spcode.tnpscprep.ui.affairs.AffairUi
 import java.time.ZoneId
 
 data class DueItem(
@@ -16,6 +18,8 @@ data class DueItem(
     val level: Int,
     /** 0 = due today; positive = days overdue. */
     val daysOverdue: Int,
+    /** Non-null = this is a current-affairs item (shown with its category instead of a subject). */
+    val affairCategory: AffairCategory? = null,
 )
 
 data class SubjectProgress(
@@ -76,3 +80,17 @@ fun buildTodayProgress(
         },
     )
 }
+
+private val dueOrder = compareByDescending<DueItem> { it.daysOverdue }.thenBy { it.level }.thenBy { it.nameEn }
+
+/** Current-affairs items she has revised at least once follow the same 3/7/21/60-day schedule as topics. */
+fun buildAffairDue(items: List<AffairUi>, today: LocalDate, zone: ZoneId): List<DueItem> =
+    items.mapNotNull { a ->
+        if (a.level <= 0) return@mapNotNull null // a bookmark alone is not a revision schedule
+        val due = RevisionSchedule.dueDate(a.level, a.lastUpdated, zone) ?: return@mapNotNull null
+        val overdue = RevisionSchedule.daysOverdue(due, today)
+        if (overdue < 0) null
+        else DueItem(a.id, a.titleEn, a.titleTa, "", "", a.level, overdue.toInt(), affairCategory = a.category)
+    }
+
+fun mergeDue(topics: List<DueItem>, affairs: List<DueItem>): List<DueItem> = (topics + affairs).sortedWith(dueOrder)

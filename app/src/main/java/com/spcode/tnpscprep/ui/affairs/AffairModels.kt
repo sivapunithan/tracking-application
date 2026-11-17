@@ -21,6 +21,7 @@ data class AffairUi(
     val userId: Long?,
     val bookmarked: Boolean,
     val level: Int,
+    val lastUpdated: Long = 0L,
 )
 
 data class AffairFilter(
@@ -48,6 +49,7 @@ fun buildAffairList(
             p.id, LocalDate.parse(p.date), AffairCategory.fromName(p.category) ?: AffairCategory.INDIA,
             p.titleEn, p.titleTa, p.summaryEn, p.summaryTa, p.sourceName, p.url, p.verified,
             isUser = false, userId = null, bookmarked = st?.bookmarked ?: false, level = st?.level ?: 0,
+            lastUpdated = st?.lastUpdated ?: 0L,
         )
     } + user.map { u ->
         val id = AffairRepository.USER_PREFIX + u.id
@@ -56,6 +58,7 @@ fun buildAffairList(
             id, LocalDate.parse(u.date), AffairCategory.fromName(u.category) ?: AffairCategory.INDIA,
             u.title, u.title, u.summary, u.summary, "", "", verified = false,
             isUser = true, userId = u.id, bookmarked = st?.bookmarked ?: false, level = st?.level ?: 0,
+            lastUpdated = st?.lastUpdated ?: 0L,
         )
     }
     val months = all.map { YearMonth.from(it.date) }.distinct().sortedDescending()
