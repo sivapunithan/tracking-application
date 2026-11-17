@@ -1,0 +1,81 @@
+{
+  "version": 1,
+  "_notice": "SAMPLE DATA ONLY - NOT the official TNPSC syllabus. Replace with content converted from the official TNPSC PDFs and bump 'version'. Tamil text is a draft: have a native speaker check it.",
+  "subjects": [
+    {
+      "id": "sample-history",
+      "nameEn": "[SAMPLE] History",
+      "nameTa": "[மாதிரி] வரலாறு",
+      "units": [
+        {
+          "id": "sample-history.u1",
+          "nameEn": "[SAMPLE] Ancient period",
+          "nameTa": "[மாதிரி] பண்டைய காலம்",
+          "topics": [
+            { "id": "sample-history.u1.t1", "nameEn": "[SAMPLE] Indus Valley civilisation", "nameTa": "[மாதிரி] சிந்துவெளி நாகரிகம்", "exams": ["G1", "G2", "G4"] },
+            { "id": "sample-history.u1.t2", "nameEn": "[SAMPLE] Sangam age", "nameTa": "[மாதிரி] சங்க காலம்", "exams": ["G1", "G2", "G4"] }
+          ]
+        },
+        {
+          "id": "sample-history.u2",
+          "nameEn": "[SAMPLE] Modern period",
+          "nameTa": "[மாதிரி] நவீன காலம்",
+          "topics": [
+            { "id": "sample-history.u2.t1", "nameEn": "[SAMPLE] Freedom struggle", "nameTa": "[மாதிரி] விடுதலைப் போராட்டம்", "exams": ["G1", "G2", "G4"] },
+            { "id": "sample-history.u2.t2", "nameEn": "[SAMPLE] Revolt of 1857", "nameTa": "[மாதிரி] 1857 கிளர்ச்சி", "exams": ["G1", "G2"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sample-polity",
+      "nameEn": "[SAMPLE] Polity",
+      "nameTa": "[மாதிரி] அரசியல் அமைப்பு",
+      "units": [
+        {
+          "id": "sample-polity.u1",
+          "nameEn": "[SAMPLE] Constitution basics",
+          "nameTa": "[மாதிரி] அரசமைப்பு அடிப்படைகள்",
+          "topics": [
+            { "id": "sample-polity.u1.t1", "nameEn": "[SAMPLE] Preamble", "nameTa": "[மாதிரி] முகவுரை", "exams": ["G1", "G2", "G4"] },
+            { "id": "sample-polity.u1.t2", "nameEn": "[SAMPLE] Fundamental rights", "nameTa": "[மாதிரி] அடிப்படை உரிமைகள்", "exams": ["G1", "G2", "G4"] }
+          ]
+        },
+        {
+          "id": "sample-polity.u2",
+          "nameEn": "[SAMPLE] Governance",
+          "nameTa": "[மாதிரி] ஆட்சிமுறை",
+          "topics": [
+            { "id": "sample-polity.u2.t1", "nameEn": "[SAMPLE] Parliamentary committees", "nameTa": "[மாதிரி] நாடாளுமன்றக் குழுக்கள்", "exams": ["G1"] },
+            { "id": "sample-polity.u2.t2", "nameEn": "[SAMPLE] Local administration", "nameTa": "[மாதிரி] உள்ளாட்சி அமைப்பு", "exams": ["G2", "G4"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sample-aptitude",
+      "nameEn": "[SAMPLE] Aptitude",
+      "nameTa": "[மாதிரி] திறனறிவு",
+      "units": [
+        {
+          "id": "sample-aptitude.u1",
+          "nameEn": "[SAMPLE] Numerical ability",
+          "nameTa": "[மாதிரி] எண் திறன்",
+          "topics": [
+            { "id": "sample-aptitude.u1.t1", "nameEn": "[SAMPLE] Percentage", "nameTa": "[மாதிரி] சதவீதம்", "exams": ["G1", "G2", "G4"] },
+            { "id": "sample-aptitude.u1.t2", "nameEn": "[SAMPLE] Simple interest", "nameTa": "[மாதிரி] தனி வட்டி", "exams": ["G2", "G4"] },
+            { "id": "sample-aptitude.u1.t3", "nameEn": "[SAMPLE] Simplification", "nameTa": "[மாதிரி] சுருக்குதல்", "exams": ["G4"] }
+          ]
+        },
+        {
+          "id": "sample-aptitude.u2",
+          "nameEn": "[SAMPLE] Reasoning",
+          "nameTa": "[மாதிரி] அறிவுக்கூர்மை",
+          "topics": [
+            { "id": "sample-aptitude.u2.t1", "nameEn": "[SAMPLE] Logical reasoning", "nameTa": "[மாதிரி] தர்க்க அறிவு", "exams": ["G1", "G2"] }
+          ]
+        }
+      ]
+    }
+  ]
+}

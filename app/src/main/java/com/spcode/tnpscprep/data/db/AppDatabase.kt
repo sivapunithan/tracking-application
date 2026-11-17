@@ -1,0 +1,20 @@
+package com.spcode.tnpscprep.data.db
+
+import androidx.room.Database
+import androidx.room.RoomDatabase
+
+// exportSchema = true writes app/schemas/*.json: the baseline for writing migrations later, so a
+// schema change never forces the user to lose her progress.
+@Database(
+    entities = [
+        SubjectEntity::class, SyllabusUnitEntity::class, TopicEntity::class,
+        TopicProgressEntity::class, StudySessionEntity::class, AppMetaEntity::class,
+    ],
+    version = 1,
+    exportSchema = true,
+)
+abstract class AppDatabase : RoomDatabase() {
+    abstract fun syllabusDao(): SyllabusDao
+    abstract fun progressDao(): ProgressDao
+    abstract fun sessionDao(): SessionDao
+}
