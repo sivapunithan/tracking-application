@@ -22,6 +22,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.background
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.Lock
+import androidx.compose.material.icons.rounded.NightsStay
+import androidx.compose.material.icons.rounded.Palette
+import androidx.compose.material.icons.rounded.Restaurant
+import androidx.compose.material.icons.rounded.School
+import androidx.compose.material.icons.rounded.Storage
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
@@ -42,7 +48,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
@@ -103,34 +108,30 @@ private fun Hub(headlines: HeadlinesViewModel, settings: com.spcode.tnpscprep.da
     val strict by settings.strictFood.collectAsStateWithLifecycle()
     val themeMode by headlines.themeMode.collectAsStateWithLifecycle()
     val exams = ExamSelection.codes(mask).joinToString(" · ")
-    Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary), modifier = Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)), modifier = Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(Modifier.size(52.dp).background(Color.White.copy(alpha = 0.2f), CircleShape), contentAlignment = Alignment.Center) {
-                    Text(name.trim().take(1).uppercase().ifEmpty { "•" }, style = MaterialTheme.typography.headlineSmall, color = Color.White)
+                Box(Modifier.size(52.dp).background(MaterialTheme.colorScheme.primaryContainer, CircleShape), contentAlignment = Alignment.Center) {
+                    Text(name.trim().take(1).uppercase().ifEmpty { "•" }, style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.onPrimaryContainer)
                 }
                 Column(Modifier.padding(start = 14.dp)) {
-                    Text(name.ifBlank { stringResource(R.string.profile_title) }, style = MaterialTheme.typography.titleLarge, color = Color.White)
-                    Text(exams.ifEmpty { stringResource(R.string.exam_all) }, style = MaterialTheme.typography.bodyMedium, color = Color.White.copy(alpha = 0.85f))
+                    Text(name.ifBlank { stringResource(R.string.profile_title) }, style = MaterialTheme.typography.titleLarge)
+                    Text(exams.ifEmpty { stringResource(R.string.exam_all) }, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
             OutlinedTextField(
                 value = name, onValueChange = headlines::setUserName, singleLine = true, modifier = Modifier.fillMaxWidth(),
                 label = { Text(stringResource(R.string.profile_name_label)) },
-                colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = Color.White, unfocusedTextColor = Color.White, focusedLabelColor = Color.White, unfocusedLabelColor = Color.White.copy(alpha = 0.8f),
-                    focusedBorderColor = Color.White, unfocusedBorderColor = Color.White.copy(alpha = 0.5f), cursorColor = Color.White,
-                ),
             )
         }
     }
     val on = stringResource(R.string.state_on); val off = stringResource(R.string.state_off)
-    HubRow("📚", stringResource(R.string.profile_pg_study), stringResource(R.string.profile_sub_study, exams.ifEmpty { stringResource(R.string.exam_all) }, goal)) { open("study") }
-    HubRow("🌙", stringResource(R.string.profile_pg_evening), stringResource(R.string.profile_sub_evening, wrapHour, if (reminderOn) on else off)) { open("evening") }
-    HubRow("🥗", stringResource(R.string.profile_pg_food), stringResource(R.string.profile_sub_food, if (strict) on else off)) { open("food") }
-    HubRow("🎨", stringResource(R.string.profile_pg_look), stringResource(R.string.profile_sub_look, themeLabel(themeMode), languageLabel(AppLocale.current()))) { open("look") }
-    HubRow("🔒", stringResource(R.string.profile_pg_privacy), stringResource(R.string.profile_sub_privacy)) { open("privacy") }
-    HubRow("🗂", stringResource(R.string.profile_pg_data), stringResource(R.string.profile_sub_data)) { open("data") }
+    HubRow(Icons.Rounded.School, stringResource(R.string.profile_pg_study), stringResource(R.string.profile_sub_study, exams.ifEmpty { stringResource(R.string.exam_all) }, goal)) { open("study") }
+    HubRow(Icons.Rounded.NightsStay, stringResource(R.string.profile_pg_evening), stringResource(R.string.profile_sub_evening, wrapHour, if (reminderOn) on else off)) { open("evening") }
+    HubRow(Icons.Rounded.Restaurant, stringResource(R.string.profile_pg_food), stringResource(R.string.profile_sub_food, if (strict) on else off)) { open("food") }
+    HubRow(Icons.Rounded.Palette, stringResource(R.string.profile_pg_look), stringResource(R.string.profile_sub_look, themeLabel(themeMode), languageLabel(AppLocale.current()))) { open("look") }
+    HubRow(Icons.Rounded.Lock, stringResource(R.string.profile_pg_privacy), stringResource(R.string.profile_sub_privacy)) { open("privacy") }
+    HubRow(Icons.Rounded.Storage, stringResource(R.string.profile_pg_data), stringResource(R.string.profile_sub_data)) { open("data") }
 }
 
 @Composable
@@ -144,10 +145,10 @@ private fun languageLabel(l: AppLanguage): String = when (l) {
 }
 
 @Composable
-private fun HubRow(icon: String, title: String, summary: String, onClick: () -> Unit) {
+private fun HubRow(icon: androidx.compose.ui.graphics.vector.ImageVector, title: String, summary: String, onClick: () -> Unit) {
     Card(onClick = onClick, modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))) {
         Row(Modifier.padding(horizontal = 16.dp, vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text(icon, style = MaterialTheme.typography.headlineSmall)
+            Icon(icon, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(26.dp))
             Column(Modifier.weight(1f).padding(horizontal = 14.dp)) {
                 Text(title, style = MaterialTheme.typography.titleMedium)
                 Text(summary, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2)
