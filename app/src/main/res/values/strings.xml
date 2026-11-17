@@ -554,4 +554,20 @@
     <string name="bkn_off">Don\'t remind me</string>
     <string name="bk_remind_switch">Remind me to back up</string>
     <string name="na_ctx_today">%1$d of %2$d min today</string>
+    <string name="widget_today_name">Mathi: Today</string>
+    <string name="widget_plan_name">Mathi: Today\'s plan</string>
+    <string name="widget_today_desc">Days to your exam, study minutes today and your streak.</string>
+    <string name="widget_plan_desc">Your plan for today. Shows study items only.</string>
+    <plurals name="widget_days_to_exam"><item quantity="one">day to exam</item><item quantity="other">days to exam</item></plurals>
+    <string name="widget_set_exam">Set your exam date in Mathi</string>
+    <string name="widget_minutes">%1$d of %2$d min today</string>
+    <string name="widget_plan_title">Today\'s plan</string>
+    <string name="widget_plan_title_n">Today\'s plan · %1$d of %2$d done</string>
+    <string name="widget_plan_empty">Open Mathi to see today\'s plan.</string>
+    <string name="widget_section">Home-screen widgets</string>
+    <string name="widget_section_note">Shows your exam countdown and plan on the home screen. Study facts only: nothing private, because a widget is visible without the PIN.</string>
+    <string name="widget_add_today">Add Today widget</string>
+    <string name="widget_add_plan">Add Plan widget</string>
+    <string name="widget_pin_asked">Your phone will ask you to confirm. If nothing appears, add it by long-pressing the home screen › Widgets › Mathi.</string>
+    <string name="widget_pin_unsupported">This home screen cannot add widgets from here. Long-press the home screen › Widgets › Mathi.</string>
 </resources>

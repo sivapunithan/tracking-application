@@ -29,6 +29,11 @@ import com.spcode.tnpscprep.ui.today.TodayViewModel
 // AppCompatActivity (not ComponentActivity) so AppCompatDelegate.setApplicationLocales works on API 26+.
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 class MainActivity : AppCompatActivity() {
+    override fun onStop() {
+        super.onStop()
+        com.spcode.tnpscprep.widget.WidgetUpdater.refreshAll(applicationContext) // widgets show what she just did
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen() // must run before super.onCreate: swaps the splash theme for the normal one
         super.onCreate(savedInstanceState)

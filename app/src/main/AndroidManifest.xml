@@ -38,6 +38,16 @@
 
         <receiver android:name=".reminder.ReminderReceiver" android:exported="false" />
 
+        <!-- Home-screen widgets (study facts only; they sit outside the PIN lock). -->
+        <receiver android:name=".widget.TodayWidget" android:exported="false" android:label="@string/widget_today_name">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_today_info" />
+        </receiver>
+        <receiver android:name=".widget.PlanWidget" android:exported="false" android:label="@string/widget_plan_name">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_plan_info" />
+        </receiver>
+
         <!-- Persists the in-app language on Android 8-12 (API < 33 has no system store for per-app locales). -->
         <service
             android:name="androidx.appcompat.app.AppLocalesMetadataHolderService"

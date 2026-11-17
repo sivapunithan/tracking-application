@@ -421,3 +421,9 @@ reference, write own notes with page refs.
 ## Today: greeting font + red card restructure
 - Greeting ("Good morning") uses bundled **Playfair Display Bold** (`res/font/playfair_display.ttf`, the OFL variable font pinned to weight 700, +300 KB; licence in `design/licenses/PlayfairDisplay-OFL.txt`). Only the greeting uses it; Tamil glyphs fall back to the phone's Tamil font (not yet seen in Tamil).
 - Next best step card: small caps label, 2-line bold title, 2-line body, a quiet facts line (streak when > 0 + "x of goal min today", `na_ctx_today`), smaller button, 112dp picture in the bottom-right corner. Rule order and actions unchanged. Seen on the phone (English, set-exam-date state only; other states not seen).
+
+## Home-screen widgets (Today + Plan)
+- Plain RemoteViews (no Glance/library): `widget/MathiWidgets.kt` (`WidgetUpdater`, `TodayWidget` 2x2, `PlanWidget` 3-4x2), layouts `widget_today/plan`, `xml/widget_*_info`, manifest receivers. Study facts ONLY (exam countdown, minutes vs goal, streak, thumbs-up picture if present; plan lines): nothing from diary/health/mood, because a widget is visible without the PIN. Pure rules in `domain/WidgetRules` (tested).
+- Refresh: system `updatePeriodMillis` 30 min (a floor) + `WidgetUpdater.refreshAll` in `MainActivity.onStop`. Follows the app's per-app language. Tap = open the app. No new permission, no schema change. Tamil strings `widget_*` are DRAFT and not yet seen.
+- Profile > Look and language > "Home-screen widgets": two buttons call `AppWidgetManager.requestPinAppWidget` (Android's own confirm dialog); falls back to a how-to line. Both widgets seen working on the phone (Oppo launcher): Today showed "12 days to exam / 0 of 60 min today" + picture; Plan showed 2 lines "0 of 2 done".
+- Not done: widget preview images in the picker (it shows the app icon), widget in dark mode / Tamil, quick check-in and Focus widgets.

@@ -229,6 +229,7 @@ private fun LookPage(headlines: HeadlinesViewModel) {
         }
     }
     Text(stringResource(R.string.language_note), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    WidgetSection()
     // Developer tool: only in debug builds, never in the APK she gets.
     val ctx = androidx.compose.ui.platform.LocalContext.current
     if ((ctx.applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
@@ -318,6 +319,23 @@ private fun BackupSection() {
     notice?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary) }
 }
 
+
+/** Asks Android to place a widget through its own confirm dialog (no permission). The launcher may still say no: then she adds it by hand. */
+@Composable
+private fun WidgetSection() {
+    val ctx = androidx.compose.ui.platform.LocalContext.current
+    var msg by rememberSaveable { mutableStateOf<String?>(null) }
+    val unsupported = stringResource(R.string.widget_pin_unsupported)
+    val asked = stringResource(R.string.widget_pin_asked)
+    Spacer(Modifier.height(8.dp))
+    SectionLabel(stringResource(R.string.widget_section))
+    Text(stringResource(R.string.widget_section_note), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        OutlinedButton(onClick = { msg = if (com.spcode.tnpscprep.widget.WidgetUpdater.requestPin(ctx, com.spcode.tnpscprep.widget.TodayWidget::class.java)) asked else unsupported }) { Text(stringResource(R.string.widget_add_today)) }
+        OutlinedButton(onClick = { msg = if (com.spcode.tnpscprep.widget.WidgetUpdater.requestPin(ctx, com.spcode.tnpscprep.widget.PlanWidget::class.java)) asked else unsupported }) { Text(stringResource(R.string.widget_add_plan)) }
+    }
+    msg?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary) }
+}
 
 @Composable
 private fun SectionLabel(text: String) {

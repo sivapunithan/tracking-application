@@ -554,4 +554,20 @@
     <string name="bkn_off">நினைவூட்ட வேண்டாம்</string>
     <string name="bk_remind_switch">காப்புப்பிரதி நினைவூட்டு</string>
     <string name="na_ctx_today">இன்று %1$d / %2$d நிமிடம்</string>
+    <string name="widget_today_name">மதி: இன்று</string>
+    <string name="widget_plan_name">மதி: இன்றைய திட்டம்</string>
+    <string name="widget_today_desc">தேர்வுக்கு மீதமுள்ள நாட்கள், இன்றைய படிப்பு நிமிடங்கள், தொடர்ச்சி.</string>
+    <string name="widget_plan_desc">இன்றைய திட்டம். படிப்பு விஷயங்கள் மட்டும்.</string>
+    <plurals name="widget_days_to_exam"><item quantity="one">நாள் தேர்வுக்கு</item><item quantity="other">நாட்கள் தேர்வுக்கு</item></plurals>
+    <string name="widget_set_exam">மதியில் தேர்வு தேதியை அமைக்கவும்</string>
+    <string name="widget_minutes">இன்று %1$d / %2$d நிமிடம்</string>
+    <string name="widget_plan_title">இன்றைய திட்டம்</string>
+    <string name="widget_plan_title_n">இன்றைய திட்டம் · %1$d / %2$d முடிந்தது</string>
+    <string name="widget_plan_empty">இன்றைய திட்டத்தைக் காண மதியைத் திறக்கவும்.</string>
+    <string name="widget_section">முகப்புத் திரை விட்ஜெட்டுகள்</string>
+    <string name="widget_section_note">தேர்வு எண்ணிக்கையையும் திட்டத்தையும் முகப்புத் திரையில் காட்டும். படிப்பு தகவல்கள் மட்டும்: PIN இல்லாமலே விட்ஜெட் தெரியும் என்பதால் தனிப்பட்டது எதுவும் இல்லை.</string>
+    <string name="widget_add_today">இன்று விட்ஜெட் சேர்</string>
+    <string name="widget_add_plan">திட்ட விட்ஜெட் சேர்</string>
+    <string name="widget_pin_asked">உங்கள் போன் உறுதிப்படுத்தக் கேட்கும். எதுவும் தோன்றவில்லை என்றால் முகப்புத் திரையை அழுத்திப் பிடித்து › விட்ஜெட்டுகள் › மதி என்பதில் சேர்க்கவும்.</string>
+    <string name="widget_pin_unsupported">இந்த முகப்புத் திரை இங்கிருந்து விட்ஜெட் சேர்க்க முடியாது. முகப்புத் திரையை அழுத்திப் பிடித்து › விட்ஜெட்டுகள் › மதி.</string>
 </resources>
