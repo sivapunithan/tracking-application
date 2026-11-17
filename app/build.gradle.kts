@@ -44,6 +44,13 @@ android {
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"))
             signingConfigs.findByName("release")?.let { signingConfig = it }
         }
+        // "perf": exactly the release code (R8 + shrunk resources) but signed with the DEBUG key, so it installs OVER a debug build without wiping
+        // its data. Only for measuring speed on a phone; never hand this APK to anyone.
+        create("perf") {
+            initWith(getByName("release"))
+            signingConfig = signingConfigs.getByName("debug")
+            matchingFallbacks += "release"
+        }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17

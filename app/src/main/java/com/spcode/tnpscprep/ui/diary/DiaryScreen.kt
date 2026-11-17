@@ -192,9 +192,10 @@ fun JournalEditorScreen(vm: DiaryViewModel, entryId: Long?, dateArg: String?, on
 @Composable
 fun DiaryMood(id: String?, size: androidx.compose.ui.unit.Dp, modifier: Modifier = Modifier) {
     val ctx = LocalContext.current
-    val res = remember(id) { Mood.entries.firstOrNull { it.name == id }?.let { moodImageRes(ctx, it) } ?: 0 }
-    if (res != 0) {
-        Image(painterResource(res), null, modifier.size(size), contentScale = ContentScale.Crop, alignment = Alignment.TopCenter)
+    val res = remember(id, size) { Mood.entries.firstOrNull { it.name == id }?.let { moodImageRes(ctx, it, size) } ?: 0 }
+    val bitmap = if (res != 0) remember(res) { com.spcode.tnpscprep.ui.mood.MoodBitmaps.get(ctx, res) } else null
+    if (bitmap != null) {
+        Image(bitmap, null, modifier.size(size), contentScale = ContentScale.Crop, alignment = Alignment.TopCenter)
     } else if (id != null) {
         // picture not on this phone: a small badge with the mood's first letter
         Box(modifier.size(size).clip(CircleShape).background(MaterialTheme.colorScheme.primaryContainer), contentAlignment = Alignment.Center) {

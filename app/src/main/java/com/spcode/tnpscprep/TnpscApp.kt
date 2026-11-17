@@ -18,6 +18,8 @@ class TnpscApp : Application() {
         container = AppContainer(this)
         // Alarms do not survive a phone restart: re-arm (or clear) the optional reminder whenever the app starts.
         com.spcode.tnpscprep.reminder.ReminderScheduler.sync(this, container.settingsStore.reminderEnabled.value, container.settingsStore.reminderMinutes.value)
+        // Decode the small mood pictures in the background so no screen decodes them on the main thread.
+        appScope.launch { runCatching { com.spcode.tnpscprep.ui.mood.MoodBitmaps.warm(this@TnpscApp) } }
         // Seeds on first launch; later launches (or an older asset version) are a cheap no-op.
         // Independent: a problem in one file must not stop the other from loading.
         appScope.launch {

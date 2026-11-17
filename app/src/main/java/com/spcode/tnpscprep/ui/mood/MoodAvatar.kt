@@ -29,7 +29,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.spcode.tnpscprep.domain.Mood
@@ -62,9 +62,40 @@ private fun poseFor(mood: Mood, ownPicture: Boolean): Pose = if (!ownPicture) De
     else -> DefaultPose
 }
 
-/** The picture for [mood] if it exists; otherwise 0. Pictures are optional (they are not part of the public repo). */
-fun moodImageRes(context: Context, mood: Mood): Int =
-    context.resources.getIdentifier(mood.imageName, "drawable", context.packageName)
+/**
+ * The picture for [mood] if it exists; otherwise 0. Pictures are optional (they are not part of the public repo).
+ * [size] picks a pre-scaled copy so a 44 dp avatar never decodes a 512 px bitmap: <= 64 dp -> `_s` (256 px), <= 128 dp -> `_m` (384 px),
+ * else the original. A missing copy falls back to the original, so an older picture set still works.
+ */
+fun moodImageRes(context: Context, mood: Mood, size: Dp? = null): Int {
+    val res = context.resources
+    val tier = when { size == null -> ""; size <= 64.dp -> "_s"; size <= 128.dp -> "_m"; else -> "" }
+    if (tier.isNotEmpty()) res.getIdentifier(mood.imageName + tier, "drawable", context.packageName).let { if (it != 0) return it }
+    return res.getIdentifier(mood.imageName, "drawable", context.packageName)
+}
+
+/**
+ * Decoded pictures, kept in memory. Without this every screen that enters (each tab switch) decoded its pictures AGAIN on the main thread
+ * (painterResource does not cache bitmaps): 100 ms frames on a 2020 phone. [warm] fills it in the background at app start.
+ */
+object MoodBitmaps {
+    private val cache = object : android.util.LruCache<Int, androidx.compose.ui.graphics.ImageBitmap>(20) {}
+
+    fun get(context: Context, res: Int): androidx.compose.ui.graphics.ImageBitmap? {
+        cache.get(res)?.let { return it }
+        val bmp = android.graphics.BitmapFactory.decodeResource(context.resources, res)?.asImageBitmap() ?: return null
+        cache.put(res, bmp)
+        return bmp
+    }
+
+    /** Pre-decodes the small and medium copies of every mood (about 6 MB in all) off the main thread. */
+    fun warm(context: Context) {
+        for (m in Mood.entries) for (tier in listOf(32.dp, 100.dp)) {
+            val r = moodImageRes(context, m, tier)
+            if (r != 0) get(context, r)
+        }
+    }
+}
 
 fun hasMoodImage(context: Context, mood: Mood): Boolean = moodImageRes(context, mood) != 0
 
@@ -79,9 +110,10 @@ fun hasMoodImage(context: Context, mood: Mood): Boolean = moodImageRes(context, 
 @Composable
 fun MoodAvatar(mood: Mood, modifier: Modifier = Modifier, size: Dp = 96.dp, previewWithFallback: Boolean = false) {
     val ctx = LocalContext.current
-    val own = remember(mood) { moodImageRes(ctx, mood) }
-    val res = if (own != 0) own else if (previewWithFallback) moodImageRes(ctx, Mood.PROUD) else 0
+    val own = remember(mood, size) { moodImageRes(ctx, mood, size) }
+    val res = if (own != 0) own else if (previewWithFallback) moodImageRes(ctx, Mood.PROUD, size) else 0
     if (res == 0) return
+    val bitmap = remember(res) { MoodBitmaps.get(ctx, res) } ?: return
 
     val pose = remember(mood, own) { poseFor(mood, own != 0) }
     val clock = rememberInfiniteTransition(label = "mood")
@@ -90,7 +122,7 @@ fun MoodAvatar(mood: Mood, modifier: Modifier = Modifier, size: Dp = 96.dp, prev
     Box(modifier.size(size)) {
         val s = with(androidx.compose.ui.platform.LocalDensity.current) { size.toPx() }
         Image(
-            painterResource(res), contentDescription = null, contentScale = ContentScale.Crop, alignment = androidx.compose.ui.Alignment.TopCenter,
+            bitmap, contentDescription = null, contentScale = ContentScale.Crop, alignment = androidx.compose.ui.Alignment.TopCenter,
             modifier = Modifier
                 .size(size)
                 .graphicsLayer {
