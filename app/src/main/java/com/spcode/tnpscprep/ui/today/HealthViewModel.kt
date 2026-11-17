@@ -18,7 +18,9 @@ class HealthViewModel(private val repo: HealthRepository, private val settings: 
     val profile: StateFlow<HealthProfile> = settings.healthProfile
 
     fun saveProfile(p: HealthProfile) = settings.setHealthProfile(p)
-    fun add(kind: String, value: Double) { viewModelScope.launch { repo.add(kind, value, LocalDate.now()) } }
+    fun add(kind: String, value: Double) { viewModelScope.launch { repo.add(kind, value, com.spcode.tnpscprep.domain.LogicalDay.of(System.currentTimeMillis(), java.time.ZoneId.systemDefault())) } }
+    /** Same as [add] but for a chosen day (e.g. a period that started earlier). */
+    fun addOn(kind: String, value: Double, date: LocalDate) { viewModelScope.launch { repo.add(kind, value, date) } }
     fun delete(id: Long) { viewModelScope.launch { repo.delete(id) } }
     fun deleteAll() { viewModelScope.launch { repo.deleteAll() } }
 }

@@ -48,6 +48,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
@@ -111,8 +112,11 @@ private fun Hub(headlines: HeadlinesViewModel, settings: com.spcode.tnpscprep.da
     Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)), modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(Modifier.size(52.dp).background(MaterialTheme.colorScheme.primaryContainer, CircleShape), contentAlignment = Alignment.Center) {
-                    Text(name.trim().take(1).uppercase().ifEmpty { "•" }, style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                Box(Modifier.size(64.dp).background(MaterialTheme.colorScheme.primaryContainer, CircleShape), contentAlignment = Alignment.Center) {
+                    // the thumbs-up picture when it is on this phone, else the initial
+                    if (com.spcode.tnpscprep.ui.mood.hasMoodImage(androidx.compose.ui.platform.LocalContext.current, com.spcode.tnpscprep.domain.Mood.PROUD)) {
+                        Box(Modifier.size(64.dp).clip(CircleShape)) { com.spcode.tnpscprep.ui.diary.DiaryMood("PROUD", 64.dp) }
+                    } else Text(name.trim().take(1).uppercase().ifEmpty { "•" }, style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.onPrimaryContainer)
                 }
                 Column(Modifier.padding(start = 14.dp)) {
                     Text(name.ifBlank { stringResource(R.string.profile_title) }, style = MaterialTheme.typography.titleLarge)

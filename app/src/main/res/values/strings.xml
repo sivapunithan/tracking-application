@@ -510,4 +510,28 @@
         <item quantity="one">%1$d day to exam</item>
         <item quantity="other">%1$d days to exam</item>
     </plurals>
+    <string name="bc_setup_title">Set up once</string>
+    <string name="bc_setup_note">Height and age make the estimates work. Stored only on this phone.</string>
+    <string name="bc_profile_line">%1$d cm · %2$d years · %3$s</string>
+    <string name="bc_edit">Edit</string>
+    <string name="bc_body_title">Body</string>
+    <string name="bc_no_weight">Log your weight to see BMI and a 30-day trend.</string>
+    <string name="bc_kg">%1$s kg</string>
+    <string name="bc_change_30">%1$s kg in 30 days</string>
+    <string name="bc_more">Waist and hip (optional)</string>
+    <string name="bc_cycle_title">Cycle</string>
+    <string name="bc_first_period">Log the first day of your last period to see where you are in your cycle.</string>
+    <string name="bc_cycle_day">Day %1$d of about %2$d</string>
+    <string name="bc_phase_period">Period days</string>
+    <string name="bc_phase_fertile">Estimated fertile window</string>
+    <string name="bc_phase_later">Later in the cycle</string>
+    <string name="bc_cycle_late">The estimated date has passed. Cycles vary, so a few days either way is normal.</string>
+    <string name="bc_avg">Average cycle: %1$d days, from %2$d logged cycles.</string>
+    <string name="bc_avg_default">Using your usual length of %1$d days until two periods are logged.</string>
+    <string name="bc_period_other">Another day</string>
+    <string name="bc_period_undo">Undo start on %1$s</string>
+    <plurals name="bc_days_to_go">
+        <item quantity="one">%1$d day to go</item>
+        <item quantity="other">%1$d days to go</item>
+    </plurals>
 </resources>

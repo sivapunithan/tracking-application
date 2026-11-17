@@ -122,6 +122,8 @@ fun GettingStartedStrip(items: List<GettingStartedItem>, onStep: (GettingStarted
                     style = MaterialTheme.typography.bodyLarge,
                 )
             }
+            DiaryMood(when (next.step) { GettingStartedStep.FIRST_FOCUS -> "CHEER"; GettingStartedStep.FIRST_FOOD -> "LAUGH"; else -> "PROUD" }, 44.dp)
+            Spacer(Modifier.width(6.dp))
             Text("›", style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
@@ -188,6 +190,7 @@ fun PlanCard(tasks: List<PlannedTaskEntity>, doneRefs: Set<String>, onTick: (Pla
                         style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
+                if (allDone) { DiaryMood("CELEBRATE", 52.dp); Spacer(Modifier.width(8.dp)) }
                 ProgressRing(
                     (doneNow.toFloat() / total.coerceAtLeast(1)).coerceIn(0f, 1f), Modifier.size(52.dp), strokeWidth = 6.dp,
                     track = MaterialTheme.colorScheme.outlineVariant, color = MaterialTheme.colorScheme.primary,
@@ -208,7 +211,8 @@ fun PlanCard(tasks: List<PlannedTaskEntity>, doneRefs: Set<String>, onTick: (Pla
                         Modifier.size(38.dp).clip(RoundedCornerShape(12.dp)).background(if (done) MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f) else MaterialTheme.colorScheme.primaryContainer),
                         contentAlignment = Alignment.Center,
                     ) {
-                        Icon(if (done) Icons.Rounded.CheckCircle else icon, null, modifier = Modifier.size(22.dp), tint = if (done) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onPrimaryContainer)
+                        if (done) Icon(Icons.Rounded.CheckCircle, null, modifier = Modifier.size(22.dp), tint = MaterialTheme.colorScheme.tertiary)
+                        else DiaryMood(when (t.refType) { "TOPIC" -> "PROUD"; "CURRENT_AFFAIRS" -> "LAUGH"; else -> "CHEER" }, 38.dp)
                     }
                     Spacer(Modifier.width(12.dp))
                     Column(Modifier.weight(1f)) {
@@ -237,9 +241,15 @@ fun TileRow(ui: TodayUiState, stepsToday: Int?, week: List<Int> = emptyList()) {
                         track = MaterialTheme.colorScheme.outlineVariant, color = MaterialTheme.colorScheme.secondary,
                     ) { Text(animatedInt(ui.todayMinutes).toString(), style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)) }
                     Spacer(Modifier.width(12.dp))
-                    Column {
+                    Column(Modifier.weight(1f)) {
                         Text(stringResource(R.string.tile_study_title), style = MaterialTheme.typography.labelLarge)
                         Text(stringResource(R.string.tile_study_of, ui.todayMinutes, ui.goalMinutes), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                    // how today is going, in a face: goal reached = celebrating, half way = cheering, started = proud, nothing yet = none
+                    when {
+                        ui.todayMinutes >= ui.goalMinutes -> DiaryMood("CELEBRATE", 44.dp)
+                        ui.todayMinutes * 2 >= ui.goalMinutes -> DiaryMood("CHEER", 44.dp)
+                        ui.todayMinutes > 0 -> DiaryMood("PROUD", 44.dp)
                     }
                 }
                 if (week.isNotEmpty()) {
@@ -258,7 +268,8 @@ fun TileRow(ui: TodayUiState, stepsToday: Int?, week: List<Int> = emptyList()) {
         SoftCard(Modifier.weight(1f).fillMaxHeight()) {
             Column(Modifier.padding(12.dp).fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Box(Modifier.size(40.dp), contentAlignment = Alignment.Center) {
-                    Icon(Icons.Rounded.LocalFireDepartment, null, tint = if (ui.streak > 0) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.outline, modifier = Modifier.size(32.dp))
+                    if (ui.streak > 0) DiaryMood(if (ui.streak >= 7) "LAUGH" else if (ui.streak >= 3) "CHEER" else "PROUD", 40.dp)
+                    else Icon(Icons.Rounded.LocalFireDepartment, null, tint = if (ui.streak > 0) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.outline, modifier = Modifier.size(32.dp))
                 }
                 Text(stringResource(R.string.tile_streak, ui.streak), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
                 Box(Modifier.size(40.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primaryContainer), contentAlignment = Alignment.Center) {

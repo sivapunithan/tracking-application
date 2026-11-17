@@ -510,4 +510,28 @@
         <item quantity="one">தேர்வுக்கு %1$d நாள்</item>
         <item quantity="other">தேர்வுக்கு %1$d நாட்கள்</item>
     </plurals>
+    <string name="bc_setup_title">ஒருமுறை அமைக்கவும்</string>
+    <string name="bc_setup_note">உயரமும் வயதும் மதிப்பீடுகளுக்குத் தேவை. இந்தத் தொலைபேசியில் மட்டுமே சேமிக்கப்படும்.</string>
+    <string name="bc_profile_line">%1$d செ.மீ · %2$d வயது · %3$s</string>
+    <string name="bc_edit">திருத்து</string>
+    <string name="bc_body_title">உடல்</string>
+    <string name="bc_no_weight">BMI மற்றும் 30 நாள் போக்கைக் காண எடையைப் பதிவு செய்யுங்கள்.</string>
+    <string name="bc_kg">%1$s கி.கி</string>
+    <string name="bc_change_30">30 நாட்களில் %1$s கி.கி</string>
+    <string name="bc_more">இடுப்பு, இடை அளவு (விருப்பம்)</string>
+    <string name="bc_cycle_title">சுழற்சி</string>
+    <string name="bc_first_period">உங்கள் சுழற்சி எங்கே உள்ளது எனக் காண, கடைசி மாதவிடாயின் முதல் நாளைப் பதிவு செய்யுங்கள்.</string>
+    <string name="bc_cycle_day">சுமார் %2$d நாட்களில் %1$d ஆம் நாள்</string>
+    <string name="bc_phase_period">மாதவிடாய் நாட்கள்</string>
+    <string name="bc_phase_fertile">மதிப்பிடப்பட்ட கருவுறு காலம்</string>
+    <string name="bc_phase_later">சுழற்சியின் பிற்பகுதி</string>
+    <string name="bc_cycle_late">மதிப்பிட்ட தேதி கடந்துவிட்டது. சுழற்சிகள் மாறுபடும்; சில நாட்கள் முன்பின் இயல்பே.</string>
+    <string name="bc_avg">சராசரிச் சுழற்சி: %1$d நாட்கள் (பதிவான %2$d சுழற்சிகளிலிருந்து).</string>
+    <string name="bc_avg_default">இரு மாதவிடாய்கள் பதிவாகும் வரை, வழக்கமான %1$d நாட்கள் பயன்படுத்தப்படுகிறது.</string>
+    <string name="bc_period_other">வேறு நாள்</string>
+    <string name="bc_period_undo">%1$s தொடக்கத்தை நீக்கு</string>
+    <plurals name="bc_days_to_go">
+        <item quantity="one">%1$d நாள் உள்ளது</item>
+        <item quantity="other">%1$d நாட்கள் உள்ளன</item>
+    </plurals>
 </resources>

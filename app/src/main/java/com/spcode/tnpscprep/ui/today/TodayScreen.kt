@@ -177,7 +177,7 @@ fun TodayScreen(vm: TodayViewModel, onOpenProfile: () -> Unit, onOpenDiary: (Str
         wvm.setDone(t.id, true)
         t.refId?.let { id -> when (t.refType) { "TOPIC", "REVISION" -> vm.readTopic(id); "CURRENT_AFFAIRS" -> vm.reviseAffair(id) } }
     }
-    val waterToday = healthEntries.filter { it.kind == com.spcode.tnpscprep.data.HealthKind.WATER && it.date == today.toString() }.sumOf { it.value }.toInt()
+    val waterToday = healthEntries.filter { it.kind == com.spcode.tnpscprep.data.HealthKind.WATER && it.date == foodDay.toString() }.sumOf { it.value }.toInt()
     val stepsToday = if (stepSensor && stepsAllowed(appCtx)) stepsWeek.firstOrNull { it.date == today.toString() }?.steps ?: 0 else null
     val wrapState = com.spcode.tnpscprep.domain.WrapupCard.state(hour, wrapHour, wrapped)
     val checkinsIndex = 2 + (if (showGs) 1 else 0) + (if (wrapState != com.spcode.tnpscprep.domain.WrapupCardState.HIDDEN) 1 else 0) + (if (plannedToday.isNotEmpty()) 1 else 0)
@@ -226,7 +226,7 @@ fun TodayScreen(vm: TodayViewModel, onOpenProfile: () -> Unit, onOpenDiary: (Str
             val evening = com.spcode.tnpscprep.domain.FoodCheckin.eveningPrompt(System.currentTimeMillis(), java.time.ZoneId.systemDefault(), foodLogged)
             val weightKg = healthEntries.filter { it.kind == com.spcode.tnpscprep.data.HealthKind.WEIGHT }.maxByOrNull { it.createdAt }?.value
             val waterTarget = weightKg?.let { com.spcode.tnpscprep.domain.Health.waterMl(it) } ?: 2000
-            val lastGlass = healthEntries.filter { it.kind == com.spcode.tnpscprep.data.HealthKind.WATER && it.date == today.toString() }.maxByOrNull { it.createdAt }
+            val lastGlass = healthEntries.filter { it.kind == com.spcode.tnpscprep.data.HealthKind.WATER && it.date == foodDay.toString() }.maxByOrNull { it.createdAt }
             CheckinCard(
                 mood = moods[foodDay], food = food[foodDay], foodPrompt = evening, waterMl = waterToday, waterTarget = waterTarget,
                 onMood = { sheet = "mood" }, onFood = { sheet = "foodpick" },

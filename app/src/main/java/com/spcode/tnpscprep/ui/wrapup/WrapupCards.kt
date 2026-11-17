@@ -41,7 +41,7 @@ fun WrapupCardView(state: WrapupCardState, onOpen: () -> Unit, lastSeven: Int = 
     SoftCard(Modifier.fillMaxWidth(), onClick = onOpen) {
         Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(Modifier.size(44.dp).clip(RoundedCornerShape(14.dp)).background(MaterialTheme.colorScheme.primaryContainer), contentAlignment = Alignment.Center) {
-                Icon(if (done) Icons.Rounded.CheckCircle else Icons.Rounded.NightsStay, null, tint = MaterialTheme.colorScheme.onPrimaryContainer)
+                com.spcode.tnpscprep.ui.diary.DiaryMood(if (done) "PROUD" else "CHEER", 44.dp)
             }
             Spacer(Modifier.width(14.dp))
             Column(Modifier.weight(1f)) {
