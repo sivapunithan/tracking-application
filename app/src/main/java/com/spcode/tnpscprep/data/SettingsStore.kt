@@ -109,6 +109,18 @@ class SettingsStore(context: Context) {
     val lastBackupMs: StateFlow<Long> = _lastBackup.asStateFlow()
     fun setLastBackupMs(v: Long) { prefs.edit().putLong(K_LAST_BACKUP, v).apply(); _lastBackup.value = v }
 
+    // Backup reminder card on Today (not part of the backup file)
+    private val _bkRemind = MutableStateFlow(prefs.getBoolean(K_BK_REMIND, true))
+    val backupReminder: StateFlow<Boolean> = _bkRemind.asStateFlow()
+    fun setBackupReminder(v: Boolean) { prefs.edit().putBoolean(K_BK_REMIND, v).apply(); _bkRemind.value = v }
+    private val _bkSnooze = MutableStateFlow(prefs.getLong(K_BK_SNOOZE, 0L))
+    val backupSnoozeUntilMs: StateFlow<Long> = _bkSnooze.asStateFlow()
+    fun setBackupSnoozeUntil(v: Long) { prefs.edit().putLong(K_BK_SNOOZE, v).apply(); _bkSnooze.value = v }
+    private val _bkBase = MutableStateFlow(prefs.getLong(K_BK_BASE, 0L))
+    /** When the app first looked at the backup reminder: the clock start for someone who never backed up. */
+    val backupBaseMs: StateFlow<Long> = _bkBase.asStateFlow()
+    fun setBackupBaseMs(v: Long) { prefs.edit().putLong(K_BK_BASE, v).apply(); _bkBase.value = v }
+
     fun setGettingStartedDone(v: Boolean) { prefs.edit().putBoolean(K_GS_DONE, v).apply(); _gsDone.value = v }
 
     // ---- phone usage (opt-in, off by default) ----
@@ -140,7 +152,7 @@ class SettingsStore(context: Context) {
         prefs.edit().clear().apply()
         _focus.value = 25; _break.value = 5; _goal.value = 60
         _wrapHour.value = com.spcode.tnpscprep.domain.TodayGuide.EVENING_HOUR; _remOn.value = false; _remMin.value = com.spcode.tnpscprep.domain.ReminderTime.DEFAULT_MINUTES; _targetExam.value = "ALL"; _examMask.value = com.spcode.tnpscprep.domain.Exam.ALL_MASK; _examDay.value = NO_DATE
-        _newsEnabled.value = true; _newsLast.value = 0L; _lastBackup.value = 0L
+        _newsEnabled.value = true; _newsLast.value = 0L; _lastBackup.value = 0L; _bkRemind.value = true; _bkSnooze.value = 0L; _bkBase.value = 0L
         _theme.value = "LIGHT"; _name.value = ""; _account.value = false
         _health.value = HealthProfile(); _usage.value = false; _gsDone.value = false; _strictFood.value = false; _foodAlert.value = ""
     }
@@ -188,6 +200,9 @@ class SettingsStore(context: Context) {
         private const val K_NEWS_LAST = "news_last_refresh"
         private const val K_EXAM_DAY = "exam_epoch_day"
         private const val K_LAST_BACKUP = "last_backup_ms"
+        private const val K_BK_REMIND = "backup_reminder"
+        private const val K_BK_SNOOZE = "backup_snooze_until"
+        private const val K_BK_BASE = "backup_base_ms"
     }
 }
 

@@ -150,6 +150,13 @@ fun TodayScreen(vm: TodayViewModel, onOpenProfile: () -> Unit, onOpenDiary: (Str
     )
     val gsItems = com.spcode.tnpscprep.domain.GettingStarted.items(ui.examDate != null, extras.hasAnySession, food.isNotEmpty(), diaryItems.isNotEmpty())
     val gsComplete = com.spcode.tnpscprep.domain.GettingStarted.isComplete(gsItems)
+    val lastBackup by settings.lastBackupMs.collectAsStateWithLifecycle()
+    val bkBase by settings.backupBaseMs.collectAsStateWithLifecycle()
+    val bkSnooze by settings.backupSnoozeUntilMs.collectAsStateWithLifecycle()
+    val bkOn by settings.backupReminder.collectAsStateWithLifecycle()
+    val nowMs = System.currentTimeMillis()
+    LaunchedEffect(Unit) { if (settings.backupBaseMs.value == 0L) settings.setBackupBaseMs(System.currentTimeMillis()) }
+    val showBackup = com.spcode.tnpscprep.domain.BackupNudge.shouldShow(nowMs, lastBackup, bkBase, bkSnooze, bkOn)
     LaunchedEffect(gsComplete) { if (gsComplete && !gsDone) settings.setGettingStartedDone(true) } // once done, never shown again
     val showGs = !gsDone && !gsComplete
     // ---- today's plan: built ONCE per day from existing data, then stored (so it is finite and a ticked line stays) ----
@@ -221,6 +228,15 @@ fun TodayScreen(vm: TodayViewModel, onOpenProfile: () -> Unit, onOpenDiary: (Str
 
 
         if (plannedToday.isNotEmpty()) item(key = "plan") { PlanCard(plannedToday, extras.doneRefs, tickPlan) }
+
+        if (showBackup) item(key = "backup-nudge") {
+            BackupNudgeCard(
+                days = com.spcode.tnpscprep.domain.BackupNudge.daysSince(nowMs, lastBackup),
+                onOpen = onOpenProfile,
+                onLater = { settings.setBackupSnoozeUntil(com.spcode.tnpscprep.domain.BackupNudge.snoozeUntil(System.currentTimeMillis())) },
+                onTurnOff = { settings.setBackupReminder(false) },
+            )
+        }
 
         item(key = "checkins") {
             val evening = com.spcode.tnpscprep.domain.FoodCheckin.eveningPrompt(System.currentTimeMillis(), java.time.ZoneId.systemDefault(), foodLogged)

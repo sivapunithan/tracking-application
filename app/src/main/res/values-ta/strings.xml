@@ -545,4 +545,12 @@
     <string name="bk_restored">மீட்கப்பட்டது. %1$d சேர்க்கப்பட்டன, %2$d புதுப்பிக்கப்பட்டன.</string>
     <string name="bk_bad">அது சரியான மதி காப்புப்பிரதி கோப்பு அல்ல. எதுவும் மாற்றப்படவில்லை.</string>
     <string name="bk_busy">செய்கிறது…</string>
+    <string name="bkn_title">காப்புப்பிரதி உங்கள் முன்னேற்றத்தைப் பாதுகாக்கும்</string>
+    <string name="bkn_never">இன்னும் காப்புப்பிரதி எடுக்கவில்லை.</string>
+    <plurals name="bkn_days"><item quantity="one">கடைசி காப்புப்பிரதி %1$d நாளுக்கு முன்.</item><item quantity="other">கடைசி காப்புப்பிரதி %1$d நாட்களுக்கு முன்.</item></plurals>
+    <string name="bkn_where">சுயவிவரம் › தரவு மற்றும் பற்றி › எல்லாவற்றையும் காப்புப்பிரதி எடு</string>
+    <string name="bkn_open">சுயவிவரத்தைத் திற</string>
+    <string name="bkn_later">பிறகு</string>
+    <string name="bkn_off">நினைவூட்ட வேண்டாம்</string>
+    <string name="bk_remind_switch">காப்புப்பிரதி நினைவூட்டு</string>
 </resources>

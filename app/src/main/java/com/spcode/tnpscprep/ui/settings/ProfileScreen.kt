@@ -305,6 +305,11 @@ private fun BackupSection() {
     Text(stringResource(R.string.bk_title), style = MaterialTheme.typography.titleMedium)
     Text(stringResource(R.string.bk_note), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
     Text(lastText, style = MaterialTheme.typography.bodyMedium)
+    val remind by container.settingsStore.backupReminder.collectAsStateWithLifecycle()
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(stringResource(R.string.bk_remind_switch), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+        Switch(checked = remind, onCheckedChange = { container.settingsStore.setBackupReminder(it) })
+    }
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         androidx.compose.material3.Button(enabled = !busy, onClick = { save.launch("mathi-backup-" + java.time.LocalDate.now() + ".json") }) { Text(stringResource(R.string.bk_save)) }
         androidx.compose.material3.OutlinedButton(enabled = !busy, onClick = { restore.launch(arrayOf("application/json", "text/plain", "application/octet-stream")) }) { Text(stringResource(R.string.bk_restore)) }

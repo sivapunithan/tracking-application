@@ -408,3 +408,7 @@ reference, write own notes with page refs.
 - Settings are applied AFTER the database part and only where the phone is still at the default (a value she changed is kept). The reminder switch is never restored (needs the notification permission + alarm).
 - UI: Profile > Data and about > "Back up and restore" (`BackupSection`): CreateDocument/OpenDocument pickers (no permission), file `mathi-backup-<date>.json`, "Last backed up" date (`SettingsStore.lastBackupMs`, not part of the backup, cleared by Erase). Tamil strings `bk_*` are DRAFT and not yet seen on the phone.
 - Phone check: backup saved (1.1 KB, no PIN/salt in it), restoring the same file = "Added 0, updated 0" (idempotent). NOT tested: restoring into a phone that has real data / after an Erase, the restore transaction has no JVM test (Room needs a device).
+
+## Full backup: Phase 3 (gentle reminder) - in code, card NOT seen on the phone
+- `domain/BackupNudge` (pure, 4 tests): shown on Today (`ui/today/BackupNudgeCard`, below Today's plan) when the reminder switch is on, 14+ days since the last backup (or, if she never backed up, since the app first looked: `SettingsStore.backupBaseMs`, so a new install is not nagged), and not snoozed. Buttons: Open Profile / Later (hides 7 days) / Don't remind me (switch off). Switch also in Profile > Data and about ("Remind me to back up", default ON). Card only: no notification, no new permission, no schema change.
+- Not seen on screen: it needs 14 days (or edited prefs) to appear; only the rule is unit-tested. Tamil strings `bkn_*` are DRAFT.

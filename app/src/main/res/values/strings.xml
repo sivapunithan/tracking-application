@@ -545,4 +545,12 @@
     <string name="bk_restored">Restored. Added %1$d, updated %2$d.</string>
     <string name="bk_bad">That file is not a valid Mathi backup. Nothing was changed.</string>
     <string name="bk_busy">Working…</string>
+    <string name="bkn_title">A backup keeps your progress safe</string>
+    <string name="bkn_never">You have not backed up yet.</string>
+    <plurals name="bkn_days"><item quantity="one">Your last backup was %1$d day ago.</item><item quantity="other">Your last backup was %1$d days ago.</item></plurals>
+    <string name="bkn_where">Profile › Data and about › Back up everything</string>
+    <string name="bkn_open">Open Profile</string>
+    <string name="bkn_later">Later</string>
+    <string name="bkn_off">Don\'t remind me</string>
+    <string name="bk_remind_switch">Remind me to back up</string>
 </resources>
