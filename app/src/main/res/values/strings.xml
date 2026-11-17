@@ -254,19 +254,9 @@
     <string name="usage_open_settings">Open Usage access</string>
     <string name="usage_unavailable">This phone has no Usage access screen, so this feature is not available.</string>
     <string name="food_question">How was your food today?</string>
-    <string name="food_evening">Evening check-in: a quick tap is enough.</string>
     <string name="food_healthy">Healthy</string>
     <string name="food_mixed">Mixed</string>
     <string name="food_junk">Junk</string>
-    <string name="food_msg_healthy">Lovely. Your body says thanks!</string>
-    <string name="food_msg_mixed">Balance is fine.</string>
-    <string name="food_msg_junk">Tomorrow\'s a fresh start.</string>
-    <string name="food_undo">Undo</string>
-    <string name="food_today_chip">Food today: %1$s</string>
-    <string name="food_change">Change</string>
-    <string name="food_none">not logged</string>
-    <string name="food_week">Healthy days this week: %1$d/7</string>
-    <string name="food_streak">%1$d-day streak</string>
     <string name="food_alert">3 junk days in a row. One healthy meal today?</string>
     <string name="food_dismiss">Dismiss</string>
     <string name="ev_food">Food check-in: %1$s</string>
@@ -340,9 +330,7 @@
     <string name="gs_food">Log your food once</string>
     <string name="gs_diary">Write your first diary entry</string>
     <string name="plan_title">Today\'s plan</string>
-    <string name="checkin_title">Quick check-ins</string>
-    <string name="water_label">Water today</string>
-    <string name="water_add">+1 glass</string>
+    <string name="checkin_title">How are you today?</string>
     <string name="tile_streak">%1$d-day streak</string>
     <string name="tile_steps">Steps</string>
     <string name="my_exams">My exams</string>
@@ -353,7 +341,6 @@
     <string name="continue_title">Continue where you stopped</string>
     <string name="bar_started">%1$d of %2$d topics started</string>
     <string name="care_food">Food</string>
-    <string name="care_log">Daily log</string>
     <string name="food_hist_summary">Last 30 days: %1$d healthy · %2$d mixed · %3$d junk</string>
     <string name="cal_legend">Colour = study · dot = food · ring = diary</string>
     <string name="onb_exams_note">Pick every exam you are preparing for. You can change this later in Profile.</string>
@@ -471,4 +458,28 @@
         <item quantity="one">%1$d year ago</item>
         <item quantity="other">%1$d years ago</item>
     </plurals>
+    <string name="ev_mood">Mood check-in</string>
+    <string name="checkin_sub">One tap each. Change it any time.</string>
+    <string name="checkin_mood">Mood</string>
+    <string name="checkin_food">Food</string>
+    <string name="checkin_water">Water</string>
+    <string name="checkin_mood_title">How are you feeling?</string>
+    <string name="checkin_clear">Clear</string>
+    <string name="water_of">of %1$d ml</string>
+    <string name="water_undo">Remove the last glass</string>
+    <string-array name="mood_labels">
+        <item>Laughing</item><item>Cheerful</item><item>Proud</item><item>Worried</item><item>Crying</item><item>Angry</item><item>Celebrating</item>
+    </string-array>
+    <string name="care_mood">Mood</string>
+    <string name="care_mood_empty">No mood logged yet. Tap a day to add one.</string>
+    <string name="care_mood_30">Last 30 days</string>
+    <string name="care_hero_title">Today</string>
+    <string name="care_hero_none">How are you feeling?</string>
+    <string name="care_hero_tap">Tap the picture to change it</string>
+    <string name="care_steps_short">Steps</string>
+    <string name="care_water_undo">Undo</string>
+    <string name="water_target_weight">About 35 ml per kg of your logged weight.</string>
+    <string name="water_target_default">A general target. Log your weight to personalise it.</string>
+    <string name="care_private_title">Body and cycle</string>
+    <string name="care_private_sub">Private. Tap to open.</string>
 </resources>

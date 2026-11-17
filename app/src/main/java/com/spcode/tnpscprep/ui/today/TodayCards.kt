@@ -197,23 +197,6 @@ fun PlanCard(tasks: List<PlannedTaskEntity>, doneRefs: Set<String>, onTick: (Pla
     }
 }
 
-/** One-tap water: 250 ml per tap, written as a health entry (the same storage the Care tab reads). The mood check-in has a reserved slot below. */
-@Composable
-fun WaterRow(todayMl: Int, onAdd: () -> Unit) {
-    SoftCard(Modifier.fillMaxWidth()) {
-        Row(Modifier.padding(horizontal = 16.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Rounded.WaterDrop, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(28.dp))
-            Spacer(Modifier.width(12.dp))
-            Column(Modifier.weight(1f)) {
-                Text(stringResource(R.string.water_label), style = MaterialTheme.typography.labelLarge)
-                Text(stringResource(R.string.health_ml, todayMl), style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
-            }
-            OutlinedButton(onClick = onAdd) { Text(stringResource(R.string.water_add)) }
-        }
-        // SLOT (future): the one-tap MOOD check-in goes here once it has storage.
-    }
-}
-
 /** Three tiles: a wide study tile (ring + minutes of goal + last 7 days), streak, steps. [week] = study minutes for the last 7 days, oldest first. */
 @Composable
 fun TileRow(ui: TodayUiState, stepsToday: Int?, week: List<Int> = emptyList()) {

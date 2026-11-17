@@ -224,6 +224,7 @@ private fun EventRow(e: ActivityEventEntity) {
             stringResource(when (FOOD_VALUE.find(e.details)?.groupValues?.get(1)) { "HEALTHY" -> R.string.food_healthy; "JUNK" -> R.string.food_junk; else -> R.string.food_mixed }),
         )
         ActivityType.AFFAIR_ADDED.name -> stringResource(R.string.ev_affair_added)
+        ActivityType.MOOD_CHECKIN.name -> stringResource(R.string.ev_mood)
         else -> stringResource(R.string.ev_other)
     }
     Row {

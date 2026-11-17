@@ -121,7 +121,7 @@ fun WrapupScreen(todayVm: TodayViewModel, onClose: () -> Unit) {
         factory = viewModelFactory {
             initializer {
                 val c = app.container
-                WrapupViewModel(c.activityRepository, c.syllabusRepository, c.diaryRepository, c.plannedTaskRepository, c.settingsStore)
+                WrapupViewModel(c.activityRepository, c.syllabusRepository, c.diaryRepository, c.plannedTaskRepository, c.settingsStore, c.moodRepository)
             }
         },
     )

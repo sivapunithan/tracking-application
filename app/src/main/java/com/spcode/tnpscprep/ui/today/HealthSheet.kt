@@ -48,7 +48,7 @@ private fun day(d: LocalDate) = d.format(DateTimeFormatter.ofLocalizedDate(Forma
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun HealthSheet(vm: HealthViewModel, dismiss: (() -> Unit)?) {
+fun HealthSheet(vm: HealthViewModel, dismiss: (() -> Unit)?, showTitle: Boolean = true) {
     val entries by vm.entries.collectAsStateWithLifecycle()
     val profile by vm.profile.collectAsStateWithLifecycle()
     val today = remember { LocalDate.now() }
@@ -58,7 +58,7 @@ fun HealthSheet(vm: HealthViewModel, dismiss: (() -> Unit)?) {
     val level = ActivityLevel.entries.firstOrNull { it.name == profile.activity } ?: ActivityLevel.LIGHT
     val waterToday = entries.filter { it.kind == HealthKind.WATER && it.date == today.toString() }.sumOf { it.value }.toInt()
 
-    Text(stringResource(R.string.health_title), style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold))
+    if (showTitle) Text(stringResource(R.string.health_title), style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold))
     Text(stringResource(R.string.health_disclaimer), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 4.dp))
     Spacer(Modifier.height(14.dp))
 

@@ -143,7 +143,7 @@ interface ActivityDao {
 
     @Query("DELETE FROM activity_event WHERE type = :type") suspend fun deleteType(type: String)
 
-    @Query("SELECT * FROM activity_event WHERE localDate >= :from AND type NOT IN ('HEALTH_LOG', 'STEPS', 'FOOD_CHECKIN', 'DIARY') ORDER BY timestamp")
+    @Query("SELECT * FROM activity_event WHERE localDate >= :from AND type NOT IN ('HEALTH_LOG', 'STEPS', 'FOOD_CHECKIN', 'DIARY', 'MOOD_CHECKIN') ORDER BY timestamp")
     fun observeSince(from: String): Flow<List<ActivityEventEntity>>
 
     @Query("SELECT * FROM day_note WHERE date = :date")

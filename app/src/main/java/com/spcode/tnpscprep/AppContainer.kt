@@ -47,6 +47,7 @@ class AppContainer(context: Context) {
     val stepRepository by lazy { com.spcode.tnpscprep.data.StepRepository(database) }
     val usageRepository by lazy { com.spcode.tnpscprep.data.UsageRepository(database, appContext) }
     val foodRepository by lazy { com.spcode.tnpscprep.data.FoodRepository(database) }
+    val moodRepository by lazy { com.spcode.tnpscprep.data.MoodRepository(database) }
     val plannedTaskRepository by lazy { com.spcode.tnpscprep.data.PlannedTaskRepository(database) }
     val diaryRepository by lazy { com.spcode.tnpscprep.data.DiaryRepository(database) }
     val activityRepository by lazy { com.spcode.tnpscprep.data.ActivityRepository(database) }

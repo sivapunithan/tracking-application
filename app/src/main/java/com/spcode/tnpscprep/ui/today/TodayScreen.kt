@@ -101,6 +101,10 @@ fun TodayScreen(vm: TodayViewModel, onOpenProfile: () -> Unit, onOpenDiary: (Str
         factory = androidx.lifecycle.viewmodel.viewModelFactory { initializer { FoodViewModel(app.container.foodRepository, app.container.settingsStore) } },
     )
     val food by fvm.days.collectAsStateWithLifecycle()
+    val mvm = androidx.lifecycle.viewmodel.compose.viewModel<MoodViewModel>(
+        factory = androidx.lifecycle.viewmodel.viewModelFactory { initializer { MoodViewModel(app.container.moodRepository) } },
+    )
+    val moods by mvm.days.collectAsStateWithLifecycle()
     val strict by fvm.strict.collectAsStateWithLifecycle()
     val lastAlert by fvm.lastAlertStart.collectAsStateWithLifecycle()
     // The food day changes at 3 AM; re-check every minute so an app left open rolls over by itself.
@@ -217,12 +221,16 @@ fun TodayScreen(vm: TodayViewModel, onOpenProfile: () -> Unit, onOpenDiary: (Str
         if (plannedToday.isNotEmpty()) item(key = "plan") { PlanCard(plannedToday, extras.doneRefs, tickPlan) }
 
         item(key = "checkins") {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                SectionTitle(stringResource(R.string.checkin_title))
-                val evening = com.spcode.tnpscprep.domain.FoodCheckin.eveningPrompt(System.currentTimeMillis(), java.time.ZoneId.systemDefault(), foodLogged)
-                FoodSection(foodDay, food, evening, onSet = fvm::set, onDay = { sheet = "day:" + it })
-                WaterRow(waterToday) { hvm.add(com.spcode.tnpscprep.data.HealthKind.WATER, 250.0) }
-            }
+            val evening = com.spcode.tnpscprep.domain.FoodCheckin.eveningPrompt(System.currentTimeMillis(), java.time.ZoneId.systemDefault(), foodLogged)
+            val weightKg = healthEntries.filter { it.kind == com.spcode.tnpscprep.data.HealthKind.WEIGHT }.maxByOrNull { it.createdAt }?.value
+            val waterTarget = weightKg?.let { com.spcode.tnpscprep.domain.Health.waterMl(it) } ?: 2000
+            val lastGlass = healthEntries.filter { it.kind == com.spcode.tnpscprep.data.HealthKind.WATER && it.date == today.toString() }.maxByOrNull { it.createdAt }
+            CheckinCard(
+                mood = moods[foodDay], food = food[foodDay], foodPrompt = evening, waterMl = waterToday, waterTarget = waterTarget,
+                onMood = { sheet = "mood" }, onFood = { sheet = "foodpick" },
+                onWaterAdd = { hvm.add(com.spcode.tnpscprep.data.HealthKind.WATER, 250.0) },
+                onWaterUndo = lastGlass?.let { g -> { hvm.delete(g.id) } },
+            )
         }
 
         item {
@@ -253,6 +261,8 @@ fun TodayScreen(vm: TodayViewModel, onOpenProfile: () -> Unit, onOpenDiary: (Str
             when {
                 current == "date" -> ExamDateSheet(ui, onSave = { vm.setExamDate(it); dismiss() }, onClear = { vm.clearExamDate(); dismiss() }, onCancel = dismiss)
                 current == "foodalert" -> FoodAlertSheet(dismiss)
+                current == "mood" -> MoodPickSheet(moods[foodDay]) { mvm.set(foodDay, it); dismiss() }
+                current == "foodpick" -> FoodPickSheet(food[foodDay]) { fvm.set(foodDay, it); dismiss() }
                 current == "health" -> {
                     val app = androidx.compose.ui.platform.LocalContext.current.applicationContext as com.spcode.tnpscprep.TnpscApp
                     val hvm = androidx.lifecycle.viewmodel.compose.viewModel<HealthViewModel>(

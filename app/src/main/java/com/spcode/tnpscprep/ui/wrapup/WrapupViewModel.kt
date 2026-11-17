@@ -68,6 +68,7 @@ class WrapupViewModel(
     private val diary: DiaryRepository,
     private val planned: PlannedTaskRepository,
     private val settings: SettingsStore,
+    private val moods: com.spcode.tnpscprep.data.MoodRepository? = null,
     private val zone: ZoneId = ZoneId.systemDefault(),
 ) : ViewModel() {
     private val _state = MutableStateFlow(WrapupState())
@@ -128,6 +129,8 @@ class WrapupViewModel(
             if (s.hasContent) {
                 diary.saveWrapup(s.day, s.content, s.mood, headings)
                 planned.replaceFor(s.day.plusDays(1), s.tomorrow)
+                // the mood she chose tonight is also that day's mood check-in (one mood per day: the latest choice wins)
+                s.mood?.let { n -> com.spcode.tnpscprep.domain.Mood.entries.firstOrNull { it.name == n } }?.let { moods?.set(s.day, it) }
             }
             settings.setWrapupDraft(null)
             _state.update { it.copy(savedSomething = s.hasContent) }
