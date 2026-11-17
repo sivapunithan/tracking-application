@@ -25,6 +25,9 @@ interface SyllabusDao {
     @Query("SELECT value FROM app_meta WHERE `key` = :key") suspend fun getMeta(key: String): String?
     @Upsert suspend fun putMeta(meta: AppMetaEntity)
 
+    @Query("SELECT * FROM subject ORDER BY sortOrder") fun observeSubjects(): Flow<List<SubjectEntity>>
+    @Query("SELECT * FROM unit ORDER BY subjectId, sortOrder") fun observeUnits(): Flow<List<SyllabusUnitEntity>>
+
     /** LEFT JOIN: topics with no progress row come back as level 0. mask = Exam bits; ALL_MASK = everything. */
     @Query(
         """SELECT t.id, t.subjectId, t.unitId, t.nameEn, t.nameTa, t.exams,

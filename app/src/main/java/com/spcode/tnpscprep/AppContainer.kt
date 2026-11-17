@@ -18,6 +18,11 @@ class AppContainer(context: Context) {
         Room.databaseBuilder(appContext, AppDatabase::class.java, "tnpscprep.db").build()
     }
 
+    val syllabusRepository by lazy { com.spcode.tnpscprep.data.SyllabusRepository(database) }
+
+    val sessionRepository by lazy { com.spcode.tnpscprep.data.SessionRepository(database) }
+    val settingsStore by lazy { com.spcode.tnpscprep.data.SettingsStore(appContext) }
+
     private val seeder by lazy { SyllabusSeeder(RoomSyllabusStore(database)) }
 
     suspend fun seedSyllabus(): SeedResult {

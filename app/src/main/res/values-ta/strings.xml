@@ -1,5 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">TNPSC தயாரிப்பு</string>
-    <string name="hello">TNPSC தயாரிப்பு இயங்குகிறது. பாடத்திட்டமும் டைமரும் அடுத்து வரும்.</string>
+    <string name="syllabus_title">பாடத்திட்டம்</string>
+    <string name="filter_all">அனைத்தும்</string>
+    <string name="hint_tap_longpress">தலைப்பைத் தட்டினால் அடுத்த நிலைக்குச் செல்லும். நீண்ட நேரம் அழுத்தினால் மீட்டமைக்கப்படும்.</string>
+    <string name="no_topics">காட்ட தலைப்புகள் இல்லை.</string>
+    <string name="back">← பின்செல்</string>
+    <string name="percent_format">%1$d%%</string>
+    <string name="topic_count">தலைப்புகள்: %1$d</string>
+    <string name="a11y_advance">மீள்பார்வை நிலையை உயர்த்து</string>
+    <string name="a11y_reset">தொடங்கவில்லை என மீட்டமை</string>
+    <string-array name="revision_levels">
+        <item>தொடங்கவில்லை</item>
+        <item>முதல் வாசிப்பு</item>
+        <item>திருப்புதல் 1</item>
+        <item>திருப்புதல் 2</item>
+        <item>திருப்புதல் 3</item>
+    </string-array>
+    <string name="timer_title">டைமர்</string>
+    <string name="phase_focus">கவனம்</string>
+    <string name="phase_break">ஓய்வு</string>
+    <string name="start">தொடங்கு</string>
+    <string name="pause">இடைநிறுத்து</string>
+    <string name="reset">மீட்டமை</string>
+    <string name="skip">தவிர்</string>
+    <string name="subject_tag_label">இந்த அமர்வுக்கு பாடத்தைக் குறிக்கவும் (விருப்பம்)</string>
+    <string name="subject_none">எதுவுமில்லை</string>
+    <string name="today_label">இன்று: %1$d / %2$d நிமிடம்</string>
+    <string name="focus_minutes_label">கவன நேரம் (நிமி)</string>
+    <string name="break_minutes_label">ஓய்வு நேரம் (நிமி)</string>
+    <string name="goal_label">தினசரி இலக்கு (நிமி)</string>
+    <string name="timer_note">டைமர் இந்தச் செயலி திறந்திருக்கும்போது மட்டுமே இயங்கும்; செயலியை விட்டு வெளியேறினால் இடைநிறுத்தப்படும். அமர்வின்போது திரை அணையாது. முடிந்த கவன அமர்வுகள் மட்டுமே கணக்கிடப்படும்.</string>
+    <string name="notice_left_app">செயலியை விட்டு வெளியேறியதால் டைமர் இடைநிறுத்தப்பட்டது.</string>
+    <string name="notice_logged">அமர்வு பதிவாகிவிட்டது: %1$d நிமிடம்</string>
+    <string name="a11y_decrease">குறை</string>
+    <string name="a11y_increase">கூட்டு</string>
+    <plurals name="streak_days">
+        <item quantity="one">தொடர்ச்சி: %d நாள்</item>
+        <item quantity="other">தொடர்ச்சி: %d நாள்கள்</item>
+    </plurals>
+    <string name="settings_title">அமைப்புகள்</string>
+    <string name="language_label">மொழி</string>
+    <string name="language_system">சாதன இயல்புநிலை</string>
+    <string name="language_note">மொழியை மாற்றும்போது திரை மீண்டும் ஏற்றப்படும். இயங்கும் டைமர் தொடர்ந்து இயங்கும்.</string>
 </resources>

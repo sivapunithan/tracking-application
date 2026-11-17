@@ -61,6 +61,34 @@ Deploy: `adb install -r app/build/outputs/apk/debug/app-debug.apk`.
 ## Increment plan / status
 1. [x] Skeleton builds (assembleDebug OK, 12 MB debug APK); phone install pending
 2. [x] Room schema, seeder, tests (JVM unit tests pass; real-Room instrumented test not written)
-3. [ ] Syllabus screen + adaptive two-pane
-4. [ ] Timer + session log
-5. [ ] Settings (language, daily goal) + Tamil polish
+3. [x] Syllabus screen + adaptive two-pane (builds, 33 unit tests pass; NOT yet seen on a real device)
+4. [x] Timer + session log (48 unit tests; countdown + pause-on-leave verified on phone; a full completed session not yet watched)
+5. [x] Language toggle (Settings tab) + Tamil typography (53 unit tests; verified on phone: Tamil renders, persists, timer survives switch, landscape two-pane OK; real tablet not tested)
+
+## Decisions added in increment 3
+- Navigation Compose is NOT used yet: with one screen, master/detail is plain state (`rememberSaveable` selected subject +
+  `BackHandler`). Introduce NavHost when the timer/settings screens are added (increment 4/5).
+- Two-pane when `WindowWidthSizeClass != Compact` (>= 600dp). `calculateWindowSizeClass` needs
+  `@OptIn(androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi)`.
+- Advance reads the current level inside a DB transaction (never trusts the level the UI showed).
+- Percent per subject is computed only from topics matching the selected exam filter.
+
+## Decisions added in increment 4
+- Navigation Compose now used: two top-level tabs (Syllabus, Timer) via PrimaryTabRow + NavHost. Both ViewModels are created at
+  Activity scope in MainActivity (NOT inside the NavHost) so the timer keeps running while viewing the syllabus tab.
+- Timer = pure `PomodoroLogic` state machine driven by an injected monotonic clock (counts against an end time, no drift).
+  When a phase ends it moves to the other phase STOPPED (never auto-starts). Only a finished FOCUS phase is logged.
+- v1 rule: leaving the app (ON_STOP, except configuration changes) PAUSES the timer and shows a notice, so away-time never counts.
+  Screen kept on via `view.keepScreenOn` while running. No foreground service / notifications yet.
+- Settings (focus/break/daily goal) in `SettingsStore` (SharedPreferences) with bounds in `TimerLimits`; edited via steppers on the Timer tab.
+- Session `date` is the local completion date stored as ISO text; today's total and streak are derived from `SUM(minutes) GROUP BY date`.
+
+## Decisions added in increment 5
+- Language: `AppCompatDelegate.setApplicationLocales` (AppCompat per-app locales) + `res/xml/locales_config.xml` + the
+  `AppLocalesMetadataHolderService` manifest entry (persists the choice on API < 33). Options: System default / English / Tamil.
+  Tradeoff: needs AppCompatActivity + appcompat lib; recreates the Activity on change (ViewModels, so the timer, survive).
+  Alternative (hand-rolled Configuration wrapper) is fragile across OS versions.
+- `androidResources.localeFilters = [en, ta]` drops library translations from the APK.
+- Tamil: no bundled font (system Noto Sans Tamil fallback renders fine on the Oppo). `tnpscTypography(tamil=true)` enforces
+  line height >= 1.6x font size with `LineHeightStyle(Center, Trim.None)` so glyphs aren't clipped. If a device shows tofu boxes, bundle Noto Sans Tamil.
+- Settings tab holds only language for now; daily goal / durations live on the Timer tab.

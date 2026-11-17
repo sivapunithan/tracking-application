@@ -5,6 +5,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.graphics.Color
 
 // Calm teal palette. Follows the system light/dark setting.
@@ -13,5 +15,10 @@ private val Dark = darkColorScheme(primary = Color(0xFF8CC5BF), background = Col
 
 @Composable
 fun TnpscTheme(content: @Composable () -> Unit) {
-    MaterialTheme(colorScheme = if (isSystemInDarkTheme()) Dark else Light, content = content)
+    val tamil = LocalConfiguration.current.locales[0].language == "ta"
+    MaterialTheme(
+        colorScheme = if (isSystemInDarkTheme()) Dark else Light,
+        typography = remember(tamil) { tnpscTypography(tamil) },
+        content = content,
+    )
 }

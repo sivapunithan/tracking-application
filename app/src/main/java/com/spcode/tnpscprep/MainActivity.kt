@@ -2,29 +2,42 @@ package com.spcode.tnpscprep
 
 import android.os.Bundle
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
+import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
+import com.spcode.tnpscprep.ui.AppRoot
+import com.spcode.tnpscprep.ui.syllabus.SyllabusViewModel
 import com.spcode.tnpscprep.ui.theme.TnpscTheme
+import com.spcode.tnpscprep.ui.timer.TimerViewModel
 
 // AppCompatActivity (not ComponentActivity) so AppCompatDelegate.setApplicationLocales works on API 26+.
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge() // targetSdk 36 is edge-to-edge anyway; AppRoot pads for system bars itself.
+        val c = (application as TnpscApp).container
         setContent {
+            // Compact = phones in portrait (<600dp). Medium/Expanded = tablets, big phones in landscape.
+            val widthClass = calculateWindowSizeClass(this).widthSizeClass
             TnpscTheme {
-                Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-                    Box(Modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
-                        Text(stringResource(R.string.hello), style = MaterialTheme.typography.bodyLarge)
-                    }
+                Surface(color = MaterialTheme.colorScheme.background) {
+                    val syllabusVm = viewModel<SyllabusViewModel>(
+                        factory = viewModelFactory { initializer { SyllabusViewModel(c.syllabusRepository) } },
+                    )
+                    val timerVm = viewModel<TimerViewModel>(
+                        factory = viewModelFactory {
+                            initializer { TimerViewModel(c.sessionRepository, c.settingsStore, c.syllabusRepository) }
+                        },
+                    )
+                    AppRoot(syllabusVm, timerVm, twoPane = widthClass != WindowWidthSizeClass.Compact)
                 }
             }
         }
