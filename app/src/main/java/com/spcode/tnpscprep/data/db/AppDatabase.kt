@@ -9,8 +9,9 @@ import androidx.room.RoomDatabase
     entities = [
         SubjectEntity::class, SyllabusUnitEntity::class, TopicEntity::class,
         TopicProgressEntity::class, StudySessionEntity::class, AppMetaEntity::class, TopicNoteEntity::class,
+        CurrentAffairEntity::class, UserAffairEntity::class, AffairStateEntity::class,
     ],
-    version = 2,
+    version = 3,
     exportSchema = true,
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -18,4 +19,5 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun progressDao(): ProgressDao
     abstract fun sessionDao(): SessionDao
     abstract fun noteDao(): NoteDao
+    abstract fun affairDao(): AffairDao
 }

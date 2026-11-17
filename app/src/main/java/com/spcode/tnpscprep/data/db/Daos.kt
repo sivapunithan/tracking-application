@@ -83,3 +83,25 @@ interface NoteDao {
     )
     fun observeStarred(mask: Int): Flow<List<StarredTopic>>
 }
+
+@Dao
+interface AffairDao {
+    @Query("SELECT * FROM current_affair") fun observePack(): Flow<List<CurrentAffairEntity>>
+    @Query("SELECT * FROM ca_user_item") fun observeUser(): Flow<List<UserAffairEntity>>
+    @Query("SELECT * FROM ca_state") fun observeStates(): Flow<List<AffairStateEntity>>
+
+    @Upsert suspend fun upsertPack(items: List<CurrentAffairEntity>)
+    @Query("SELECT id FROM current_affair") suspend fun packIds(): List<String>
+    @Query("DELETE FROM current_affair WHERE id IN (:ids)") suspend fun deletePack(ids: List<String>)
+
+    @Insert suspend fun insertUser(item: UserAffairEntity): Long
+    @Query("DELETE FROM ca_user_item WHERE id = :id") suspend fun deleteUser(id: Long)
+
+    @Query("SELECT * FROM ca_state WHERE itemId = :itemId") suspend fun getState(itemId: String): AffairStateEntity?
+    @Upsert suspend fun upsertState(state: AffairStateEntity)
+    @Query("DELETE FROM ca_state WHERE itemId = :itemId") suspend fun deleteState(itemId: String)
+
+    @Query("SELECT value FROM app_meta WHERE `key` = :key") suspend fun getMeta(key: String): String?
+    @Query("SELECT value FROM app_meta WHERE `key` = :key") fun observeMeta(key: String): Flow<String?>
+    @Upsert suspend fun putMeta(meta: AppMetaEntity)
+}

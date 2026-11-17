@@ -13,6 +13,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.spcode.tnpscprep.ui.AppRoot
+import com.spcode.tnpscprep.ui.affairs.AffairsViewModel
 import com.spcode.tnpscprep.ui.syllabus.SyllabusViewModel
 import com.spcode.tnpscprep.ui.theme.TnpscTheme
 import com.spcode.tnpscprep.ui.timer.TimerViewModel
@@ -43,7 +44,10 @@ class MainActivity : AppCompatActivity() {
                             initializer { TodayViewModel(c.syllabusRepository, c.sessionRepository, c.settingsStore) }
                         },
                     )
-                    AppRoot(todayVm, syllabusVm, timerVm, twoPane = widthClass != WindowWidthSizeClass.Compact)
+                    val affairsVm = viewModel<AffairsViewModel>(
+                        factory = viewModelFactory { initializer { AffairsViewModel(c.affairRepository) } },
+                    )
+                    AppRoot(todayVm, syllabusVm, affairsVm, timerVm, twoPane = widthClass != WindowWidthSizeClass.Compact)
                 }
             }
         }

@@ -17,10 +17,14 @@ class TnpscApp : Application() {
         super.onCreate()
         container = AppContainer(this)
         // Seeds on first launch; later launches (or an older asset version) are a cheap no-op.
+        // Independent: a problem in one file must not stop the other from loading.
         appScope.launch {
             runCatching { container.seedSyllabus() }
                 .onSuccess { Log.i("TnpscApp", "Syllabus seed: $it") }
                 .onFailure { Log.e("TnpscApp", "Syllabus seed failed", it) }
+            runCatching { container.seedAffairs() }
+                .onSuccess { Log.i("TnpscApp", "Current affairs seed: $it") }
+                .onFailure { Log.e("TnpscApp", "Current affairs seed failed", it) }
         }
     }
 }

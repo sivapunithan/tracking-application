@@ -32,6 +32,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.spcode.tnpscprep.R
+import com.spcode.tnpscprep.ui.affairs.AffairsScreen
+import com.spcode.tnpscprep.ui.affairs.AffairsViewModel
 import com.spcode.tnpscprep.ui.settings.SettingsScreen
 import com.spcode.tnpscprep.ui.syllabus.SyllabusScreen
 import com.spcode.tnpscprep.ui.syllabus.SyllabusViewModel
@@ -43,6 +45,7 @@ import com.spcode.tnpscprep.ui.timer.TimerViewModel
 private object Routes {
     const val TODAY = "today"
     const val SYLLABUS = "syllabus"
+    const val AFFAIRS = "affairs"
     const val TIMER = "timer"
     const val SETTINGS = "settings"
 }
@@ -50,6 +53,7 @@ private object Routes {
 private val TABS = listOf(
     Routes.TODAY to R.string.tab_today,
     Routes.SYLLABUS to R.string.syllabus_title,
+    Routes.AFFAIRS to R.string.tab_affairs,
     Routes.TIMER to R.string.timer_title,
     Routes.SETTINGS to R.string.settings_title,
 )
@@ -59,7 +63,9 @@ private val TABS = listOf(
  * Activity scope (not inside the NavHost), so the timer isn't torn down when she switches tabs.
  */
 @Composable
-fun AppRoot(todayVm: TodayViewModel, syllabusVm: SyllabusViewModel, timerVm: TimerViewModel, twoPane: Boolean) {
+fun AppRoot(
+    todayVm: TodayViewModel, syllabusVm: SyllabusViewModel, affairsVm: AffairsViewModel, timerVm: TimerViewModel, twoPane: Boolean,
+) {
     val nav = rememberNavController()
     val route = nav.currentBackStackEntryAsState().value?.destination?.route ?: Routes.TODAY
 
@@ -97,6 +103,7 @@ fun AppRoot(todayVm: TodayViewModel, syllabusVm: SyllabusViewModel, timerVm: Tim
         NavHost(nav, startDestination = Routes.TODAY, modifier = Modifier.weight(1f)) {
             composable(Routes.TODAY) { TodayScreen(todayVm) }
             composable(Routes.SYLLABUS) { SyllabusScreen(syllabusVm, twoPane) }
+            composable(Routes.AFFAIRS) { AffairsScreen(affairsVm) }
             composable(Routes.TIMER) { TimerScreen(timerVm) }
             composable(Routes.SETTINGS) { SettingsScreen() }
         }

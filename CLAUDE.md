@@ -12,7 +12,7 @@ The app is for **REVISION + a progress TRACKER + real CURRENT AFFAIRS**. It is N
 ## Roadmap (current)
 6. [DONE, 64 unit tests; Today screen + date picker seen on phone; due list verified by unit tests only] Revision engine: due-for-revision queue (3/7/21/60-day intervals by level), Today screen, exam date countdown, readiness %.
 7. [DONE: notes+star (schema v2, MIGRATION_1_2 verified on phone over a v1 DB), progress by subject, starred list; 67 unit tests] Tracker views: readiness per exam/subject, stale topics, starred (weak) topics, per-topic own notes.
-8. Current affairs: real dated items from official/open sources (own words + source + verified flag), monthly browse,
+8. [DONE v1: 65 items, schema v3 + MIGRATION_2_3, browse/filter/bookmark/revise/own entries; 85 unit tests; NOT yet seen on screen (phone was locked)] Current affairs: real dated items from official/open sources (own words + source + verified flag), monthly browse,
    bookmarks/revised flag on the same revision queue, user-added entries.
 9. Release: signed APK, README (EN+TA), handover notes, keystore backup instructions.
 
@@ -132,3 +132,18 @@ reference, write own notes with page refs.
 - Star/note buttons use text glyphs (☆ ★ ✎), no icon library. Note dialog state is rememberSaveable.
 - Today tab also shows progress by subject (for the target exam) and the starred (weak) list with note previews.
 - Known gap: allowBackup=false and no export, so uninstalling loses progress/notes. Consider an export/import file in the release increment.
+
+## Decisions added in increment 8 (current affairs)
+- Pack = `assets/current_affairs.json` (version, dataUpTo, items). Tables: `current_affair` (re-seedable pack), `ca_user_item` (her entries),
+  `ca_state` (bookmark + revision level for any item id; user ids are "user-<n>"; pack ids may not start with "user-"). No FKs; a pack update
+  never touches her data. Schema v3, MIGRATION_2_3 generated from the exported 3.json.
+- Every pack item: date, category (POLITY, TN, INDIA, WORLD, ECONOMY, SCIENCE, SPORTS, AWARDS), EN+TA title/summary (own words; Tamil is DRAFT),
+  source name + https url, `verified` flag. ALL v1 items are `verified=false`: nobody has checked them against official sources.
+- Sources used for v1: Wikipedia "2026 in India" (CC BY-SA; each bullet's cited news URL is the link), Wikipedia event articles, and a few
+  search-result reports (Union Budget, Padma Awards, TN cabinet). PIB blocks automated fetches (403) so it was not used.
+- Deliberately left out / toned down: a wiki line calling the Harish Rana ruling the "first" passive euthanasia case (doubtful, so only the ruling is stated).
+  One TN item is explicitly marked REPORT / unconfirmed (5-year age relaxation, 3 Nov 2026): no official order was found; do not present as fact.
+- Known gaps in v1: full Padma list, Nobel prizes other than Peace, state budgets, TN ministers list, Sept-Nov is thin (the source article had few entries).
+- UI shows "Compiled up to <dataUpTo>" and a disclaimer so stale/unverified data can never mislead silently. Source links open the browser
+  (no INTERNET permission needed). Own entries can be added/deleted in the app: this keeps the section alive with no developer.
+- Not done yet: CA items are NOT in the Today due-for-revision list (they have a level but the schedule isn't wired in). `tools/` holds provenance scripts.

@@ -75,4 +75,25 @@
     <string name="subject_progress_title">Progress by subject</string>
     <string name="starred_title">Starred topics (%1$d)</string>
     <string name="starred_empty">Star a topic in the Syllabus tab to find it here quickly.</string>
+    <string name="tab_affairs">Current affairs</string>
+    <string name="ca_compiled">Compiled up to %1$s</string>
+    <string name="ca_disclaimer">Short notes in our own words, each with a source link. Not independently verified and far from complete: check anything important against an official source. Add your own entries with the button below.</string>
+    <string name="ca_add_own">Add my own entry</string>
+    <string name="ca_bookmarked">Starred</string>
+    <string name="ca_empty">No items match these filters.</string>
+    <string name="ca_my_entry">My entry</string>
+    <string name="ca_verified">Verified</string>
+    <string name="ca_unverified">Unverified</string>
+    <string name="ca_open_source">Open source</string>
+    <string name="ca_delete">Delete</string>
+    <string name="ca_title">Title</string>
+    <string name="ca_summary">What happened (your own words)</string>
+    <string name="cat_polity">Polity and law</string>
+    <string name="cat_tn">Tamil Nadu</string>
+    <string name="cat_india">India</string>
+    <string name="cat_world">World</string>
+    <string name="cat_economy">Economy</string>
+    <string name="cat_science">Science and defence</string>
+    <string name="cat_sports">Sports</string>
+    <string name="cat_awards">Awards and honours</string>
 </resources>

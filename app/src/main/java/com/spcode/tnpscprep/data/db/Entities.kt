@@ -121,3 +121,41 @@ data class StarredTopic(
     val level: Int,
     val note: String,
 )
+
+// ---- CURRENT AFFAIRS ----
+
+/** Items shipped in assets/current_affairs.json. Replaceable by a newer pack (see AffairSeeder). */
+@Entity(tableName = "current_affair", indices = [Index("date")])
+data class CurrentAffairEntity(
+    @PrimaryKey val id: String,
+    /** ISO yyyy-MM-dd */
+    val date: String,
+    val category: String,
+    val titleEn: String,
+    val titleTa: String,
+    val summaryEn: String,
+    val summaryTa: String,
+    val sourceName: String,
+    val url: String,
+    val verified: Boolean,
+)
+
+/** Entries she writes herself. Never touched by a pack update. */
+@Entity(tableName = "ca_user_item", indices = [Index("date")])
+data class UserAffairEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val date: String,
+    val category: String,
+    val title: String,
+    val summary: String,
+    val createdAt: Long,
+)
+
+/** Bookmark + revision level for ANY item (pack id, or "user-<n>"). No FK, like topic_progress. */
+@Entity(tableName = "ca_state")
+data class AffairStateEntity(
+    @PrimaryKey val itemId: String,
+    val bookmarked: Boolean,
+    val level: Int,
+    val lastUpdated: Long,
+)

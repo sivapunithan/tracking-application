@@ -75,4 +75,25 @@
     <string name="subject_progress_title">பாடவாரி முன்னேற்றம்</string>
     <string name="starred_title">குறியிட்ட தலைப்புகள் (%1$d)</string>
     <string name="starred_empty">பாடத்திட்டப் பகுதியில் ஒரு தலைப்பை ☆ குறியிட்டால் இங்கே விரைவாகக் காணலாம்.</string>
+    <string name="tab_affairs">நடப்பு நிகழ்வுகள்</string>
+    <string name="ca_compiled">%1$s வரை தொகுக்கப்பட்டது</string>
+    <string name="ca_disclaimer">எங்கள் சொந்த வார்த்தைகளில் எழுதிய சுருக்கக் குறிப்புகள்; ஒவ்வொன்றுக்கும் மூல இணைப்பு உண்டு. தனியாக உறுதிசெய்யப்படவில்லை; முழுமையானதும் அல்ல. முக்கியமானவற்றை அதிகாரப்பூர்வ மூலத்தில் சரிபார்க்கவும். கீழே உள்ள பொத்தானால் உங்கள் சொந்தப் பதிவுகளைச் சேர்க்கலாம்.</string>
+    <string name="ca_add_own">என் சொந்தப் பதிவைச் சேர்</string>
+    <string name="ca_bookmarked">குறியிட்டவை</string>
+    <string name="ca_empty">இந்த வடிப்பான்களுக்குப் பொருந்தும் பதிவுகள் இல்லை.</string>
+    <string name="ca_my_entry">என் பதிவு</string>
+    <string name="ca_verified">உறுதிசெய்யப்பட்டது</string>
+    <string name="ca_unverified">உறுதிசெய்யப்படவில்லை</string>
+    <string name="ca_open_source">மூலத்தைத் திற</string>
+    <string name="ca_delete">நீக்கு</string>
+    <string name="ca_title">தலைப்பு</string>
+    <string name="ca_summary">என்ன நடந்தது (உங்கள் சொந்த வார்த்தைகளில்)</string>
+    <string name="cat_polity">அரசியலும் சட்டமும்</string>
+    <string name="cat_tn">தமிழ்நாடு</string>
+    <string name="cat_india">இந்தியா</string>
+    <string name="cat_world">உலகம்</string>
+    <string name="cat_economy">பொருளாதாரம்</string>
+    <string name="cat_science">அறிவியலும் பாதுகாப்பும்</string>
+    <string name="cat_sports">விளையாட்டு</string>
+    <string name="cat_awards">விருதுகளும் கௌரவங்களும்</string>
 </resources>
