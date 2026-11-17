@@ -219,3 +219,11 @@ data class StepDayEntity(
     val bootMs: Long,
     val updatedAt: Long,
 )
+
+/** One app's minutes on one day (top apps only). On-device, deletable. */
+@Entity(tableName = "usage_day", primaryKeys = ["date", "packageName"])
+data class UsageDayEntity(val date: String, val packageName: String, val label: String, val minutes: Int)
+
+/** Whole-day phone minutes (all apps), so the total never depends on how many apps were kept. */
+@Entity(tableName = "usage_total")
+data class UsageTotalEntity(@PrimaryKey val date: String, val minutes: Int)

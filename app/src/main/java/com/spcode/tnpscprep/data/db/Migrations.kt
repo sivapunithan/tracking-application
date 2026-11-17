@@ -77,3 +77,10 @@ val MIGRATION_7_8 = object : Migration(7, 8) {
         db.execSQL("CREATE TABLE IF NOT EXISTS `step_day` (`date` TEXT NOT NULL, `baseline` INTEGER NOT NULL, `lastReading` INTEGER NOT NULL, `steps` INTEGER NOT NULL, `bootMs` INTEGER NOT NULL, `updatedAt` INTEGER NOT NULL, PRIMARY KEY(`date`))")
     }
 }
+
+val MIGRATION_8_9 = object : Migration(8, 9) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("CREATE TABLE IF NOT EXISTS `usage_day` (`date` TEXT NOT NULL, `packageName` TEXT NOT NULL, `label` TEXT NOT NULL, `minutes` INTEGER NOT NULL, PRIMARY KEY(`date`, `packageName`))")
+        db.execSQL("CREATE TABLE IF NOT EXISTS `usage_total` (`date` TEXT NOT NULL, `minutes` INTEGER NOT NULL, PRIMARY KEY(`date`))")
+    }
+}

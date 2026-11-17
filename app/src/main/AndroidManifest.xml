@@ -1,11 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
     <!-- The ONLY permission. Used solely by the optional "Latest headlines" feature (HttpFeedSource);
          it can be switched off in Settings, and all traffic is https to the hosts listed in assets/feeds.json. -->
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- Optional step counter: only asked for after a plain explanation screen; the app works without it. -->
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
     <uses-feature android:name="android.hardware.sensor.stepcounter" android:required="false" />
+    <!-- Optional phone-usage view: she switches "Usage access" on in system settings; read only on app open, kept on this phone. -->
+    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" tools:ignore="ProtectedPermissions" />
+    <!-- Lets us read the NAMES of apps that have a home-screen icon (and nothing else). We do NOT request QUERY_ALL_PACKAGES. -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent>
+    </queries>
     <application
         android:name=".TnpscApp"
         android:allowBackup="false"

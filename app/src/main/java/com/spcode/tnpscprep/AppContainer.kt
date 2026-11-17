@@ -11,6 +11,7 @@ import com.spcode.tnpscprep.data.db.MIGRATION_4_5
 import com.spcode.tnpscprep.data.db.MIGRATION_5_6
 import com.spcode.tnpscprep.data.db.MIGRATION_6_7
 import com.spcode.tnpscprep.data.db.MIGRATION_7_8
+import com.spcode.tnpscprep.data.db.MIGRATION_8_9
 import com.spcode.tnpscprep.data.news.FeedListDto
 import com.spcode.tnpscprep.data.news.FeedPolicy
 import com.spcode.tnpscprep.data.news.HttpFeedSource
@@ -30,7 +31,7 @@ class AppContainer(context: Context) {
 
     val database: AppDatabase by lazy {
         Room.databaseBuilder(appContext, AppDatabase::class.java, "tnpscprep.db")
-            .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8)
+            .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9)
             .build()
     }
 
@@ -41,6 +42,7 @@ class AppContainer(context: Context) {
 
     val healthRepository by lazy { com.spcode.tnpscprep.data.HealthRepository(database) }
     val stepRepository by lazy { com.spcode.tnpscprep.data.StepRepository(database) }
+    val usageRepository by lazy { com.spcode.tnpscprep.data.UsageRepository(database, appContext) }
     val activityRepository by lazy { com.spcode.tnpscprep.data.ActivityRepository(database) }
 
     val affairRepository by lazy { com.spcode.tnpscprep.data.AffairRepository(database) }

@@ -250,8 +250,20 @@
     <string name="steps_open_settings">Open phone settings</string>
     <string name="steps_approx">Approximate: counted only when you open the app.</string>
     <string name="steps_explain_title">Count your steps?</string>
-    <string name="steps_explain_body">The phone has a built-in step counter. To read it, Android asks for the "Physical activity" permission. The app reads it only when you open it, keeps the numbers on this phone, and never sends them anywhere. Steps you take while the app is closed are added to the day you next open it, so the numbers are approximate.</string>
+    <string name="steps_explain_body">The phone has a built-in step counter. To read it, Android asks for the \"Physical activity\" permission. The app reads it only when you open it, keeps the numbers on this phone, and never sends them anywhere. Steps you take while the app is closed are added to the day you next open it, so the numbers are approximate.</string>
     <string name="steps_continue">Continue</string>
     <string name="not_now">Not now</string>
     <string name="ev_steps">Steps: about %1$d (approx.)</string>
+    <string name="usage_title">Phone usage</string>
+    <string name="usage_off">See how much time you spend on your phone next to your study time. Off for now.</string>
+    <string name="usage_turn_on">Turn on phone usage</string>
+    <string name="usage_turn_off">Turn off</string>
+    <string name="usage_delete">Delete data</string>
+    <string name="usage_delete_confirm">Tap again to erase</string>
+    <string name="usage_today_vs_study">Today on your phone. Study today: %1$d min.</string>
+    <string name="usage_note">Approximate. Read only when you open this app, kept on this phone. Small numbers under the bars are your study minutes.</string>
+    <string name="usage_explain_title">Show your phone usage?</string>
+    <string name="usage_explain_body">Android keeps a daily record of how long each app was open. To read it, this app needs \"Usage access\", which you switch on yourself in the next screen: find TnpscPrep in the list and turn it on. The app reads it only when you open it, keeps the minutes (top apps per day) on this phone for 90 days, and never sends them anywhere. You can turn it off or delete the data here at any time.</string>
+    <string name="usage_open_settings">Open Usage access</string>
+    <string name="usage_unavailable">This phone has no Usage access screen, so this feature is not available.</string>
 </resources>

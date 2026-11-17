@@ -125,6 +125,11 @@ fun TodayScreen(vm: TodayViewModel) {
         if (stepSensor) item { StepsCard() }
 
         item {
+            val studyByDate = remember(heat) { heat.weeks.flatten().filterNotNull().associate { it.date to it.minutes } }
+            UsageCard(studyByDate)
+        }
+
+        item {
             SoftCard(Modifier.fillMaxWidth(), onClick = { sheet = "health" }) {
                 Column(Modifier.padding(16.dp)) {
                     Text(stringResource(R.string.health_title), style = MaterialTheme.typography.titleSmall)

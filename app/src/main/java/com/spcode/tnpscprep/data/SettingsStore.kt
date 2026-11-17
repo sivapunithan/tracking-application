@@ -70,6 +70,11 @@ class SettingsStore(context: Context) {
         prefs.getString(K_H_ACT, "LIGHT") ?: "LIGHT", prefs.getInt(K_H_CYCLE, 28),
     )
 
+    // ---- phone usage (opt-in, off by default) ----
+    private val _usage = MutableStateFlow(prefs.getBoolean(K_USAGE, false))
+    val usageEnabled: StateFlow<Boolean> = _usage.asStateFlow()
+    fun setUsageEnabled(v: Boolean) { prefs.edit().putBoolean(K_USAGE, v).apply(); _usage.value = v }
+
     // ---- PIN: only a salted PBKDF2 hash is stored, never the PIN itself ----
     fun hasPin(): Boolean = prefs.contains(K_PIN_HASH)
     fun pinRecord(): Pair<ByteArray, ByteArray>? {
@@ -96,7 +101,7 @@ class SettingsStore(context: Context) {
         _targetExam.value = "ALL"; _examDay.value = NO_DATE
         _newsEnabled.value = true; _newsLast.value = 0L
         _theme.value = "LIGHT"; _name.value = ""; _account.value = false
-        _health.value = HealthProfile()
+        _health.value = HealthProfile(); _usage.value = false
     }
 
     val focusMinutes: StateFlow<Int> = _focus.asStateFlow()
@@ -129,6 +134,7 @@ class SettingsStore(context: Context) {
         private const val K_H_SEX = "h_sex"
         private const val K_H_ACT = "h_act"
         private const val K_H_CYCLE = "h_cycle"
+        private const val K_USAGE = "usage_enabled"
         private const val K_NAME = "user_name"
         private const val K_NEWS = "news_enabled"
         private const val K_NEWS_LAST = "news_last_refresh"

@@ -245,3 +245,11 @@ reference, write own notes with page refs.
 - Feature hidden when `getDefaultSensor(TYPE_STEP_COUNTER)` is null. Manifest: ACTIVITY_RECOGNITION (runtime prompt only on API 29+, after a plain explanation pop-up; permanently denied -> "Open phone settings").
   UI: `ui/today/StepsCard` (today's steps + 7-day bars, labelled approximate). No Health Connect, no INTERNET use.
 - NOT yet seen on the phone (PIN lock). 177 unit tests.
+
+## Increment C: phone-usage view (opt-in)
+- Android has no in-app prompt for this: she turns on "Usage access" for the app in system settings (`ACTION_USAGE_ACCESS_SETTINGS`); `UsageRepository.hasAccess()` checks AppOps. Manifest: PACKAGE_USAGE_STATS + a launcher-intent `<queries>` (app NAMES for apps with a home-screen icon only).
+  We do NOT use QUERY_ALL_PACKAGES. Off by default (`SettingsStore.usageEnabled`).
+- Read ONLY when the app comes to the front (and she opted in + access is on): `queryAndAggregateUsageStats` per calendar day for today + 6 days back (`domain/PhoneUsage`, tested). Apps without a launcher icon and the home launcher are excluded.
+  Stored in schema v9 (`usage_day` top-10 apps per day, `usage_total` whole-day minutes; MIGRATION_8_9), pruned after 90 days. No activity_event, so it never colours the heatmap. On-device only, no export.
+- UI `ui/today/UsageCard`: explanation pop-up -> system Usage access screen; today's total, top 5 apps, 7-day bars with her study minutes under each bar; "Turn off" and two-tap "Delete data". Labelled approximate.
+- Needs the Usage access screen to exist on the phone (otherwise shows "not available"). 184 unit tests. NOT yet seen on the phone.

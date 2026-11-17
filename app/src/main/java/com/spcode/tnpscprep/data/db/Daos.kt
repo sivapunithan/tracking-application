@@ -165,3 +165,16 @@ interface StepDao {
     @Insert(onConflict = androidx.room.OnConflictStrategy.REPLACE) suspend fun upsert(e: StepDayEntity)
     @Query("SELECT * FROM step_day WHERE date >= :from ORDER BY date") fun observeSince(from: String): Flow<List<StepDayEntity>>
 }
+
+@Dao
+interface UsageDao {
+    @Query("DELETE FROM usage_day WHERE date = :date") suspend fun deleteDay(date: String)
+    @Insert(onConflict = androidx.room.OnConflictStrategy.REPLACE) suspend fun insertApps(rows: List<UsageDayEntity>)
+    @Insert(onConflict = androidx.room.OnConflictStrategy.REPLACE) suspend fun upsertTotal(t: UsageTotalEntity)
+    @Query("SELECT * FROM usage_day WHERE date >= :from ORDER BY date, minutes DESC") fun observeApps(from: String): Flow<List<UsageDayEntity>>
+    @Query("SELECT * FROM usage_total WHERE date >= :from ORDER BY date") fun observeTotals(from: String): Flow<List<UsageTotalEntity>>
+    @Query("DELETE FROM usage_day WHERE date < :before") suspend fun pruneApps(before: String)
+    @Query("DELETE FROM usage_total WHERE date < :before") suspend fun pruneTotals(before: String)
+    @Query("DELETE FROM usage_day") suspend fun deleteAllApps()
+    @Query("DELETE FROM usage_total") suspend fun deleteAllTotals()
+}
