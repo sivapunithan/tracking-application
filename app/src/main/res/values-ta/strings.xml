@@ -266,4 +266,53 @@
     <string name="usage_explain_body">ஒவ்வொரு செயலியும் எவ்வளவு நேரம் திறந்திருந்தது என்பதை Android தினமும் பதிவு செய்கிறது. அதைப் படிக்க இந்த செயலிக்கு \"Usage access\" தேவை; அடுத்த திரையில் பட்டியலில் TnpscPrep-ஐக் கண்டு நீங்களே இயக்க வேண்டும். செயலியைத் திறக்கும்போது மட்டுமே படிக்கும்; முக்கிய செயலிகளின் நிமிடங்களை 90 நாட்கள் இந்த போனிலேயே வைக்கும், எங்கும் அனுப்பாது. இங்கே எப்போது வேண்டுமானாலும் அணைக்கலாம் அல்லது தரவை அழிக்கலாம்.</string>
     <string name="usage_open_settings">Usage access-ஐத் திற</string>
     <string name="usage_unavailable">இந்த போனில் Usage access திரை இல்லை, எனவே இந்த வசதி கிடைக்காது.</string>
+    <string name="food_question">இன்று உணவு எப்படி இருந்தது?</string>
+    <string name="food_evening">மாலை பதிவு: ஒரு தொடுதல் போதும்.</string>
+    <string name="food_healthy">ஆரோக்கியம்</string>
+    <string name="food_mixed">கலவை</string>
+    <string name="food_junk">ஜங்க்</string>
+    <string name="food_msg_healthy">அருமை! உங்கள் உடம்பு நன்றி சொல்லும்!</string>
+    <string name="food_msg_mixed">சமநிலை நல்லதுதான்.</string>
+    <string name="food_msg_junk">நாளை புதிய தொடக்கம்.</string>
+    <string name="food_undo">திரும்பப்பெறு</string>
+    <string name="food_today_chip">இன்றைய உணவு: %1$s</string>
+    <string name="food_change">மாற்று</string>
+    <string name="food_none">பதிவில்லை</string>
+    <string name="food_week">இந்த வாரம் ஆரோக்கிய நாட்கள்: %1$d/7</string>
+    <string name="food_streak">%1$d நாள் தொடர்</string>
+    <string name="food_alert">தொடர்ந்து 3 ஜங்க் நாட்கள். இன்று ஒரு ஆரோக்கிய உணவு சாப்பிடலாமா?</string>
+    <string name="food_dismiss">சரி</string>
+    <string name="ev_food">உணவு பதிவு: %1$s</string>
+    <string name="settings_strict">கண்டிப்பு முறை</string>
+    <string name="settings_strict_note">தொடர்ந்து 3 ஜங்க் நாட்களுக்குப் பின் ஒரு விளையாட்டான நினைவூட்டல் (ஒரு தொடருக்கு ஒரு முறை). இயல்பாக அணைந்திருக்கும்.</string>
+    <string name="diary_title">நாட்குறிப்பு</string>
+    <string name="diary_card_sub">உங்கள் நாளைப் பற்றி எழுதுங்கள். தனிப்பட்டது, இந்த போனில் மட்டும்.</string>
+    <string name="diary_new">புதிய பதிவு</string>
+    <string name="diary_search_hint">நாட்குறிப்பில் தேடு</string>
+    <string name="diary_empty">இன்னும் எதுவும் இல்லை. "புதிய பதிவு" தொட்டு முதல் பதிவை எழுதுங்கள்.</string>
+    <string name="diary_no_results">பொருந்தும் பதிவுகள் இல்லை.</string>
+    <string name="diary_saved">சேமிக்கப்பட்டது</string>
+    <string name="diary_write_hint">இங்கே எழுதுங்கள்…</string>
+    <string name="diary_delete_title">இந்தப் பதிவை அழிக்கவா?</string>
+    <string name="diary_delete_body">இந்த போனிலிருந்து நீக்கப்படும். சில விநாடிகள் திரும்பப்பெறலாம்.</string>
+    <string name="diary_deleted">பதிவு அழிக்கப்பட்டது</string>
+    <string name="diary_undo">திரும்பப்பெறு</string>
+    <string name="diary_review_title">இந்த வாரம்</string>
+    <string name="diary_review_entries">எழுதிய பதிவுகள்: %1$d</string>
+    <string name="diary_review_study">படிப்பு நேரம்: %1$d நிமிடம்</string>
+    <string name="diary_export">ஏற்றுமதி</string>
+    <string name="diary_import">இறக்குமதி</string>
+    <string name="diary_backup_note">ஏற்றுமதி உங்கள் நாட்குறிப்பை நீங்கள் தேர்ந்தெடுக்கும் இடத்தில் ஒரு எளிய கோப்பாகச் சேமிக்கும். அது குறியாக்கம் செய்யப்படவில்லை, எனவே தனிப்பட்ட இடத்தில் வையுங்கள். இறக்குமதி பதிவுகளைச் சேர்க்க மட்டுமே செய்யும், எதையும் அழிக்காது.</string>
+    <string name="diary_export_done">நாட்குறிப்பு ஏற்றுமதி செய்யப்பட்டது.</string>
+    <string name="diary_export_failed">கோப்பைச் சேமிக்க முடியவில்லை.</string>
+    <string name="diary_import_done">இறக்குமதி ஆனது. சேர்த்தது %1$d, புதுப்பித்தது %2$d, மாற்றமில்லாதது %3$d.</string>
+    <string name="diary_import_bad">அது சரியான நாட்குறிப்பு காப்புக் கோப்பு அல்ல. எதுவும் மாற்றப்படவில்லை.</string>
+    <string name="diary_section">நாட்குறிப்பு</string>
+    <string name="diary_activity">செயல்பாடுகள்</string>
+    <string name="diary_write_about">இந்த நாளைப் பற்றி எழுது</string>
+    <string-array name="diary_prompts">
+        <item>இன்று நன்றாக நடந்தது என்ன?</item>
+        <item>இன்று நான் என்ன படித்தேன்?</item>
+        <item>நான் எதற்காக நன்றியுடன் இருக்கிறேன்?</item>
+    </string-array>
 </resources>

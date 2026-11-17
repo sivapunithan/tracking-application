@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- PLACEHOLDER emoji (simple vector). Replace by adding drawable-nodpi/food_junk.webp (192x192, transparent): the app prefers that file when it exists. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="64dp" android:height="64dp" android:viewportWidth="64" android:viewportHeight="64">
+    <path android:fillColor="#E8A87C" android:pathData="M32,32m-28,0a28,28 0,1 1,56 0a28,28 0,1 1,-56 0"/>
+    <path android:fillColor="#3B1A12" android:pathData="M22,26m-3,0a3,3 0,1 1,6 0a3,3 0,1 1,-6 0"/>
+    <path android:fillColor="#3B1A12" android:pathData="M42,26m-3,0a3,3 0,1 1,6 0a3,3 0,1 1,-6 0"/>
+    <path android:strokeColor="#3B1A12" android:strokeWidth="3" android:strokeLineCap="round" android:pathData="M22,45 Q32,38 42,45"/>
+</vector>

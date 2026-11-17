@@ -253,3 +253,25 @@ reference, write own notes with page refs.
   Stored in schema v9 (`usage_day` top-10 apps per day, `usage_total` whole-day minutes; MIGRATION_8_9), pruned after 90 days. No activity_event, so it never colours the heatmap. On-device only, no export.
 - UI `ui/today/UsageCard`: explanation pop-up -> system Usage access screen; today's total, top 5 apps, 7-day bars with her study minutes under each bar; "Turn off" and two-tap "Delete data". Labelled approximate.
 - Needs the Usage access screen to exist on the phone (otherwise shows "not available"). 184 unit tests. NOT yet seen on the phone.
+
+## Increment F1: daily food check-in (habit tracker, not a diet tool)
+- No schema change: one `FOOD_CHECKIN` row per FOOD DAY in `activity_event` (refId = date, details {"value":"HEALTHY|MIXED|JUNK"}); logging again REPLACES it (`FoodRepository.set`, null = remove, used by Undo).
+  Food day changes at 3 AM local (`FoodCheckin.foodDay`). `ActivityEvents.build` got a `localDateOverride`. FOOD_CHECKIN is excluded from the heatmap study levels (like STEPS/HEALTH_LOG) but shown as a small dot per day and in the day sheet.
+- All rules are DERIVED in pure `domain/FoodCheckin` (tested): week = Mon-Sun, healthy-days count, streak (HEALTHY only; one grace day per week; unlogged today never breaks it),
+  strict chain = consecutive calendar days logged JUNK (MIXED/HEALTHY/unlogged breaks it). Strict-mode nudge shows ONCE per chain: only the chain's START date is remembered (`SettingsStore.lastFoodAlertStart`).
+  Strict mode toggle is in Settings, OFF by default. After 18:00 with nothing logged the card is highlighted (no notifications: ColorOS kills background work).
+- UI `ui/today/FoodCard`: pick card -> result (spring + confetti + haptic for HEALTHY, 5 s Undo) -> compact chip; Mon-Sun strip (emoji + colour); "Healthy days this week X/7" + streak.
+- EMOJI ASSETS: lookup order = own `food_*.webp` -> mood avatar stand-ins (healthy=cheer, mixed=proud, junk=worried, angry=angry; top square) -> placeholder vectors. The app uses `drawable-nodpi/food_healthy|mixed|junk|angry.webp` (192x192, transparent) when present, else the marked placeholder vectors `drawable/food_ph_*.xml`. `res/raw/keep.xml` protects name-looked-up pictures (mood_/login_/food_) from the release resource shrinker.
+- 197 unit tests; NOT seen on the phone (PIN lock). Tamil copy is DRAFT.
+
+## Increment D1: diary (plain text, offline, private)
+- Schema v10: `diary_entry(id, localDate, text, moodEmojiId?, createdAt, updatedAt)` + index on localDate + MIGRATION_9_10. Several entries per day. `localDate` uses the shared 3 AM rollover (`domain/LogicalDay`, also used by the food check-in).
+- Every save refreshes ONE `DIARY` activity event per entry (refId = entry id; holds only the character count, NEVER the text). DIARY is excluded from heatmap colour like STEPS/FOOD; the day sheet shows entries as their own "Diary" section (day story: diary, then sessions/food/steps, empty sections skipped) + a "Write about this day" button.
+- Editor: `ui/diary/DiaryScreen` (full-screen Dialog over the app, opened from the Today "Diary" card or the day sheet). Autosave = the effect restarts on every keystroke + 800 ms delay; rules in pure `domain/Autosave` (blank NEW entry never stored; blank existing entry deleted only on leaving; flush on back and on ON_STOP). Saves are serialised by a Mutex in `DiaryViewModel` so two saves never create two rows.
+  Mood row reuses the 7 mood avatars (`moodEmojiId` = Mood name). Prompt chip rotates daily (`DiaryPrompts`), inserts as the first line. 20,000 char cap, 34sp line height on 19sp text (Tamil not clipped).
+- Timeline: lazy list grouped by month; only the first 200 chars of each entry are loaded (no Paging library). Search = `LIKE '%q%' ESCAPE '\'` (NFC-normalised, % _ \ escaped, 200 results). NOT FTS: FTS tokenises whole words and Tamil combining signs make that unreliable; substring match works on any script and a personal diary is small.
+  Verified by a unit test that runs the real SQLite LIKE on Tamil text (test-only dependency `org.xerial:sqlite-jdbc`, never packaged in the app).
+- Weekly review = counts only (entries this week, mood spread, study minutes): no interpretation or advice.
+- Backup: `data/DiaryBackup` = minimal diary-only Export/Import through Android's file pickers (no permission): `{"app":"TnpscPrep","version":1,"diary":[...]}` (top-level sections so a full backup can add more later). Import is merge-only in ONE transaction: new entries added (identity = localDate + createdAt), a match is updated only if the file's copy is newer, NOTHING is deleted; any invalid entry rejects the whole file; 10 MB cap. The file is plain text (the UI warns).
+  The FULL app backup (progress, notes, sessions, food, health ...) is still NOT built: next increment.
+- 212 unit tests. NOT yet seen on the phone (PIN lock). Tamil copy is DRAFT.

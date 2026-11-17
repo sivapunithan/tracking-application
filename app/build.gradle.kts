@@ -78,4 +78,6 @@ dependencies {
     // The XML pull parser is built into Android; JVM unit tests need a real implementation on the classpath.
     testImplementation("net.sf.kxml:kxml2:2.3.0")
     testImplementation("xmlpull:xmlpull:1.1.3.1")
+    // TEST-only: runs the real SQLite LIKE statement on Tamil text in JVM unit tests. Never packaged into the app.
+    testImplementation("org.xerial:sqlite-jdbc:3.46.1.0")
 }

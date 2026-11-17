@@ -70,6 +70,14 @@ class SettingsStore(context: Context) {
         prefs.getString(K_H_ACT, "LIGHT") ?: "LIGHT", prefs.getInt(K_H_CYCLE, 28),
     )
 
+    // ---- food check-in: strict mode is OFF unless she turns it on; lastFoodAlert = start date of the chain already shown ----
+    private val _strictFood = MutableStateFlow(prefs.getBoolean(K_STRICT, false))
+    val strictFood: StateFlow<Boolean> = _strictFood.asStateFlow()
+    fun setStrictFood(v: Boolean) { prefs.edit().putBoolean(K_STRICT, v).apply(); _strictFood.value = v }
+    private val _foodAlert = MutableStateFlow(prefs.getString(K_FOOD_ALERT, "") ?: "")
+    val lastFoodAlertStart: StateFlow<String> = _foodAlert.asStateFlow()
+    fun setLastFoodAlertStart(v: String) { prefs.edit().putString(K_FOOD_ALERT, v).apply(); _foodAlert.value = v }
+
     // ---- phone usage (opt-in, off by default) ----
     private val _usage = MutableStateFlow(prefs.getBoolean(K_USAGE, false))
     val usageEnabled: StateFlow<Boolean> = _usage.asStateFlow()
@@ -101,7 +109,7 @@ class SettingsStore(context: Context) {
         _targetExam.value = "ALL"; _examDay.value = NO_DATE
         _newsEnabled.value = true; _newsLast.value = 0L
         _theme.value = "LIGHT"; _name.value = ""; _account.value = false
-        _health.value = HealthProfile(); _usage.value = false
+        _health.value = HealthProfile(); _usage.value = false; _strictFood.value = false; _foodAlert.value = ""
     }
 
     val focusMinutes: StateFlow<Int> = _focus.asStateFlow()
@@ -134,6 +142,8 @@ class SettingsStore(context: Context) {
         private const val K_H_SEX = "h_sex"
         private const val K_H_ACT = "h_act"
         private const val K_H_CYCLE = "h_cycle"
+        private const val K_STRICT = "food_strict"
+        private const val K_FOOD_ALERT = "food_alert_start"
         private const val K_USAGE = "usage_enabled"
         private const val K_NAME = "user_name"
         private const val K_NEWS = "news_enabled"

@@ -37,7 +37,7 @@ class ActivityEventsTest {
 
     @Test fun type_names_are_stable() {
         assertEquals(
-            listOf("FOCUS_SESSION", "TOPIC_PROGRESS", "NOTE", "AFFAIR_REVISED", "AFFAIR_ADDED", "MOCK_TEST", "HEALTH_LOG", "STEPS"),
+            listOf("FOCUS_SESSION", "TOPIC_PROGRESS", "NOTE", "AFFAIR_REVISED", "AFFAIR_ADDED", "MOCK_TEST", "HEALTH_LOG", "DIARY", "FOOD_CHECKIN", "STEPS"),
             ActivityType.entries.map { it.name },
         )
     }

@@ -133,11 +133,14 @@ interface ActivityDao {
 
     @Query("SELECT COUNT(*) FROM activity_event") suspend fun count(): Int
 
+    @Query("SELECT * FROM activity_event WHERE type = :type AND localDate >= :from ORDER BY timestamp")
+    fun observeByType(type: String, from: String): Flow<List<ActivityEventEntity>>
+
     @Query("DELETE FROM activity_event WHERE type = :type AND refId = :refId") suspend fun deleteByRef(type: String, refId: String)
 
     @Query("DELETE FROM activity_event WHERE type = :type") suspend fun deleteType(type: String)
 
-    @Query("SELECT * FROM activity_event WHERE localDate >= :from AND type NOT IN ('HEALTH_LOG', 'STEPS') ORDER BY timestamp")
+    @Query("SELECT * FROM activity_event WHERE localDate >= :from AND type NOT IN ('HEALTH_LOG', 'STEPS', 'FOOD_CHECKIN', 'DIARY') ORDER BY timestamp")
     fun observeSince(from: String): Flow<List<ActivityEventEntity>>
 
     @Query("SELECT * FROM day_note WHERE date = :date")

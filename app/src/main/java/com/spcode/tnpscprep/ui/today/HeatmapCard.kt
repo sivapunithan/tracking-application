@@ -17,6 +17,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.clickable
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -53,7 +54,7 @@ private fun levelColor(level: Int): Color {
 
 /** GitHub-style grid: one column per week (Monday on top), newest week at the right edge. */
 @Composable
-fun HeatmapSection(state: HeatState, onDay: (String) -> Unit) {
+fun HeatmapSection(state: HeatState, food: Map<LocalDate, com.spcode.tnpscprep.domain.FoodState>, onDay: (String) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
             stringResource(R.string.heat_title),
@@ -69,7 +70,7 @@ fun HeatmapSection(state: HeatState, onDay: (String) -> Unit) {
                         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                             week.forEach { day ->
                                 if (day == null) Spacer(Modifier.size(16.dp))
-                                else Cell(day, hasNote = day.date in state.noteDates, onClick = { onDay(day.date.toString()) })
+                                else Cell(day, hasNote = day.date in state.noteDates, food = food[day.date], onClick = { onDay(day.date.toString()) })
                             }
                         }
                     }
@@ -86,19 +87,26 @@ fun HeatmapSection(state: HeatState, onDay: (String) -> Unit) {
 }
 
 @Composable
-private fun Cell(day: DaySummary, hasNote: Boolean, onClick: () -> Unit) {
+private fun Cell(day: DaySummary, hasNote: Boolean, food: com.spcode.tnpscprep.domain.FoodState?, onClick: () -> Unit) {
     val ring = if (hasNote) Modifier.background(MaterialTheme.colorScheme.tertiary, RoundedCornerShape(4.dp)).padding(1.5.dp) else Modifier
     androidx.compose.foundation.layout.Box(ring) {
-        Spacer(
-            Modifier.size(if (hasNote) 13.dp else 16.dp).clip(RoundedCornerShape(4.dp)).background(levelColor(day.level)).clickable(onClick = onClick),
-        )
+        androidx.compose.foundation.layout.Box(contentAlignment = androidx.compose.ui.Alignment.BottomEnd) {
+            Spacer(
+                Modifier.size(if (hasNote) 13.dp else 16.dp).clip(RoundedCornerShape(4.dp)).background(levelColor(day.level)).clickable(onClick = onClick),
+            )
+            // Small dot = that day's food check-in (colour + it is also listed with its name in the day sheet).
+            if (food != null) Spacer(Modifier.size(6.dp).clip(androidx.compose.foundation.shape.CircleShape).background(foodColor(food)))
+        }
     }
 }
 
 /** Pop-up for one day: what she did (from activity_event) plus an optional one-line note. */
 @Composable
-fun DaySheet(vm: TodayViewModel, date: LocalDate, dismiss: () -> Unit) {
-    val events by vm.dayEvents(date).collectAsState(emptyList())
+fun DaySheet(vm: TodayViewModel, date: LocalDate, dismiss: () -> Unit, onDiary: (String) -> Unit) {
+    val allEvents by vm.dayEvents(date).collectAsState(emptyList())
+    val events = allEvents.filter { it.type != ActivityType.DIARY.name } // diary entries are shown as their own section below
+    val diaryRepo = (androidx.compose.ui.platform.LocalContext.current.applicationContext as com.spcode.tnpscprep.TnpscApp).container.diaryRepository
+    val entries by remember(date) { diaryRepo.observeForDate(date) }.collectAsState(emptyList())
     val saved by vm.dayNote(date).collectAsState("")
     var text by remember(date) { mutableStateOf<String?>(null) }
     val shown = text ?: saved
@@ -107,11 +115,32 @@ fun DaySheet(vm: TodayViewModel, date: LocalDate, dismiss: () -> Unit) {
     Text(date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL)), style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold))
     if (minutes > 0) Text(stringResource(R.string.day_minutes, minutes), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(top = 4.dp))
     Spacer(Modifier.height(12.dp))
-    if (events.isEmpty()) {
-        Text(stringResource(R.string.day_nothing), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-    } else {
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) { events.forEach { EventRow(it) } }
+    // "Day story": the diary first, then what she did (study sessions, food check-in, steps ...). A section with nothing in it is skipped.
+    if (entries.isNotEmpty()) {
+        Text(stringResource(R.string.diary_section), style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.primary)
+        Spacer(Modifier.height(6.dp))
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            entries.forEach { e ->
+                Row(
+                    Modifier.fillMaxWidth().clip(androidx.compose.foundation.shape.RoundedCornerShape(14.dp)).clickable { onDiary("entry:" + e.id) }.padding(vertical = 6.dp),
+                    verticalAlignment = androidx.compose.ui.Alignment.Top,
+                ) {
+                    com.spcode.tnpscprep.ui.diary.DiaryMood(e.moodEmojiId, 32.dp)
+                    Text(e.text.trim().take(160), style = MaterialTheme.typography.bodyMedium, maxLines = 3, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis, modifier = Modifier.padding(start = 12.dp))
+                }
+            }
+        }
+        Spacer(Modifier.height(14.dp))
     }
+    if (events.isNotEmpty()) {
+        if (entries.isNotEmpty()) Text(stringResource(R.string.diary_activity), style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.primary)
+        Spacer(Modifier.height(6.dp))
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) { events.forEach { EventRow(it) } }
+    } else if (entries.isEmpty()) {
+        Text(stringResource(R.string.day_nothing), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+    Spacer(Modifier.height(12.dp))
+    OutlinedButton(onClick = { onDiary("new:$date") }, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.diary_write_about)) }
     Spacer(Modifier.height(16.dp))
     OutlinedTextField(
         value = shown, onValueChange = { text = it.take(200) }, modifier = Modifier.fillMaxWidth(),
@@ -125,6 +154,7 @@ fun DaySheet(vm: TodayViewModel, date: LocalDate, dismiss: () -> Unit) {
 
 private val INT_FROM = Regex("\"from\"\\s*:\\s*(\\d+)")
 private val INT_STEPS = Regex("\"steps\"\\s*:\\s*(\\d+)")
+private val FOOD_VALUE = Regex("\"value\"\\s*:\\s*\"(\\w+)\"")
 private val INT_TO = Regex("\"to\"\\s*:\\s*(\\d+)")
 
 @Composable
@@ -139,6 +169,10 @@ private fun EventRow(e: ActivityEventEntity) {
         ActivityType.STEPS.name -> stringResource(R.string.ev_steps, INT_STEPS.find(e.details)?.groupValues?.get(1)?.toIntOrNull() ?: 0)
         ActivityType.NOTE.name -> stringResource(R.string.ev_note)
         ActivityType.AFFAIR_REVISED.name -> stringResource(R.string.ev_affair_revised)
+        ActivityType.FOOD_CHECKIN.name -> stringResource(
+            R.string.ev_food,
+            stringResource(when (FOOD_VALUE.find(e.details)?.groupValues?.get(1)) { "HEALTHY" -> R.string.food_healthy; "JUNK" -> R.string.food_junk; else -> R.string.food_mixed }),
+        )
         ActivityType.AFFAIR_ADDED.name -> stringResource(R.string.ev_affair_added)
         else -> stringResource(R.string.ev_other)
     }

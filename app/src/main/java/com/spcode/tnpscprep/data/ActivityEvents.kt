@@ -11,10 +11,11 @@ import kotlinx.serialization.json.buildJsonObject
 object ActivityEvents {
     fun build(
         type: ActivityType, refId: String?, nowMs: Long, zone: ZoneId = ZoneId.systemDefault(),
+        localDateOverride: String? = null, // e.g. the food day (3 AM rollover) differs from the calendar date
         details: JsonObjectBuilder.() -> Unit = {},
     ): ActivityEventEntity = ActivityEventEntity(
         timestamp = nowMs,
-        localDate = Instant.ofEpochMilli(nowMs).atZone(zone).toLocalDate().toString(),
+        localDate = localDateOverride ?: Instant.ofEpochMilli(nowMs).atZone(zone).toLocalDate().toString(),
         type = type.name,
         refId = refId,
         details = buildJsonObject(details).toString(),

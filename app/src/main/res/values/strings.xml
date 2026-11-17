@@ -266,4 +266,53 @@
     <string name="usage_explain_body">Android keeps a daily record of how long each app was open. To read it, this app needs \"Usage access\", which you switch on yourself in the next screen: find TnpscPrep in the list and turn it on. The app reads it only when you open it, keeps the minutes (top apps per day) on this phone for 90 days, and never sends them anywhere. You can turn it off or delete the data here at any time.</string>
     <string name="usage_open_settings">Open Usage access</string>
     <string name="usage_unavailable">This phone has no Usage access screen, so this feature is not available.</string>
+    <string name="food_question">How was your food today?</string>
+    <string name="food_evening">Evening check-in: a quick tap is enough.</string>
+    <string name="food_healthy">Healthy</string>
+    <string name="food_mixed">Mixed</string>
+    <string name="food_junk">Junk</string>
+    <string name="food_msg_healthy">Lovely. Your body says thanks!</string>
+    <string name="food_msg_mixed">Balance is fine.</string>
+    <string name="food_msg_junk">Tomorrow\'s a fresh start.</string>
+    <string name="food_undo">Undo</string>
+    <string name="food_today_chip">Food today: %1$s</string>
+    <string name="food_change">Change</string>
+    <string name="food_none">not logged</string>
+    <string name="food_week">Healthy days this week: %1$d/7</string>
+    <string name="food_streak">%1$d-day streak</string>
+    <string name="food_alert">3 junk days in a row. One healthy meal today?</string>
+    <string name="food_dismiss">Dismiss</string>
+    <string name="ev_food">Food check-in: %1$s</string>
+    <string name="settings_strict">Strict mode</string>
+    <string name="settings_strict_note">After 3 junk days in a row, show a playful nudge (once per streak). Off by default.</string>
+    <string name="diary_title">Diary</string>
+    <string name="diary_card_sub">Write about your day. Private, on this phone only.</string>
+    <string name="diary_new">New entry</string>
+    <string name="diary_search_hint">Search your diary</string>
+    <string name="diary_empty">Nothing here yet. Tap "New entry" to write your first one.</string>
+    <string name="diary_no_results">No entries match.</string>
+    <string name="diary_saved">Saved</string>
+    <string name="diary_write_hint">Write here…</string>
+    <string name="diary_delete_title">Delete this entry?</string>
+    <string name="diary_delete_body">It will be removed from this phone. You can undo for a few seconds.</string>
+    <string name="diary_deleted">Entry deleted</string>
+    <string name="diary_undo">Undo</string>
+    <string name="diary_review_title">This week</string>
+    <string name="diary_review_entries">Entries written: %1$d</string>
+    <string name="diary_review_study">Study time: %1$d min</string>
+    <string name="diary_export">Export</string>
+    <string name="diary_import">Import</string>
+    <string name="diary_backup_note">Export saves your diary to a plain file you choose where to keep. It is not encrypted, so keep it somewhere private. Import only adds entries and never deletes any.</string>
+    <string name="diary_export_done">Diary exported.</string>
+    <string name="diary_export_failed">Could not save the file.</string>
+    <string name="diary_import_done">Imported. Added %1$d, updated %2$d, unchanged %3$d.</string>
+    <string name="diary_import_bad">That file is not a valid diary backup. Nothing was changed.</string>
+    <string name="diary_section">Diary</string>
+    <string name="diary_activity">Activity</string>
+    <string name="diary_write_about">Write about this day</string>
+    <string-array name="diary_prompts">
+        <item>What went well today?</item>
+        <item>What did I study today?</item>
+        <item>What am I grateful for?</item>
+    </string-array>
 </resources>

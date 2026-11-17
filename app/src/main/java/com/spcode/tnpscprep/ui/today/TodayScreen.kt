@@ -66,6 +66,7 @@ import com.spcode.tnpscprep.domain.RevisionLevel
 import com.spcode.tnpscprep.domain.RevisionSchedule
 import com.spcode.tnpscprep.ui.affairs.categoryLabelRes
 import com.spcode.tnpscprep.ui.design.AnimatedProgressBar
+import com.spcode.tnpscprep.ui.diary.DiaryHost
 import com.spcode.tnpscprep.ui.design.LevelTrack
 import com.spcode.tnpscprep.ui.design.LocalBottomBarInset
 import com.spcode.tnpscprep.ui.design.PopIn
@@ -92,6 +93,18 @@ fun TodayScreen(vm: TodayViewModel) {
     val ui by vm.ui.collectAsStateWithLifecycle()
     val name by vm.userName.collectAsStateWithLifecycle()
     val heat by vm.heat.collectAsStateWithLifecycle()
+    val app = androidx.compose.ui.platform.LocalContext.current.applicationContext as com.spcode.tnpscprep.TnpscApp
+    val fvm = androidx.lifecycle.viewmodel.compose.viewModel<FoodViewModel>(
+        factory = androidx.lifecycle.viewmodel.viewModelFactory { initializer { FoodViewModel(app.container.foodRepository, app.container.settingsStore) } },
+    )
+    var diary by rememberSaveable { mutableStateOf<String?>(null) }
+    val food by fvm.days.collectAsStateWithLifecycle()
+    val strict by fvm.strict.collectAsStateWithLifecycle()
+    val lastAlert by fvm.lastAlertStart.collectAsStateWithLifecycle()
+    // The food day changes at 3 AM; re-check every minute so an app left open rolls over by itself.
+    val foodDay by androidx.compose.runtime.produceState(com.spcode.tnpscprep.domain.FoodCheckin.foodDay(System.currentTimeMillis(), java.time.ZoneId.systemDefault())) {
+        while (true) { value = com.spcode.tnpscprep.domain.FoodCheckin.foodDay(System.currentTimeMillis(), java.time.ZoneId.systemDefault()); kotlinx.coroutines.delay(60_000) }
+    }
     val appCtx = androidx.compose.ui.platform.LocalContext.current.applicationContext
     val stepSensor = remember { hasStepSensor(appCtx) }
     // Which pop-up is open: null, "date", "due:<id>" or "star:<id>" (saveable, so rotation keeps it).
@@ -103,6 +116,11 @@ fun TodayScreen(vm: TodayViewModel) {
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
         item { Header(name, ui) }
+
+        item {
+            val evening = com.spcode.tnpscprep.domain.FoodCheckin.eveningPrompt(System.currentTimeMillis(), java.time.ZoneId.systemDefault(), food[foodDay] != null)
+            FoodSection(foodDay, food, evening, onSet = fvm::set, onDay = { sheet = "day:" + it })
+        }
 
         item { HeroCard(ui, onPickDate = { sheet = "date" }) }
 
@@ -120,13 +138,22 @@ fun TodayScreen(vm: TodayViewModel) {
 
         item { StatsRow(ui) }
 
-        item { HeatmapSection(heat, onDay = { sheet = "day:" + it }) }
+        item { HeatmapSection(heat, food, onDay = { sheet = "day:" + it }) }
 
         if (stepSensor) item { StepsCard() }
 
         item {
             val studyByDate = remember(heat) { heat.weeks.flatten().filterNotNull().associate { it.date to it.minutes } }
             UsageCard(studyByDate)
+        }
+
+        item {
+            SoftCard(Modifier.fillMaxWidth(), onClick = { diary = "list" }) {
+                Column(Modifier.padding(16.dp)) {
+                    Text(stringResource(R.string.diary_title), style = MaterialTheme.typography.titleSmall)
+                    Text(stringResource(R.string.diary_card_sub), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
         }
 
         item {
@@ -224,12 +251,27 @@ fun TodayScreen(vm: TodayViewModel) {
         }
     }
 
+    diary?.let { start ->
+        val studyAll = remember(heat) { heat.weeks.flatten().filterNotNull().associate { it.date to it.minutes } }
+        DiaryHost(start, studyAll, onClose = { diary = null })
+    }
+
+    // Strict mode: shown ONCE per chain of 3 junk days (the chain's start date is remembered), and only when nothing else is open.
+    val chain = com.spcode.tnpscprep.domain.FoodCheckin.junkChain(food, foodDay)
+    LaunchedEffect(chain, strict, sheet) {
+        val start = chain.start
+        if (sheet == null && start != null && com.spcode.tnpscprep.domain.FoodCheckin.shouldAlert(chain, strict, lastAlert.takeIf { it.isNotEmpty() }?.let { java.time.LocalDate.parse(it) })) {
+            fvm.markAlerted(start); sheet = "foodalert"
+        }
+    }
+
     // ---------------- pop-ups ----------------
     val current = sheet
     if (current != null) {
         PopSheet(onDismiss = { sheet = null }) { dismiss ->
             when {
                 current == "date" -> ExamDateSheet(ui, onSave = { vm.setExamDate(it); dismiss() }, onClear = { vm.clearExamDate(); dismiss() }, onCancel = dismiss)
+                current == "foodalert" -> FoodAlertSheet(dismiss)
                 current == "health" -> {
                     val app = androidx.compose.ui.platform.LocalContext.current.applicationContext as com.spcode.tnpscprep.TnpscApp
                     val hvm = androidx.lifecycle.viewmodel.compose.viewModel<HealthViewModel>(
@@ -241,7 +283,7 @@ fun TodayScreen(vm: TodayViewModel) {
                 }
                 current.startsWith("day:") -> {
                     val date = runCatching { java.time.LocalDate.parse(current.removePrefix("day:")) }.getOrNull()
-                    if (date == null) LaunchedEffect(Unit) { dismiss() } else DaySheet(vm, date, dismiss)
+                    if (date == null) LaunchedEffect(Unit) { dismiss() } else DaySheet(vm, date, dismiss, onDiary = { diary = it; sheet = null })
                 }
                 current.startsWith("due:") -> {
                     val item = ui.progress.due.firstOrNull { it.topicId == current.removePrefix("due:") }

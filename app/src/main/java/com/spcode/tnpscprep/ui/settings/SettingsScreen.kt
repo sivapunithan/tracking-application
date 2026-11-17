@@ -142,6 +142,14 @@ fun SettingsScreen(headlines: HeadlinesViewModel, auth: AuthViewModel) {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Spacer(Modifier.height(16.dp))
+        val foodSettings = (androidx.compose.ui.platform.LocalContext.current.applicationContext as com.spcode.tnpscprep.TnpscApp).container.settingsStore
+        val strictFood by foodSettings.strictFood.collectAsStateWithLifecycle()
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(stringResource(R.string.settings_strict), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+            Switch(checked = strictFood, onCheckedChange = foodSettings::setStrictFood)
+        }
+        Text(stringResource(R.string.settings_strict_note), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Spacer(Modifier.height(16.dp))
         Text(stringResource(R.string.syllabus_source_title), style = MaterialTheme.typography.titleMedium)
         Text(
             stringResource(R.string.syllabus_source_note),
