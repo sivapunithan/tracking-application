@@ -1,4 +1,5 @@
-# TnpscPrep
+# Mathi (formerly TnpscPrep)
+The app is now called **Mathi** (Tamil: மதி). Launcher label/UI text/README use the new name; the applicationId and packages (`com.spcode.tnpscprep`), the DB file name (`tnpscprep.db`), the prefs name, the diary-export tag `"app":"TnpscPrep"` and the `Theme.TnpscPrep` style are INTENTIONALLY unchanged so updates install over existing copies and old exports still import.
 
 ## PURPOSE (clarified by the owner, overrides earlier guesses)
 The app is for **REVISION + a progress TRACKER + real CURRENT AFFAIRS**. It is NOT primarily a question bank / mock-test app
@@ -388,3 +389,9 @@ reference, write own notes with page refs.
 - Header: greeting + name, date line and an exam-countdown chip (plural `today_exam_days`; no exam date -> "Set exam date", tap opens the date sheet). The old tagline is removed.
 - Order: [evening and not wrapped up: wrap-up card FIRST] -> Next best step -> slim Getting-started strip (4 dots + next undone step, replaces the big checklist card; `GettingStartedStrip`) -> Today's plan -> How are you today? -> numbers tiles -> heatmap -> [wrapped up: the "Wrapped up tonight" card at the bottom]. Logic, data and plan storage unchanged; no schema/permission change.
 - The old `GettingStartedCard` is now unused (kept for now).
+
+## Rename to Mathi + new icon (Phases 1-2)
+- App name: Mathi / மதி (see the note at the top). Icon pipeline: `design/icon-source/mathi_symbol.png` (cropped from the owner's picture; the "second" image = gold symbol alone) -> `tools/trace_symbol.py` (white -> alpha, then REAL potrace via ctypes on libpotrace0, because the potrace CLI is not installed; path in `symbol_path.json`) -> `tools/make_icon_assets.py` writes the vector layers + previews (`design/icon-preview/`, git-ignored). Re-run both scripts to regenerate everything.
+- Layers: adaptive icon foreground (gold gradient #E9CB82 -> #B8862B, 58% of 108dp), background (crimson #B0102C -> maroon #6E0A1E + radial vignette, no border), monochrome (themed icons), `ic_splash` (inside the 192dp safe circle), `app_logo` (tile on the lock/welcome badge), one-colour `ic_stat_wrapup` (notification). Old raster logo/foreground/monochrome webps are removed.
+- Splash: AndroidX `core-splashscreen` 1.0.1 (new, build-time only dependency); `Theme.Mathi.Starting` (crimson) on MainActivity, `installSplashScreen()` before `super.onCreate`, post-splash theme `Theme.TnpscPrep`.
+- The Oppo launcher draws icons small on its own dark plate; that is the launcher, not the icon.

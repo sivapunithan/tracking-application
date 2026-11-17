@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">TNPSC Prep</string>
+    <string name="app_name">Mathi</string>
     <string name="syllabus_title">Syllabus</string>
     <string name="filter_all">All</string>
     <string name="hint_tap_longpress">Tap a topic to move it up one level. Long-press to reset.</string>
@@ -140,7 +140,7 @@
     <string name="mood_cry">Crying</string>
     <string name="mood_angry">Angry</string>
     <string name="mood_celebrate">Celebrate</string>
-    <string name="welcome_title">Welcome to TNPSC Prep</string>
+    <string name="welcome_title">Welcome to Mathi</string>
     <string name="welcome_sub">Revise smarter, track every topic and stay on top of current affairs.</string>
     <string name="welcome_private">Everything stays on this phone. No sign-up, no email, no internet needed.</string>
     <string name="get_started">Get started</string>
@@ -249,7 +249,7 @@
     <string name="usage_today_vs_study">Today on your phone. Study today: %1$d min.</string>
     <string name="usage_note">Approximate. Read only when you open this app, kept on this phone. Small numbers under the bars are your study minutes.</string>
     <string name="usage_explain_title">Show your phone usage?</string>
-    <string name="usage_explain_body">Android keeps a daily record of how long each app was open. To read it, this app needs \"Usage access\", which you switch on yourself in the next screen: find TnpscPrep in the list and turn it on. The app reads it only when you open it, keeps the minutes (top apps per day) on this phone for 90 days, and never sends them anywhere. You can turn it off or delete the data here at any time.</string>
+    <string name="usage_explain_body">Android keeps a daily record of how long each app was open. To read it, this app needs \"Usage access\", which you switch on yourself in the next screen: find Mathi in the list and turn it on. The app reads it only when you open it, keeps the minutes (top apps per day) on this phone for 90 days, and never sends them anywhere. You can turn it off or delete the data here at any time.</string>
     <string name="usage_open_settings">Open Usage access</string>
     <string name="usage_unavailable">This phone has no Usage access screen, so this feature is not available.</string>
     <string name="food_question">How was your food today?</string>

@@ -9,6 +9,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -72,12 +73,12 @@ fun AuthHero(pictures: List<String>, modifier: Modifier = Modifier, height: andr
         modifier.fillMaxWidth().height(height).clip(RoundedCornerShape(bottomStart = 48.dp, bottomEnd = 48.dp)).background(brush),
         contentAlignment = Alignment.BottomCenter,
     ) {
-        // The brand mark on a white badge (crimson-on-crimson would vanish), top-left, below the status bar.
+        // The brand tile (crimson rounded square + gold symbol; a thin light ring keeps it readable on the crimson header), top-left, below the status bar.
         val logoId = remember { drawableId(ctx, "app_logo") }
         if (logoId != 0) {
             Box(
                 Modifier.align(Alignment.TopStart).statusBarsPadding().padding(16.dp).size(54.dp)
-                    .clip(RoundedCornerShape(16.dp)).background(Color.White).padding(7.dp),
+                    .clip(RoundedCornerShape(16.dp)).border(1.5.dp, Color.White.copy(alpha = 0.6f), RoundedCornerShape(16.dp)),
             ) { Image(painterResource(logoId), null, modifier = Modifier.fillMaxSize()) }
         }
         if (id != 0) {

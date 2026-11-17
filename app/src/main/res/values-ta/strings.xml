@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">TNPSC தயாரிப்பு</string>
+    <string name="app_name">மதி</string>
     <string name="syllabus_title">பாடத்திட்டம்</string>
     <string name="filter_all">அனைத்தும்</string>
     <string name="hint_tap_longpress">தலைப்பைத் தட்டினால் அடுத்த நிலைக்குச் செல்லும். நீண்ட நேரம் அழுத்தினால் மீட்டமைக்கப்படும்.</string>
@@ -140,7 +140,7 @@
     <string name="mood_cry">அழுகை</string>
     <string name="mood_angry">கோபம்</string>
     <string name="mood_celebrate">கொண்டாட்டம்</string>
-    <string name="welcome_title">TNPSC தயாரிப்புக்கு வரவேற்கிறோம்</string>
+    <string name="welcome_title">மதிக்கு வரவேற்கிறோம்</string>
     <string name="welcome_sub">புத்திசாலித்தனமாகத் திருப்புங்கள், ஒவ்வொரு தலைப்பையும் கண்காணியுங்கள், நடப்பு நிகழ்வுகளில் முன்னிலையில் இருங்கள்.</string>
     <string name="welcome_private">எல்லாமே இந்த போனிலேயே இருக்கும். பதிவு, மின்னஞ்சல், இணையம் தேவையில்லை.</string>
     <string name="get_started">தொடங்குவோம்</string>
@@ -249,7 +249,7 @@
     <string name="usage_today_vs_study">இன்று போனில். இன்றைய படிப்பு: %1$d நிமிடம்.</string>
     <string name="usage_note">தோராயம். இந்த செயலியைத் திறக்கும்போது மட்டுமே படிக்கப்படும்; இந்த போனிலேயே இருக்கும். பட்டைகளின் கீழ் உள்ள சிறிய எண்கள் உங்கள் படிப்பு நிமிடங்கள்.</string>
     <string name="usage_explain_title">போன் பயன்பாட்டைக் காட்டலாமா?</string>
-    <string name="usage_explain_body">ஒவ்வொரு செயலியும் எவ்வளவு நேரம் திறந்திருந்தது என்பதை Android தினமும் பதிவு செய்கிறது. அதைப் படிக்க இந்த செயலிக்கு \"Usage access\" தேவை; அடுத்த திரையில் பட்டியலில் TnpscPrep-ஐக் கண்டு நீங்களே இயக்க வேண்டும். செயலியைத் திறக்கும்போது மட்டுமே படிக்கும்; முக்கிய செயலிகளின் நிமிடங்களை 90 நாட்கள் இந்த போனிலேயே வைக்கும், எங்கும் அனுப்பாது. இங்கே எப்போது வேண்டுமானாலும் அணைக்கலாம் அல்லது தரவை அழிக்கலாம்.</string>
+    <string name="usage_explain_body">ஒவ்வொரு செயலியும் எவ்வளவு நேரம் திறந்திருந்தது என்பதை Android தினமும் பதிவு செய்கிறது. அதைப் படிக்க இந்த செயலிக்கு \"Usage access\" தேவை; அடுத்த திரையில் பட்டியலில் Mathi (மதி) என்பதைக் கண்டு நீங்களே இயக்க வேண்டும். செயலியைத் திறக்கும்போது மட்டுமே படிக்கும்; முக்கிய செயலிகளின் நிமிடங்களை 90 நாட்கள் இந்த போனிலேயே வைக்கும், எங்கும் அனுப்பாது. இங்கே எப்போது வேண்டுமானாலும் அணைக்கலாம் அல்லது தரவை அழிக்கலாம்.</string>
     <string name="usage_open_settings">Usage access-ஐத் திற</string>
     <string name="usage_unavailable">இந்த போனில் Usage access திரை இல்லை, எனவே இந்த வசதி கிடைக்காது.</string>
     <string name="food_question">இன்று உணவு எப்படி இருந்தது?</string>

@@ -5,4 +5,10 @@
     <style name="Theme.TnpscPrep" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:windowBackground">@color/window_background</item>
     </style>
+    <!-- Splash: crimson window with the Mathi symbol; hands over to the normal theme once the app is ready (AndroidX SplashScreen). -->
+    <style name="Theme.Mathi.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">#FF7A0019</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash</item>
+        <item name="postSplashScreenTheme">@style/Theme.TnpscPrep</item>
+    </style>
 </resources>

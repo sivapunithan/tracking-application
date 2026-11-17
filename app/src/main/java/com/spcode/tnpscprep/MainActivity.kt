@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
@@ -29,6 +30,7 @@ import com.spcode.tnpscprep.ui.today.TodayViewModel
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        installSplashScreen() // must run before super.onCreate: swaps the splash theme for the normal one
         super.onCreate(savedInstanceState)
         enableEdgeToEdge() // targetSdk 36 is edge-to-edge anyway; AppRoot pads for system bars itself.
         val c = (application as TnpscApp).container

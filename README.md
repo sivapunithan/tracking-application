@@ -1,4 +1,4 @@
-# TNPSC Prep (v1.1.0)
+# Mathi (v1.1.0)
 
 An Android app for revising and tracking TNPSC **Group 1, Group 2/2A and Group 4** preliminary exams.
 No ads, no analytics, no account. Everything is stored on the phone. **It works fully offline;** the only thing that uses the internet is the optional *Latest headlines* feature (see *Privacy and internet use*), which can be switched off.
@@ -17,7 +17,7 @@ No ads, no analytics, no account. Everything is stored on the phone. **It works 
 **Revision schedule:** a topic (or current-affairs item) you have studied comes back in the *Due for revision* list after 3 days (First read), 7 (Revision 1), 21 (Revision 2) and 60 (Revision 3). Press **Revised** to move it up.
 
 ## Install on a phone (Android 8.0 or newer)
-1. Send `TnpscPrep-1.1.0.apk` to the phone (WhatsApp, Drive, USB cable...).
+1. Send `Mathi-1.1.0.apk` to the phone (WhatsApp, Drive, USB cable...).
 2. Open the file. If Android asks, allow **"Install unknown apps"** for the app you opened it from.
 3. Tap **Install**.
 4. **To update later, install the newer APK over the old one. Do NOT uninstall first: uninstalling deletes all progress and notes** (there is no backup/export yet).
@@ -78,7 +78,7 @@ Every schema change needs: a version bump in `AppDatabase`, a `Migration` in `da
 
 ## தமிழ்
 
-**TNPSC தயாரிப்பு** - TNPSC தொகுதி 1, தொகுதி 2/2A, தொகுதி 4 முதல்நிலைத் தேர்வுகளைத் திருப்பிப் படிக்கவும் முன்னேற்றத்தைக் கண்காணிக்கவும் உதவும் ஆண்ட்ராய்டு செயலி. விளம்பரம் இல்லை; கணக்கு தேவையில்லை; எல்லாத் தகவலும் உங்கள் போனிலேயே இருக்கும். **இணையம் இல்லாமலும் முழுமையாகச் செயல்படும்;** இணையத்தைப் பயன்படுத்துவது விருப்பத்தின்பேரில் இயங்கும் *சமீபத்திய தலைப்புச் செய்திகள்* வசதி மட்டுமே (அதை அணைக்கலாம்).
+**மதி** - TNPSC தொகுதி 1, தொகுதி 2/2A, தொகுதி 4 முதல்நிலைத் தேர்வுகளைத் திருப்பிப் படிக்கவும் முன்னேற்றத்தைக் கண்காணிக்கவும் உதவும் ஆண்ட்ராய்டு செயலி. விளம்பரம் இல்லை; கணக்கு தேவையில்லை; எல்லாத் தகவலும் உங்கள் போனிலேயே இருக்கும். **இணையம் இல்லாமலும் முழுமையாகச் செயல்படும்;** இணையத்தைப் பயன்படுத்துவது விருப்பத்தின்பேரில் இயங்கும் *சமீபத்திய தலைப்புச் செய்திகள்* வசதி மட்டுமே (அதை அணைக்கலாம்).
 
 ### செயலியில் உள்ளவை
 - **இன்று:** தேர்வுக்கு எத்தனை நாள், பாடத்திட்டத் தயார்நிலை, இன்றைய படிப்பு நேரம், தொடர் நாள்கள், **இன்று திருப்ப வேண்டிய தலைப்புகள்**.
@@ -90,7 +90,7 @@ Every schema change needs: a version bump in `AppDatabase`, a `Migration` in `da
 **திருப்புதல் அட்டவணை:** படித்த தலைப்பு 3 நாள் (முதல் வாசிப்பு), 7 (திருப்புதல் 1), 21 (திருப்புதல் 2), 60 (திருப்புதல் 3) நாள்களுக்குப் பிறகு "திருப்ப வேண்டியவை" பட்டியலில் மீண்டும் வரும். **திருப்பினேன்** பொத்தானை அழுத்தினால் அடுத்த நிலைக்குச் செல்லும்.
 
 ### போனில் நிறுவுவது எப்படி (ஆண்ட்ராய்டு 8.0 அல்லது புதியது)
-1. `TnpscPrep-1.1.0.apk` கோப்பை போனுக்கு அனுப்புங்கள் (WhatsApp, Drive, USB வழியாக).
+1. `Mathi-1.1.0.apk` கோப்பை போனுக்கு அனுப்புங்கள் (WhatsApp, Drive, USB வழியாக).
 2. கோப்பைத் திறக்கவும். கேட்டால் **"தெரியாத செயலிகளை நிறுவ அனுமதி"** வழங்கவும்.
 3. **நிறுவு** பொத்தானை அழுத்தவும்.
 4. **புதிய பதிப்பு வந்தால் பழையதின் மேலேயே நிறுவவும். முதலில் நீக்கிவிடாதீர்கள்: நீக்கினால் உங்கள் முன்னேற்றமும் குறிப்புகளும் அழிந்துவிடும்** (தற்போது காப்புப் பிரதி வசதி இல்லை).
