@@ -57,6 +57,8 @@ interface ProgressDao {
            WHERE p.level > 0 AND (t.exams & :mask) != 0"""
     )
     fun observeStudied(mask: Int): Flow<List<StudiedTopic>>
+
+    @Query("SELECT * FROM topic_progress") suspend fun all(): List<TopicProgressEntity>
 }
 
 @Dao
@@ -65,6 +67,8 @@ interface SessionDao {
 
     @Query("SELECT date, SUM(minutes) AS minutes FROM study_session GROUP BY date")
     fun observeDayTotals(): Flow<List<DayTotal>>
+
+    @Query("SELECT * FROM study_session ORDER BY startedAt") suspend fun all(): List<StudySessionEntity>
 }
 
 @Dao
@@ -83,6 +87,8 @@ interface NoteDao {
            ORDER BY t.subjectId, t.unitId, t.sortOrder"""
     )
     fun observeStarred(mask: Int): Flow<List<StarredTopic>>
+
+    @Query("SELECT * FROM topic_note") suspend fun all(): List<TopicNoteEntity>
 }
 
 @Dao
@@ -90,6 +96,8 @@ interface AffairDao {
     @Query("SELECT * FROM current_affair") fun observePack(): Flow<List<CurrentAffairEntity>>
     @Query("SELECT * FROM ca_user_item") fun observeUser(): Flow<List<UserAffairEntity>>
     @Query("SELECT * FROM ca_state") fun observeStates(): Flow<List<AffairStateEntity>>
+    @Query("SELECT * FROM ca_state") suspend fun allStates(): List<AffairStateEntity>
+    @Query("SELECT * FROM ca_user_item") suspend fun allUser(): List<UserAffairEntity>
 
     @Upsert suspend fun upsertPack(items: List<CurrentAffairEntity>)
     @Query("SELECT id FROM current_affair") suspend fun packIds(): List<String>
@@ -146,6 +154,10 @@ interface ActivityDao {
     @Query("SELECT * FROM activity_event WHERE localDate >= :from AND type NOT IN ('HEALTH_LOG', 'STEPS', 'FOOD_CHECKIN', 'DIARY', 'MOOD_CHECKIN') ORDER BY timestamp")
     fun observeSince(from: String): Flow<List<ActivityEventEntity>>
 
+    /** Backup export: everything except private health markers (HEALTH_LOG rows carry only a kind, and the readings go in their own section). */
+    @Query("SELECT * FROM activity_event WHERE type != 'HEALTH_LOG' ORDER BY timestamp") suspend fun allForBackup(): List<ActivityEventEntity>
+    @Query("SELECT * FROM day_note") suspend fun allNotes(): List<DayNoteEntity>
+
     @Query("SELECT * FROM day_note WHERE date = :date")
     fun observeNote(date: String): Flow<DayNoteEntity?>
 
@@ -161,6 +173,7 @@ interface ActivityDao {
 interface HealthDao {
     @Insert suspend fun insert(e: HealthEntryEntity)
     @Query("SELECT * FROM health_entry ORDER BY date DESC, id DESC") fun observeAll(): Flow<List<HealthEntryEntity>>
+    @Query("SELECT * FROM health_entry ORDER BY date, id") suspend fun all(): List<HealthEntryEntity>
     @Query("DELETE FROM health_entry WHERE id = :id") suspend fun delete(id: Long)
     @Query("DELETE FROM health_entry") suspend fun deleteAll()
 }
@@ -168,6 +181,7 @@ interface HealthDao {
 @Dao
 interface StepDao {
     @Query("SELECT * FROM step_day ORDER BY date DESC LIMIT 1") suspend fun latest(): StepDayEntity?
+    @Query("SELECT * FROM step_day ORDER BY date") suspend fun all(): List<StepDayEntity>
     @Insert(onConflict = androidx.room.OnConflictStrategy.REPLACE) suspend fun upsert(e: StepDayEntity)
     @Query("SELECT * FROM step_day WHERE date >= :from ORDER BY date") fun observeSince(from: String): Flow<List<StepDayEntity>>
 }

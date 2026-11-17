@@ -28,6 +28,7 @@ data class PlannedTaskEntity(
 interface PlannedTaskDao {
     @Insert suspend fun insert(t: PlannedTaskEntity): Long
     @Query("SELECT * FROM planned_task WHERE localDate = :date ORDER BY sortOrder, id") fun observe(date: String): Flow<List<PlannedTaskEntity>>
+    @Query("SELECT * FROM planned_task ORDER BY localDate, sortOrder, id") suspend fun all(): List<PlannedTaskEntity>
     @Query("SELECT * FROM planned_task WHERE localDate = :date ORDER BY sortOrder, id") suspend fun forDate(date: String): List<PlannedTaskEntity>
     @Query("UPDATE planned_task SET done = :done WHERE id = :id") suspend fun setDone(id: Long, done: Boolean)
     @Query("UPDATE planned_task SET sortOrder = :order WHERE id = :id") suspend fun setOrder(id: Long, order: Int)

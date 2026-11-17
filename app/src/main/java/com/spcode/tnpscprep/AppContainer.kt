@@ -50,6 +50,7 @@ class AppContainer(context: Context) {
     val moodRepository by lazy { com.spcode.tnpscprep.data.MoodRepository(database) }
     val plannedTaskRepository by lazy { com.spcode.tnpscprep.data.PlannedTaskRepository(database) }
     val diaryRepository by lazy { com.spcode.tnpscprep.data.DiaryRepository(database) }
+    val backupRepository by lazy { com.spcode.tnpscprep.data.BackupRepository(database, settingsStore) }
     val activityRepository by lazy { com.spcode.tnpscprep.data.ActivityRepository(database) }
 
     val affairRepository by lazy { com.spcode.tnpscprep.data.AffairRepository(database) }

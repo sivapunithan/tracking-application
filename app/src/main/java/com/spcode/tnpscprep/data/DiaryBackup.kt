@@ -11,7 +11,7 @@ import kotlinx.serialization.json.Json
  */
 @Serializable
 data class DiaryBackupFile(val app: String = APP, val version: Int = VERSION, val exportedAt: Long = 0, val diary: List<DiaryDto> = emptyList()) {
-    companion object { const val APP = "TnpscPrep"; const val VERSION = 2 /* v2 adds pinned + wrapup; v1 files still import */ }
+    companion object { const val APP = "TnpscPrep"; const val VERSION = 3 /* v2 adds pinned + wrapup; v3 = full backup (see AppBackup); older files still import */ }
 }
 
 @Serializable
