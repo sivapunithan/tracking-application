@@ -35,6 +35,12 @@ class AffairRepository(
         db.activityDao().insert(ActivityEvents.build(ActivityType.AFFAIR_REVISED, itemId, now()) { put("to", next) })
     }
 
+    /** Undo a mistaken "Revised": back to level 0, keeping the bookmark (the state row is deleted when nothing is left to keep). */
+    suspend fun resetRevision(itemId: String) = db.withTransaction {
+        val cur = dao.getState(itemId)
+        if (cur != null) write(itemId, bookmarked = cur.bookmarked, level = 0)
+    }
+
     private suspend fun write(itemId: String, bookmarked: Boolean, level: Int) {
         if (!bookmarked && level == 0) dao.deleteState(itemId)
         else dao.upsertState(AffairStateEntity(itemId, bookmarked, level, now()))

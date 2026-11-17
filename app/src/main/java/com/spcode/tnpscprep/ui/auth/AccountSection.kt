@@ -40,20 +40,20 @@ import kotlinx.coroutines.launch
 
 /** Settings > Account: set / change / remove the PIN, lock now, or delete the account and all its data. */
 @Composable
-fun AccountSection(auth: AuthViewModel) {
+fun AccountSection(auth: AuthViewModel, showSecurity: Boolean = true, showErase: Boolean = true) {
     var sheet by rememberSaveable { mutableStateOf<String?>(null) }
     var hasPin by remember { mutableStateOf(auth.hasPin()) }
 
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(stringResource(R.string.account_title), style = MaterialTheme.typography.titleMedium)
-        if (hasPin) {
+        if (showSecurity) Text(stringResource(R.string.section_security), style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.primary)
+        if (!showSecurity) Unit else if (hasPin) {
             OutlinedButton(onClick = { sheet = "change" }, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.change_pin)) }
             OutlinedButton(onClick = { sheet = "remove" }, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.remove_pin)) }
             Button(onClick = { auth.lockNow() }, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.lock_now)) }
         } else {
             OutlinedButton(onClick = { sheet = "set" }, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.set_pin)) }
         }
-        TextButton(onClick = { sheet = "delete" }, modifier = Modifier.fillMaxWidth()) {
+        if (showErase) TextButton(onClick = { sheet = "delete" }, modifier = Modifier.fillMaxWidth()) {
             Text(stringResource(R.string.delete_account), color = MaterialTheme.colorScheme.error)
         }
     }

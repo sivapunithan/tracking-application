@@ -36,6 +36,7 @@ class AffairsViewModel(private val repo: AffairRepository) : ViewModel() {
 
     fun toggleBookmark(id: String) { viewModelScope.launch { repo.toggleBookmark(id) } }
     fun revise(id: String) { viewModelScope.launch { repo.revise(id) } }
+    fun resetRevision(id: String) { viewModelScope.launch { repo.resetRevision(id) } }
     fun addOwn(date: LocalDate, category: AffairCategory, title: String, summary: String) {
         viewModelScope.launch { repo.addUserItem(date, category.name, title, summary) }
     }

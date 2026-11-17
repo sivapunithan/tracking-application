@@ -38,6 +38,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -52,7 +53,11 @@ data class NavItem(val label: String, val icon: ImageVector)
  * springy curve (it overshoots slightly = the "pop"), the selected icon grows and bounces, and the label brightens.
  */
 @Composable
-fun FloatingNavBar(items: List<NavItem>, selected: Int, onSelect: (Int) -> Unit, modifier: Modifier = Modifier) {
+fun FloatingNavBar(
+    items: List<NavItem>, selected: Int, onSelect: (Int) -> Unit, modifier: Modifier = Modifier,
+    /** Optional round action button in the MIDDLE of the bar (the Focus button). Not a tab: it never gets selected. */
+    center: NavItem? = null, onCenter: () -> Unit = {},
+) {
     val haptic = LocalHapticFeedback.current
     Box(
         modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = 16.dp, vertical = 12.dp),
@@ -66,36 +71,64 @@ fun FloatingNavBar(items: List<NavItem>, selected: Int, onSelect: (Int) -> Unit,
             modifier = Modifier.widthIn(max = 560.dp).fillMaxWidth(),
         ) {
             BoxWithConstraints(Modifier.padding(6.dp)) {
-                val itemWidth = maxWidth / items.size
+                val slots = items.size + if (center != null) 1 else 0
+                val centerSlot = items.size / 2
+                val itemWidth = maxWidth / slots
+                // tab index -> slot (tabs after the middle button shift one slot to the right); no tab selected (-1) hides the pill
+                val selectedSlot = if (selected < 0) 0 else if (center != null && selected >= centerSlot) selected + 1 else selected
                 val pillOffset by animateDpAsState(
-                    targetValue = itemWidth * selected,
+                    targetValue = itemWidth * selectedSlot,
                     animationSpec = spring(dampingRatio = 0.6f, stiffness = Spring.StiffnessMedium),
                     label = "navPill",
                 )
+                val pillAlpha by animateFloatAsState(if (selected < 0) 0f else 1f, label = "navPillAlpha")
                 Box(
                     Modifier
                         .offset(x = pillOffset)
                         .width(itemWidth)
                         .height(58.dp)
                         .padding(horizontal = 3.dp)
+                        .graphicsLayer { alpha = pillAlpha }
                         .clip(RoundedCornerShape(24.dp))
                         .background(MaterialTheme.colorScheme.primaryContainer),
                 )
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    items.forEachIndexed { i, item ->
-                        NavButton(
-                            item = item,
-                            selected = i == selected,
-                            modifier = Modifier.width(itemWidth),
-                            onClick = {
-                                if (i != selected) haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                onSelect(i)
-                            },
-                        )
+                    for (slot in 0 until slots) {
+                        if (center != null && slot == centerSlot) {
+                            CenterButton(center, Modifier.width(itemWidth)) { haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove); onCenter() }
+                        } else {
+                            val i = if (center != null && slot > centerSlot) slot - 1 else slot
+                            NavButton(
+                                item = items[i],
+                                selected = i == selected,
+                                modifier = Modifier.width(itemWidth),
+                                onClick = {
+                                    if (i != selected) haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    onSelect(i)
+                                },
+                            )
+                        }
                     }
                 }
             }
         }
+    }
+}
+
+/** The round Focus button: crimson, icon only (the label is its accessibility description). */
+@Composable
+private fun CenterButton(item: NavItem, modifier: Modifier, onClick: () -> Unit) {
+    val source = remember { MutableInteractionSource() }
+    val pressed by source.collectIsPressedAsState()
+    val scale by animateFloatAsState(if (pressed) 0.92f else 1f, spring(dampingRatio = 0.5f, stiffness = Spring.StiffnessMedium), label = "centerScale")
+    Box(modifier.height(58.dp), contentAlignment = Alignment.Center) {
+        Box(
+            Modifier.size(52.dp).graphicsLayer { scaleX = scale; scaleY = scale }
+                .clip(androidx.compose.foundation.shape.CircleShape).background(MaterialTheme.colorScheme.primary)
+                .semantics { contentDescription = item.label }
+                .clickable(interactionSource = source, indication = null, role = Role.Button, onClick = onClick),
+            contentAlignment = Alignment.Center,
+        ) { Icon(item.icon, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(26.dp)) }
     }
 }
 

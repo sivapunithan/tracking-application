@@ -53,4 +53,13 @@ class AffairListTest {
         val r = buildAffairList(listOf(p("x", "2026-01-01", cat = "NOT_A_CATEGORY")), emptyList(), emptyList(), AffairFilter())
         assertEquals(AffairCategory.INDIA, r.items.single().category)
     }
+
+    @Test fun an_item_with_no_state_row_is_level_zero_and_the_top_level_is_four() {
+        // no row = never revised: level 0, so no dot is filled and the label is "Not started"
+        assertEquals(0, buildAffairList(pack, emptyList(), emptyList(), AffairFilter()).items.first { it.id == "b" }.level)
+        // a row at the top level (4 taps of Revised) really is level 4 = "Revision 3" with all four dots filled
+        assertEquals(4, buildAffairList(pack, emptyList(), listOf(AffairStateEntity("b", false, 4, 0L)), AffairFilter()).items.first { it.id == "b" }.level)
+        // after a reset (state row deleted) it is back to 0
+        assertEquals(0, buildAffairList(pack, emptyList(), emptyList(), AffairFilter()).items.first { it.id == "b" }.level)
+    }
 }

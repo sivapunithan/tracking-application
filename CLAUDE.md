@@ -275,3 +275,45 @@ reference, write own notes with page refs.
 - Backup: `data/DiaryBackup` = minimal diary-only Export/Import through Android's file pickers (no permission): `{"app":"TnpscPrep","version":1,"diary":[...]}` (top-level sections so a full backup can add more later). Import is merge-only in ONE transaction: new entries added (identity = localDate + createdAt), a match is updated only if the file's copy is newer, NOTHING is deleted; any invalid entry rejects the whole file; 10 MB cap. The file is plain text (the UI warns).
   The FULL app backup (progress, notes, sessions, food, health ...) is still NOT built: next increment.
 - 212 unit tests. NOT yet seen on the phone (PIN lock). Tamil copy is DRAFT.
+
+## UI upgrade pass: Phase 1 (bugs) - done in code, awaiting phone review
+- Phone usage: `domain/UsageForeground` computes per-app foreground time from usage EVENTS (resumed/paused/shutdown), clipped to the day (never `queryAndAggregateUsageStats`: it returns whole overlapping buckets = 54h days).
+  Android sends "paused" AND "stopped" for one close: only "paused" counts; a BG with nothing open counts from the window start only for an app's FIRST event. Own app is excluded from the list. Tests assert no app/day exceeds 24 h.
+- Bottom inset: `LocalBottomBarInset` is now the floating bar's MEASURED height + 16dp (fallback 108dp), so lists always scroll clear of it.
+- News revision: state logic was correct (level 4 = "Revision 3" = all four dots); the phone held two items at level 4 from old test taps and affair cards had no way to undo. Added `AffairRepository.resetRevision` + a "Reset" button when level > 0. Test: no state row = level 0.
+- "Preview reactions" only in debuggable builds; "Delete account and data" -> "Erase all my data" (EN + TA). Greetings capitalise the first letter (`properName`). ONE exam filter: SyllabusViewModel now reads/writes `SettingsStore.targetExam` like Today.
+- Reminder: every install cold-starts the app, which re-locks it behind the PIN, so on-device checks need the owner to unlock after each install.
+
+## Day-centred restructure: Phase 1 (navigation shell + Profile) - in code, awaiting phone review
+- Decisions (owner OK'd): UI restructure only (no schema / activity_event / data-logic change); "My exams" becomes a multi-select preference (SharedPreferences, old value converted) in Phase 3; NO mood quick check-in for now (no storage: slot only);
+  full app Backup is a separate step AFTER the restructure (only the diary can be exported today); read-only queries for Getting Started are allowed; phone usage lives in Profile > Insights; "Next best action" order = exam date -> due revision -> focus session today -> food (after 18:00) -> new topic.
+- Bar: Today | Study | [Focus button] | Care | Journal. One NavHost with a NESTED graph per tab (`g_today`, `g_study`, `g_care`, `g_journal`) + full-screen routes `focus`, `profile`, `journal/editor?id&date`. Tab switch = `popUpTo(start){saveState}` + `restoreState`, so each tab keeps its sub-screen and scroll.
+  Full-screen pages hide the bar (`NavPolicy.isFullScreen`, tested). `LocalBottomBarInset` = measured bar height + 16dp while the bar shows, else 16dp + system nav inset.
+- Today: the avatar moved to the top right and opens Profile; the phone-usage card moved to Profile > Insights; the diary Dialog is gone (Journal tab + editor route; DiaryViewModel is Activity-scoped and holds the Undo/notice state).
+- Study = segmented Syllabus | News (a Revise segment joins in Phase 3). Care = steps card + the health log as a page (HealthSheet with `dismiss = null`). Focus = TimerScreen(onClose) with ONE subject chip that opens a sheet and a marked empty `FocusMusicSlot()`.
+- Profile = sections Profile (name, strict food mode), Appearance, Security (PIN), Language, Insights (usage), Data (headlines switch, Erase all my data). Settings tab and `nav_settings` are gone from the bar; dead strings are removed in Phase 5.
+
+## Day-centred restructure: Phase 2 (Today rebuilt) - in code, awaiting phone review
+- Today, top to bottom: greeting + avatar (opens Profile) -> **Next best action** card (`domain/TodayGuide.nextAction`, rule order: no exam date -> due revisions -> no focus session today -> food after 18:00 if unlogged -> new topic -> all caught up) ->
+  **Getting started** checklist (exam date, first focus session, first food log, first diary entry; once complete the flag `gettingStartedDone` is stored and it never returns) -> **Today's plan** (`TodayPlan`: up to 3 due revisions + the next unread topic + the newest unrevised
+  curated current-affairs item; "x of y done" = revisions/first-reads counted from today's activity events + what is still open; tapping a circle does the action) -> **Quick check-ins** (the existing food card with its week strip, + one-tap water = 250 ml health entry; marked SLOT for the future mood check-in) ->
+  **tile row** (study ring, streak, steps) -> **12-week heatmap** with month and weekday labels (cells fill the card width, tap = day sheet).
+- Removed from Today: readiness hero, exam chips (the one filter lives in Study until the global My exams in Phase 3), steps card (now in Care), Diary and Health cards (Journal / Care tabs), due list, progress by subject, starred list.
+  The due / progress / starred lists moved UNCHANGED into **Study > Revise** (`ui/study/ReviseScreen`), so nothing is lost before Phase 3.
+- Steps are read on app start by `StepsAutoRead()` (Today) now that the steps card is not on Today. TodayViewModel got `extras` (read-only derivations: any session ever, done-today count, next unread topic, newest unrevised affair): no schema/data-logic change.
+- 238+ unit tests (TodayGuideTest: rule order, getting-started completion, plan caps).
+
+## Day-centred restructure: Phase 3 (Study) - in code, awaiting phone review
+- **My exams** is now one global MULTI-select (`domain/ExamSelection`, tested): stored in the same `SettingsStore.targetExam` text ("ALL", "G1", or "G1,G4"), so old single values need no conversion; read as a bitmask via `SettingsStore.examMask`. Empty/unknown = all exams (lists can never go empty because of a setting).
+  Today, Revise and Syllabus all read it. Edit it in Profile (under the name) or from the chip at the top of Syllabus (`ui/syllabus/ExamPicker`). The per-screen G1/G2/G4 chips are gone; the Welcome flow still picks one value (multi-select there comes in Phase 5).
+- Syllabus: search box (English or Tamil substring, `searchTopics`, tested), "Continue where you stopped" card (the most recently touched topic inside My exams; opens its subject), subject cards use a stacked per-level bar (`LevelBar`, replaces LinearProgressIndicator whose empty state showed a stray red dot at 0%).
+- No schema / activity_event change.
+
+## Day-centred restructure: Phase 4 (Care + Journal) - in code, awaiting phone review
+- **Care** = three groups on one page: Food (new `FoodHistoryCard`: last-30-day counts + last 5 weeks as coloured dots, derived by pure `domain/FoodHistory`, tested), Steps (existing card), Daily log (the existing health log: water, body, cycle estimates).
+- **Journal** = segmented Diary | Calendar. Calendar (`ui/diary/JournalCalendar`): one month at a time with prev/next back to the oldest loaded week (53 weeks from `TodayViewModel.yearHeat`, same level rules as the Today heatmap); colour = study, dot = food, ring = diary entry, today outlined. Tap a day = the existing day story sheet (diary -> activity, "Write about this day").
+- `MusicLogSlot()` in the calendar page is the marked empty slot for the future music log. No schema / activity_event change.
+
+## Day-centred restructure: Phase 5 (onboarding + cleanup) - in code, awaiting phone review
+- Welcome flow step 2 now uses the same multi-select `ExamPicker` ("My exams"), a gentle non-blocking nudge under the optional exam-date button, and the daily goal; then the optional PIN; the app opens on Today, whose Getting started card (exam date, first focus, first food, first diary) continues the setup. Existing installs are unaffected (the flow only runs for a new account).
+- Cleanup: the old single-value `ExamFilter` enum is removed (everything uses the `Exam` bitmask / `ExamSelection`); 17 unused strings (settings tab, readiness hero, old diary/health card text, nav_timer, nav_settings ...) deleted from English and Tamil.

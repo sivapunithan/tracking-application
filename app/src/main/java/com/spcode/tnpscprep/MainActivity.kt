@@ -43,7 +43,7 @@ class MainActivity : AppCompatActivity() {
                     )
                     AuthGate(authVm) {
                         val syllabusVm = viewModel<SyllabusViewModel>(
-                            factory = viewModelFactory { initializer { SyllabusViewModel(c.syllabusRepository) } },
+                            factory = viewModelFactory { initializer { SyllabusViewModel(c.syllabusRepository, c.settingsStore) } },
                         )
                         val timerVm = viewModel<TimerViewModel>(
                             factory = viewModelFactory {
@@ -63,7 +63,10 @@ class MainActivity : AppCompatActivity() {
                                 initializer { HeadlinesViewModel(c.newsRepository, c.affairRepository, c.settingsStore) }
                             },
                         )
-                        AppRoot(todayVm, syllabusVm, affairsVm, headlinesVm, authVm, timerVm, twoPane = widthClass != WindowWidthSizeClass.Compact)
+                        val diaryVm = viewModel<com.spcode.tnpscprep.ui.diary.DiaryViewModel>(
+                            factory = viewModelFactory { initializer { com.spcode.tnpscprep.ui.diary.DiaryViewModel(c.diaryRepository) } },
+                        )
+                        AppRoot(todayVm, syllabusVm, affairsVm, headlinesVm, authVm, timerVm, diaryVm, twoPane = widthClass != WindowWidthSizeClass.Compact)
                     }
                 }
             }

@@ -71,4 +71,5 @@ class HeadlinesViewModel(
 
     fun toggleBookmark(id: String) { viewModelScope.launch { affairs.toggleBookmark(id) } }
     fun revise(id: String) { viewModelScope.launch { affairs.revise(id) } }
+    fun resetRevision(id: String) { viewModelScope.launch { affairs.resetRevision(id) } }
 }

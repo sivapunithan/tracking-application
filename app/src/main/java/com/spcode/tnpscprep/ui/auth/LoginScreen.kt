@@ -68,7 +68,7 @@ fun LoginScreen(
         AuthHero(listOf("mood_proud", "login_wave"), height = 280.dp)
         Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 18.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             Text(stringResource(R.string.welcome_back), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Text(name.ifBlank { stringResource(R.string.app_name) }, style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold), textAlign = TextAlign.Center)
+            Text(com.spcode.tnpscprep.ui.properName(name).ifBlank { stringResource(R.string.app_name) }, style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold), textAlign = TextAlign.Center)
             Spacer(Modifier.height(18.dp))
             PinInput(
                 prompt = stringResource(R.string.pin_enter), message = message, errorTick = err, busy = busy, enabled = !locked,

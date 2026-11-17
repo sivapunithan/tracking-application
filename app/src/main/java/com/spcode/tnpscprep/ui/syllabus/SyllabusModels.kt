@@ -3,12 +3,7 @@ package com.spcode.tnpscprep.ui.syllabus
 import com.spcode.tnpscprep.data.db.SubjectEntity
 import com.spcode.tnpscprep.data.db.SyllabusUnitEntity
 import com.spcode.tnpscprep.data.db.TopicWithLevel
-import com.spcode.tnpscprep.domain.Exam
 import com.spcode.tnpscprep.domain.RevisionLevel
-
-enum class ExamFilter(val mask: Int) {
-    ALL(Exam.ALL_MASK), G1(Exam.G1.bit), G2(Exam.G2.bit), G4(Exam.G4.bit)
-}
 
 data class TopicUi(
     val id: String, val nameEn: String, val nameTa: String, val exams: Int, val level: Int,
@@ -18,7 +13,31 @@ data class UnitUi(val id: String, val nameEn: String, val nameTa: String, val to
 data class SubjectUi(
     val id: String, val nameEn: String, val nameTa: String,
     val percent: Int, val topicCount: Int, val units: List<UnitUi>,
+    /** How many topics sit at each revision level 0..MAX (index = level): drives the stacked bar. */
+    val levelCounts: List<Int> = emptyList(),
 )
+/** A topic found by the search box, with the subject it lives in. */
+data class TopicHit(val subjectId: String, val subjectNameEn: String, val subjectNameTa: String, val topic: TopicUi)
+
+/** Pure search over the already exam-filtered syllabus: case-insensitive substring on the topic or subject name, English OR Tamil (works for any script). */
+fun searchTopics(subjects: List<SubjectUi>, query: String, limit: Int = 60): List<TopicHit> {
+    val q = java.text.Normalizer.normalize(query.trim(), java.text.Normalizer.Form.NFC).lowercase()
+    if (q.isEmpty()) return emptyList()
+    val out = ArrayList<TopicHit>()
+    fun norm(x: String) = java.text.Normalizer.normalize(x, java.text.Normalizer.Form.NFC).lowercase()
+    for (s in subjects) for (u in s.units) for (t in u.topics) {
+        // a topic matches by its own name OR by its subject's name (searching "polity" lists the Polity topics)
+        if (listOf(t.nameEn, t.nameTa, s.nameEn, s.nameTa).any { norm(it).contains(q) }) { out += TopicHit(s.id, s.nameEn, s.nameTa, t); if (out.size >= limit) return out }
+    }
+    return out
+}
+
+/** Counts of topics per level 0..MAX. */
+fun levelCounts(levels: List<Int>): List<Int> {
+    val c = IntArray(RevisionLevel.MAX + 1)
+    levels.forEach { c[RevisionLevel.clamp(it)]++ }
+    return c.toList()
+}
 
 /**
  * Pure function (no Android): easy to unit test. [topics] are ALREADY filtered by exam (SQL does
@@ -41,7 +60,7 @@ fun buildSyllabusUi(
         if (unitUis.isEmpty()) null
         else {
             val all = unitUis.flatMap { it.topics }
-            SubjectUi(s.id, s.nameEn, s.nameTa, RevisionLevel.percent(all.map { it.level }), all.size, unitUis)
+            SubjectUi(s.id, s.nameEn, s.nameTa, RevisionLevel.percent(all.map { it.level }), all.size, unitUis, levelCounts(all.map { it.level }))
         }
     }
 }

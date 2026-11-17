@@ -17,6 +17,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -43,7 +47,7 @@ import androidx.compose.ui.unit.dp
 import com.spcode.tnpscprep.R
 
 @Composable
-fun SettingsScreen(headlines: HeadlinesViewModel, auth: AuthViewModel) {
+fun ProfileScreen(headlines: HeadlinesViewModel, auth: AuthViewModel, studyByDate: Map<java.time.LocalDate, Int>, onBack: () -> Unit) {
     var selected by remember { mutableStateOf(AppLocale.current()) }
     val newsOn by headlines.enabled.collectAsStateWithLifecycle()
     val lastMs by headlines.lastRefreshMs.collectAsStateWithLifecycle()
@@ -55,8 +59,34 @@ fun SettingsScreen(headlines: HeadlinesViewModel, auth: AuthViewModel) {
             .padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 16.dp + LocalBottomBarInset.current),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        ScreenTitle(stringResource(R.string.settings_title))
-        Text(stringResource(R.string.appearance_title), style = MaterialTheme.typography.titleMedium)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Rounded.ArrowBack, stringResource(R.string.sheet_close)) }
+            ScreenTitle(stringResource(R.string.profile_title))
+        }
+        // ---- Profile ----
+        SectionLabel(stringResource(R.string.section_profile))
+        OutlinedTextField(
+            value = name,
+            onValueChange = headlines::setUserName,
+            label = { Text(stringResource(R.string.profile_name_label)) },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        val foodSettings = (androidx.compose.ui.platform.LocalContext.current.applicationContext as com.spcode.tnpscprep.TnpscApp).container.settingsStore
+        val examMask by foodSettings.examMask.collectAsStateWithLifecycle()
+        Text(stringResource(R.string.my_exams), style = MaterialTheme.typography.titleSmall)
+        com.spcode.tnpscprep.ui.syllabus.ExamPicker(examMask, foodSettings::setExamMask)
+        Text(stringResource(R.string.my_exams_note), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        val strictFood by foodSettings.strictFood.collectAsStateWithLifecycle()
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(stringResource(R.string.settings_strict), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+            Switch(checked = strictFood, onCheckedChange = foodSettings::setStrictFood)
+        }
+        Text(stringResource(R.string.settings_strict_note), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+
+        // ---- Appearance ----
+        Spacer(Modifier.height(12.dp))
+        SectionLabel(stringResource(R.string.appearance_title))
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             ThemeMode.entries.forEach { m ->
                 FilterChip(
@@ -76,20 +106,11 @@ fun SettingsScreen(headlines: HeadlinesViewModel, auth: AuthViewModel) {
                 )
             }
         }
-        OutlinedTextField(
-            value = name,
-            onValueChange = headlines::setUserName,
-            label = { Text(stringResource(R.string.profile_name_label)) },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
-        )
-        AccountSection(auth)
-        Spacer(Modifier.height(8.dp))
-        var showMoods by rememberSaveable { mutableStateOf(false) }
-        OutlinedButton(onClick = { showMoods = true }) { Text(stringResource(R.string.mood_lab_button)) }
-        if (showMoods) MoodLabSheet(onDismiss = { showMoods = false })
-        Spacer(Modifier.height(8.dp))
-        Text(stringResource(R.string.language_label), style = MaterialTheme.typography.titleMedium)
+        // ---- Security ----
+        Spacer(Modifier.height(12.dp))
+        AccountSection(auth, showErase = false)
+        Spacer(Modifier.height(12.dp))
+        SectionLabel(stringResource(R.string.language_label))
         Column(Modifier.selectableGroup()) {
             AppLanguage.entries.forEach { lang ->
                 Row(
@@ -127,7 +148,21 @@ fun SettingsScreen(headlines: HeadlinesViewModel, auth: AuthViewModel) {
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        Spacer(Modifier.height(16.dp))
+        // Developer tool: only in debug builds, never in the APK she gets.
+        val ctx = androidx.compose.ui.platform.LocalContext.current
+        if ((ctx.applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+            var showMoods by rememberSaveable { mutableStateOf(false) }
+            OutlinedButton(onClick = { showMoods = true }) { Text(stringResource(R.string.mood_lab_button)) }
+            if (showMoods) MoodLabSheet(onDismiss = { showMoods = false })
+        }
+        // ---- Insights ----
+        Spacer(Modifier.height(12.dp))
+        SectionLabel(stringResource(R.string.section_insights))
+        com.spcode.tnpscprep.ui.today.UsageCard(studyByDate, showTitle = false)
+
+        // ---- Data ----
+        Spacer(Modifier.height(12.dp))
+        SectionLabel(stringResource(R.string.section_data))
         Text(stringResource(R.string.settings_news_title), style = MaterialTheme.typography.titleMedium)
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(stringResource(R.string.settings_news_switch), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
@@ -141,14 +176,7 @@ fun SettingsScreen(headlines: HeadlinesViewModel, auth: AuthViewModel) {
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        Spacer(Modifier.height(16.dp))
-        val foodSettings = (androidx.compose.ui.platform.LocalContext.current.applicationContext as com.spcode.tnpscprep.TnpscApp).container.settingsStore
-        val strictFood by foodSettings.strictFood.collectAsStateWithLifecycle()
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(stringResource(R.string.settings_strict), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
-            Switch(checked = strictFood, onCheckedChange = foodSettings::setStrictFood)
-        }
-        Text(stringResource(R.string.settings_strict_note), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        AccountSection(auth, showSecurity = false)
         Spacer(Modifier.height(16.dp))
         Text(stringResource(R.string.syllabus_source_title), style = MaterialTheme.typography.titleMedium)
         Text(
@@ -157,4 +185,9 @@ fun SettingsScreen(headlines: HeadlinesViewModel, auth: AuthViewModel) {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
+}
+
+@Composable
+private fun SectionLabel(text: String) {
+    Text(text, style = MaterialTheme.typography.titleMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold), color = MaterialTheme.colorScheme.primary)
 }

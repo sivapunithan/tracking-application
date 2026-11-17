@@ -42,6 +42,12 @@ class DiaryViewModel(private val repo: DiaryRepository) : ViewModel() {
 
     private val lock = Mutex()
 
+    /** Messages shown over the Journal list: an Undo bar after a delete, and the result of an import/export. Kept here so they survive leaving the editor. */
+    val undo = MutableStateFlow<DiaryEntryEntity?>(null)
+    val notice = MutableStateFlow<String?>(null)
+    fun showUndo(e: DiaryEntryEntity) { undo.value = e }
+    fun postNotice(text: String) { notice.value = text }
+
     suspend fun load(id: Long) = repo.get(id)
 
     /** Applies the autosave rules (domain/Autosave) and stores the result. A mood change alone also counts as a change. */
@@ -73,6 +79,8 @@ class DiaryViewModel(private val repo: DiaryRepository) : ViewModel() {
 
     suspend fun delete(id: Long) = repo.delete(id)
     fun restore(e: DiaryEntryEntity) { viewModelScope.launch { repo.restore(e) } }
+    fun clearUndo() { undo.value = null }
+    fun clearNotice() { notice.value = null }
 
     suspend fun exportTo(resolver: ContentResolver, uri: Uri): Boolean = withContext(Dispatchers.IO) {
         runCatching {

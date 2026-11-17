@@ -1,5 +1,6 @@
 package com.spcode.tnpscprep.data
 
+import com.spcode.tnpscprep.domain.ExamSelection
 import android.content.Context
 import com.spcode.tnpscprep.domain.TimerLimits
 import java.util.Base64
@@ -26,7 +27,11 @@ class SettingsStore(context: Context) {
     /** Exam date as an epoch day (LocalDate.toEpochDay), or [NO_DATE]. */
     val examEpochDay: StateFlow<Long> = _examDay.asStateFlow()
 
-    fun setTargetExam(v: String) { prefs.edit().putString(K_TARGET, v).apply(); _targetExam.value = v }
+    fun setTargetExam(v: String) { prefs.edit().putString(K_TARGET, v).apply(); _targetExam.value = v; _examMask.value = ExamSelection.parse(v) }
+    private val _examMask = MutableStateFlow(ExamSelection.parse(_targetExam.value))
+    /** "My exams" as a bitmask (G1=1, G2=2, G4=4); every exam when nothing specific is chosen. The one global filter. */
+    val examMask: StateFlow<Int> = _examMask.asStateFlow()
+    fun setExamMask(mask: Int) = setTargetExam(ExamSelection.format(mask))
     fun setExamEpochDay(v: Long) { prefs.edit().putLong(K_EXAM_DAY, v).apply(); _examDay.value = v }
 
     private val _newsEnabled = MutableStateFlow(prefs.getBoolean(K_NEWS, true))
@@ -78,6 +83,11 @@ class SettingsStore(context: Context) {
     val lastFoodAlertStart: StateFlow<String> = _foodAlert.asStateFlow()
     fun setLastFoodAlertStart(v: String) { prefs.edit().putString(K_FOOD_ALERT, v).apply(); _foodAlert.value = v }
 
+    // ---- Getting started checklist: once completed it never comes back ----
+    private val _gsDone = MutableStateFlow(prefs.getBoolean(K_GS_DONE, false))
+    val gettingStartedDone: StateFlow<Boolean> = _gsDone.asStateFlow()
+    fun setGettingStartedDone(v: Boolean) { prefs.edit().putBoolean(K_GS_DONE, v).apply(); _gsDone.value = v }
+
     // ---- phone usage (opt-in, off by default) ----
     private val _usage = MutableStateFlow(prefs.getBoolean(K_USAGE, false))
     val usageEnabled: StateFlow<Boolean> = _usage.asStateFlow()
@@ -106,10 +116,10 @@ class SettingsStore(context: Context) {
     fun clearAll() {
         prefs.edit().clear().apply()
         _focus.value = 25; _break.value = 5; _goal.value = 60
-        _targetExam.value = "ALL"; _examDay.value = NO_DATE
+        _targetExam.value = "ALL"; _examMask.value = com.spcode.tnpscprep.domain.Exam.ALL_MASK; _examDay.value = NO_DATE
         _newsEnabled.value = true; _newsLast.value = 0L
         _theme.value = "LIGHT"; _name.value = ""; _account.value = false
-        _health.value = HealthProfile(); _usage.value = false; _strictFood.value = false; _foodAlert.value = ""
+        _health.value = HealthProfile(); _usage.value = false; _gsDone.value = false; _strictFood.value = false; _foodAlert.value = ""
     }
 
     val focusMinutes: StateFlow<Int> = _focus.asStateFlow()
@@ -144,6 +154,7 @@ class SettingsStore(context: Context) {
         private const val K_H_CYCLE = "h_cycle"
         private const val K_STRICT = "food_strict"
         private const val K_FOOD_ALERT = "food_alert_start"
+        private const val K_GS_DONE = "getting_started_done"
         private const val K_USAGE = "usage_enabled"
         private const val K_NAME = "user_name"
         private const val K_NEWS = "news_enabled"

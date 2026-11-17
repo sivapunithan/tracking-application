@@ -58,7 +58,7 @@ import com.spcode.tnpscprep.domain.AccountForm
 import com.spcode.tnpscprep.domain.TimerLimits
 import com.spcode.tnpscprep.ui.design.DatePickerContent
 import com.spcode.tnpscprep.ui.design.PopSheet
-import com.spcode.tnpscprep.ui.syllabus.ExamFilter
+import com.spcode.tnpscprep.ui.syllabus.ExamPicker
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -70,7 +70,7 @@ import kotlinx.coroutines.launch
 fun WelcomeFlow(onCreate: suspend (name: String, exam: String, examEpochDay: Long?, goalMinutes: Int, pin: String?) -> Unit) {
     var step by rememberSaveable { mutableIntStateOf(0) }
     var name by rememberSaveable { mutableStateOf("") }
-    var exam by rememberSaveable { mutableStateOf(ExamFilter.ALL.name) }
+    var examMask by rememberSaveable { mutableIntStateOf(com.spcode.tnpscprep.domain.Exam.ALL_MASK) }
     var examDay by rememberSaveable { mutableStateOf<Long?>(null) }
     var goal by rememberSaveable { mutableIntStateOf(60) }
     var showDate by rememberSaveable { mutableStateOf(false) }
@@ -81,7 +81,7 @@ fun WelcomeFlow(onCreate: suspend (name: String, exam: String, examEpochDay: Lon
     fun finish(pin: String?) {
         if (busy) return
         busy = true
-        scope.launch { onCreate(name, exam, examDay, goal, pin) }
+        scope.launch { onCreate(name, com.spcode.tnpscprep.domain.ExamSelection.format(examMask), examDay, goal, pin) }
     }
 
     Column(
@@ -129,14 +129,8 @@ fun WelcomeFlow(onCreate: suspend (name: String, exam: String, examEpochDay: Lon
                             label = { Text(stringResource(R.string.account_name_label)) }, singleLine = true, modifier = Modifier.fillMaxWidth(),
                         )
                         Text(stringResource(R.string.target_exam_label), style = MaterialTheme.typography.titleSmall)
-                        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            ExamFilter.entries.forEach { f ->
-                                FilterChip(
-                                    selected = exam == f.name, onClick = { exam = f.name },
-                                    label = { Text(if (f == ExamFilter.ALL) stringResource(R.string.filter_all) else f.name) },
-                                )
-                            }
-                        }
+                        ExamPicker(examMask, { examMask = it })
+                        Text(stringResource(R.string.onb_exams_note), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         OutlinedButton(onClick = { showDate = true }, modifier = Modifier.fillMaxWidth().height(52.dp)) {
                             Icon(Icons.Rounded.CalendarMonth, null, modifier = Modifier.size(18.dp))
                             Spacer(Modifier.width(8.dp))
@@ -145,6 +139,8 @@ fun WelcomeFlow(onCreate: suspend (name: String, exam: String, examEpochDay: Lon
                                     ?: stringResource(R.string.exam_date_optional),
                             )
                         }
+                        // gentle nudge, never a blocker: the date can be added later from Today
+                        if (examDay == null) Text(stringResource(R.string.onb_date_nudge), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(stringResource(R.string.goal_label), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
                             OutlinedButton(onClick = { goal = TimerLimits.step(goal, -TimerLimits.GOAL_STEP, TimerLimits.GOAL) }, modifier = Modifier.size(48.dp), contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp)) { Text("−") }

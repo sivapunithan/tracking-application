@@ -66,7 +66,7 @@ class UsageViewModel(private val repo: UsageRepository, private val settings: Se
 }
 
 @Composable
-fun UsageCard(studyMinutesByDate: Map<LocalDate, Int>) {
+fun UsageCard(studyMinutesByDate: Map<LocalDate, Int>, showTitle: Boolean = true) {
     val ctx = LocalContext.current
     val app = ctx.applicationContext as TnpscApp
     val vm = viewModel<UsageViewModel>(factory = viewModelFactory { initializer { UsageViewModel(app.container.usageRepository, app.container.settingsStore) } })
@@ -86,7 +86,7 @@ fun UsageCard(studyMinutesByDate: Map<LocalDate, Int>) {
     val today = LocalDate.now()
     val live = enabled && access
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(stringResource(R.string.usage_title), style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold), modifier = Modifier.padding(top = 6.dp))
+        if (showTitle) Text(stringResource(R.string.usage_title), style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold), modifier = Modifier.padding(top = 6.dp))
         SoftCard(Modifier.fillMaxWidth()) {
             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 if (!live) {

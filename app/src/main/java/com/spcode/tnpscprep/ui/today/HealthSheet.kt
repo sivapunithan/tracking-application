@@ -48,7 +48,7 @@ private fun day(d: LocalDate) = d.format(DateTimeFormatter.ofLocalizedDate(Forma
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun HealthSheet(vm: HealthViewModel, dismiss: () -> Unit) {
+fun HealthSheet(vm: HealthViewModel, dismiss: (() -> Unit)?) {
     val entries by vm.entries.collectAsStateWithLifecycle()
     val profile by vm.profile.collectAsStateWithLifecycle()
     val today = remember { LocalDate.now() }
@@ -161,7 +161,7 @@ fun HealthSheet(vm: HealthViewModel, dismiss: () -> Unit) {
         onClick = { if (confirm) { vm.deleteAll(); confirm = false } else confirm = true },
         modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
     ) { Text(stringResource(if (confirm) R.string.health_delete_all_confirm else R.string.health_delete_all), color = MaterialTheme.colorScheme.error) }
-    TextButton(onClick = dismiss, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.sheet_close)) }
+    if (dismiss != null) TextButton(onClick = dismiss, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.sheet_close)) }
 }
 
 @Composable

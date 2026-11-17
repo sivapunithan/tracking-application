@@ -1,6 +1,18 @@
 package com.spcode.tnpscprep.ui.timer
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ArrowDropDown
+import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import com.spcode.tnpscprep.ui.design.PopSheet
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -42,14 +54,17 @@ import java.util.Locale
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun TimerScreen(vm: TimerViewModel) {
+fun TimerScreen(vm: TimerViewModel, onClose: (() -> Unit)? = null) {
     val ui by vm.ui.collectAsStateWithLifecycle()
 
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 16.dp + LocalBottomBarInset.current),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        ScreenTitle(stringResource(R.string.timer_title))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            if (onClose != null) IconButton(onClick = onClose) { Icon(Icons.Rounded.Close, stringResource(R.string.sheet_close)) }
+            ScreenTitle(stringResource(if (onClose != null) R.string.focus_title else R.string.timer_title))
+        }
         // --- clock ---
         Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
@@ -86,26 +101,29 @@ fun TimerScreen(vm: TimerViewModel) {
             is TimerNotice.Logged -> Text(stringResource(R.string.notice_logged, n.minutes), color = MaterialTheme.colorScheme.primary)
         }
 
-        // --- optional subject tag ---
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(stringResource(R.string.subject_tag_label), style = MaterialTheme.typography.titleSmall)
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                FilterChip(
-                    selected = ui.selectedSubjectId == null,
-                    enabled = !ui.running,
-                    onClick = { vm.selectSubject(null) },
-                    label = { Text(stringResource(R.string.subject_none)) },
-                )
-                ui.subjects.forEach { s ->
-                    FilterChip(
-                        selected = ui.selectedSubjectId == s.id,
-                        enabled = !ui.running,
-                        onClick = { vm.selectSubject(s.id) },
-                        label = { Text(localized(s.nameEn, s.nameTa)) },
-                    )
+        // --- optional subject tag: ONE chip that opens a sheet (not a chip per subject) ---
+        var pickSubject by rememberSaveable { mutableStateOf(false) }
+        val chosen = ui.subjects.firstOrNull { it.id == ui.selectedSubjectId }?.let { localized(it.nameEn, it.nameTa) } ?: stringResource(R.string.subject_none)
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            Text(stringResource(R.string.subject_tag_label), style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(1f))
+            AssistChip(
+                onClick = { pickSubject = true }, enabled = !ui.running, label = { Text(chosen, maxLines = 1) },
+                trailingIcon = { Icon(Icons.Rounded.ArrowDropDown, null) },
+            )
+        }
+        if (pickSubject) {
+            PopSheet(onDismiss = { pickSubject = false }) { dismiss ->
+                Text(stringResource(R.string.focus_subject_pick), style = MaterialTheme.typography.headlineSmall.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold))
+                Spacer(Modifier.height(12.dp))
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    FilterChip(selected = ui.selectedSubjectId == null, onClick = { vm.selectSubject(null); dismiss() }, label = { Text(stringResource(R.string.subject_none)) })
+                    ui.subjects.forEach { s ->
+                        FilterChip(selected = ui.selectedSubjectId == s.id, onClick = { vm.selectSubject(s.id); dismiss() }, label = { Text(localized(s.nameEn, s.nameTa)) })
+                    }
                 }
             }
         }
+        FocusMusicSlot()
 
         // --- today + streak ---
         Card(Modifier.fillMaxWidth()) {
@@ -142,6 +160,10 @@ fun TimerScreen(vm: TimerViewModel) {
         )
     }
 }
+
+/** SLOT (future): the "Start with music" button goes here. Intentionally empty for now. */
+@Composable
+private fun FocusMusicSlot() = Unit
 
 @Composable
 private fun Stepper(label: String, value: Int, enabled: Boolean, onMinus: () -> Unit, onPlus: () -> Unit) {

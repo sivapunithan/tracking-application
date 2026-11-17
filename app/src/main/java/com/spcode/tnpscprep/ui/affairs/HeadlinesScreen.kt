@@ -153,6 +153,7 @@ fun HeadlinesScreen(vm: HeadlinesViewModel) {
                         a,
                         onBookmark = { vm.toggleBookmark(a.id) },
                         onRevise = { vm.revise(a.id) },
+                        onReset = { vm.resetRevision(a.id) },
                         onOpen = { runCatching { uriHandler.openUri(a.url) } },
                         onDelete = {},
                     )

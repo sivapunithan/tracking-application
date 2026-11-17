@@ -4,6 +4,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -54,7 +56,9 @@ private fun levelColor(level: Int): Color {
 
 /** GitHub-style grid: one column per week (Monday on top), newest week at the right edge. */
 @Composable
-fun HeatmapSection(state: HeatState, food: Map<LocalDate, com.spcode.tnpscprep.domain.FoodState>, onDay: (String) -> Unit) {
+fun HeatmapSection(state: HeatState, food: Map<LocalDate, com.spcode.tnpscprep.domain.FoodState>, onDay: (String) -> Unit, weeks: Int = 12) {
+    val shown = state.weeks.takeLast(weeks)
+    val locale = java.util.Locale.getDefault()
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
             stringResource(R.string.heat_title),
@@ -63,14 +67,50 @@ fun HeatmapSection(state: HeatState, food: Map<LocalDate, com.spcode.tnpscprep.d
         )
         SoftCard(Modifier.fillMaxWidth()) {
             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                val scroll = rememberScrollState()
-                LaunchedEffect(state.weeks.size) { scroll.scrollTo(scroll.maxValue) } // show the newest weeks first
-                Row(Modifier.horizontalScroll(scroll), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    state.weeks.forEach { week ->
-                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                            week.forEach { day ->
-                                if (day == null) Spacer(Modifier.size(16.dp))
-                                else Cell(day, hasNote = day.date in state.noteDates, food = food[day.date], onClick = { onDay(day.date.toString()) })
+                androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxWidth()) {
+                    val labelW = 16.dp
+                    val gap = 4.dp
+                    // the cells share the card width, so 12 weeks fill it without scrolling
+                    val cell = ((maxWidth - labelW - gap * shown.size) / shown.size.coerceAtLeast(1)).coerceIn(12.dp, 28.dp)
+                    Row(horizontalArrangement = Arrangement.spacedBy(gap)) {
+                        // weekday labels: Monday, Wednesday, Friday
+                        Column(Modifier.width(labelW), verticalArrangement = Arrangement.spacedBy(gap)) {
+                            Spacer(Modifier.height(14.dp))
+                            for (d in 0..6) {
+                                Box(Modifier.height(cell), contentAlignment = androidx.compose.ui.Alignment.CenterStart) {
+                                    if (d == 0 || d == 2 || d == 4) Text(
+                                        java.time.DayOfWeek.of(d + 1).getDisplayName(java.time.format.TextStyle.NARROW, locale),
+                                        style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
+                            }
+                        }
+                        Column(verticalArrangement = Arrangement.spacedBy(gap)) {
+                            // month labels: shown where a new month starts
+                            Row(Modifier.height(14.dp), horizontalArrangement = Arrangement.spacedBy(gap)) {
+                                shown.forEachIndexed { i, week ->
+                                    val first = week.firstOrNull()?.date
+                                    val prev = shown.getOrNull(i - 1)?.firstOrNull()?.date
+                                    Box(Modifier.width(cell)) {
+                                        if (first != null && (prev == null || prev.month != first.month)) {
+                                            Text(
+                                                first.month.getDisplayName(java.time.format.TextStyle.SHORT, locale), maxLines = 1, softWrap = false,
+                                                style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                modifier = Modifier.wrapContentWidth(align = androidx.compose.ui.Alignment.Start, unbounded = true),
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                            Row(horizontalArrangement = Arrangement.spacedBy(gap)) {
+                                shown.forEach { week ->
+                                    Column(verticalArrangement = Arrangement.spacedBy(gap)) {
+                                        week.forEach { day ->
+                                            if (day == null) Spacer(Modifier.size(cell))
+                                            else Cell(day, hasNote = day.date in state.noteDates, food = food[day.date], size = cell, onClick = { onDay(day.date.toString()) })
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -87,12 +127,12 @@ fun HeatmapSection(state: HeatState, food: Map<LocalDate, com.spcode.tnpscprep.d
 }
 
 @Composable
-private fun Cell(day: DaySummary, hasNote: Boolean, food: com.spcode.tnpscprep.domain.FoodState?, onClick: () -> Unit) {
+private fun Cell(day: DaySummary, hasNote: Boolean, food: com.spcode.tnpscprep.domain.FoodState?, size: androidx.compose.ui.unit.Dp, onClick: () -> Unit) {
     val ring = if (hasNote) Modifier.background(MaterialTheme.colorScheme.tertiary, RoundedCornerShape(4.dp)).padding(1.5.dp) else Modifier
     androidx.compose.foundation.layout.Box(ring) {
         androidx.compose.foundation.layout.Box(contentAlignment = androidx.compose.ui.Alignment.BottomEnd) {
             Spacer(
-                Modifier.size(if (hasNote) 13.dp else 16.dp).clip(RoundedCornerShape(4.dp)).background(levelColor(day.level)).clickable(onClick = onClick),
+                Modifier.size(if (hasNote) size - 3.dp else size).clip(RoundedCornerShape(4.dp)).background(levelColor(day.level)).clickable(onClick = onClick),
             )
             // Small dot = that day's food check-in (colour + it is also listed with its name in the day sheet).
             if (food != null) Spacer(Modifier.size(6.dp).clip(androidx.compose.foundation.shape.CircleShape).background(foodColor(food)))

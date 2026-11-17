@@ -154,6 +154,7 @@ fun AffairsScreen(vm: AffairsViewModel) {
                     a,
                     onBookmark = { vm.toggleBookmark(a.id) },
                     onRevise = { vm.revise(a.id) },
+                    onReset = { vm.resetRevision(a.id) },
                     onOpen = { runCatching { uriHandler.openUri(a.url) } }, // no browser installed: ignore
                     onDelete = { a.userId?.let(vm::deleteOwn) },
                 )
@@ -170,7 +171,7 @@ fun AffairsScreen(vm: AffairsViewModel) {
 }
 
 @Composable
-internal fun AffairCard(a: AffairUi, onBookmark: () -> Unit, onRevise: () -> Unit, onOpen: () -> Unit, onDelete: () -> Unit) {
+internal fun AffairCard(a: AffairUi, onBookmark: () -> Unit, onRevise: () -> Unit, onReset: () -> Unit, onOpen: () -> Unit, onDelete: () -> Unit) {
     val levelName = stringArrayResource(R.array.revision_levels)[RevisionLevel.clamp(a.level)]
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -216,8 +217,14 @@ internal fun AffairCard(a: AffairUi, onBookmark: () -> Unit, onRevise: () -> Uni
                     }
                 }
                 Text(levelName, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.weight(1f))
-                if (a.url.isNotEmpty()) TextButton(onClick = onOpen) { Text(stringResource(R.string.ca_open_source)) }
-                if (a.isUser) TextButton(onClick = onDelete) { Text(stringResource(R.string.ca_delete)) }
+            }
+            if (a.level > 0 || a.url.isNotEmpty() || a.isUser) {
+                // second line: the secondary actions, so the level name never gets squeezed into two lines
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                    if (a.level > 0) TextButton(onClick = onReset) { Text(stringResource(R.string.affair_reset)) }
+                    if (a.url.isNotEmpty()) TextButton(onClick = onOpen) { Text(stringResource(R.string.ca_open_source)) }
+                    if (a.isUser) TextButton(onClick = onDelete) { Text(stringResource(R.string.ca_delete)) }
+                }
             }
         }
     }

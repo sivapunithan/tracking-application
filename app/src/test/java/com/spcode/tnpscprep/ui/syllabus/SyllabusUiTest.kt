@@ -43,10 +43,10 @@ class SyllabusUiTest {
         assertTrue(buildSyllabusUi(subjects, units, emptyList()).isEmpty())
 
     @Test fun exam_filter_masks_match_the_exam_bits() {
-        assertEquals(1, ExamFilter.G1.mask)
-        assertEquals(2, ExamFilter.G2.mask)
-        assertEquals(4, ExamFilter.G4.mask)
-        assertEquals(7, ExamFilter.ALL.mask)
+        assertEquals(1, com.spcode.tnpscprep.domain.Exam.G1.bit)
+        assertEquals(2, com.spcode.tnpscprep.domain.Exam.G2.bit)
+        assertEquals(4, com.spcode.tnpscprep.domain.Exam.G4.bit)
+        assertEquals(7, com.spcode.tnpscprep.domain.Exam.ALL_MASK)
     }
 
     @Test fun star_and_note_flags_reach_the_ui_model() {

@@ -13,7 +13,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.shape.RoundedCornerShape
+import com.spcode.tnpscprep.data.db.StudiedTopic
+import com.spcode.tnpscprep.domain.ExamSelection
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -23,9 +27,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -35,6 +39,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -60,7 +65,11 @@ import com.spcode.tnpscprep.ui.localized
 @Composable
 fun SyllabusScreen(viewModel: SyllabusViewModel, twoPane: Boolean) {
     val subjects by viewModel.subjects.collectAsStateWithLifecycle()
-    val filter by viewModel.filter.collectAsStateWithLifecycle()
+    val examMask by viewModel.examMask.collectAsStateWithLifecycle()
+    val lastTouched by viewModel.lastTouched.collectAsStateWithLifecycle()
+    var query by rememberSaveable { mutableStateOf("") }
+    var showExams by rememberSaveable { mutableStateOf(false) }
+    val hits = remember(subjects, query) { searchTopics(subjects, query) }
     // rememberSaveable: survives rotation AND process death (ColorOS kills background apps).
     var selectedId by rememberSaveable { mutableStateOf<String?>(null) }
     // Note dialog state is saveable too, so rotating while typing doesn't lose the text.
@@ -77,22 +86,32 @@ fun SyllabusScreen(viewModel: SyllabusViewModel, twoPane: Boolean) {
         ?: if (twoPane) subjects.firstOrNull() else null
 
     Column(Modifier.fillMaxSize()) {
-        Header(filter, onFilter = viewModel::setFilter)
+        Header(examMask, query, onQuery = { query = it }, onExams = { showExams = true })
         HorizontalDivider()
         when {
+            query.isNotBlank() -> SearchResults(hits, Modifier.fillMaxSize()) { id -> selectedId = id; query = "" }
             subjects.isEmpty() -> Box(Modifier.fillMaxSize(), Alignment.Center) {
                 Text(stringResource(R.string.no_topics), style = MaterialTheme.typography.bodyLarge)
             }
             twoPane -> Row(Modifier.fillMaxSize()) {
-                SubjectList(subjects, current?.id, { selectedId = it }, Modifier.weight(0.4f).fillMaxHeight())
+                SubjectList(subjects, current?.id, { selectedId = it }, Modifier.weight(0.4f).fillMaxHeight(), lastTouched) { selectedId = it }
                 VerticalDivider()
                 if (current != null) SubjectDetail(current, viewModel, onOpenNote, showBack = false, onBack = {}, Modifier.weight(0.6f).fillMaxHeight())
             }
-            current == null -> SubjectList(subjects, null, { selectedId = it }, Modifier.fillMaxSize())
+            current == null -> SubjectList(subjects, null, { selectedId = it }, Modifier.fillMaxSize(), lastTouched) { selectedId = it }
             else -> {
                 BackHandler { selectedId = null }
                 SubjectDetail(current, viewModel, onOpenNote, showBack = true, onBack = { selectedId = null }, Modifier.fillMaxSize())
             }
+        }
+    }
+
+    if (showExams) com.spcode.tnpscprep.ui.design.PopSheet(onDismiss = { showExams = false }) {
+        Column(Modifier.padding(horizontal = 24.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Text(stringResource(R.string.my_exams), style = MaterialTheme.typography.titleLarge)
+            ExamPicker(examMask, viewModel::setExamMask)
+            Text(stringResource(R.string.my_exams_note), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Spacer(Modifier.size(16.dp))
         }
     }
 
@@ -121,32 +140,68 @@ fun SyllabusScreen(viewModel: SyllabusViewModel, twoPane: Boolean) {
 }
 
 @Composable
-private fun Header(filter: ExamFilter, onFilter: (ExamFilter) -> Unit) {
-    Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
-        ScreenTitle(stringResource(R.string.syllabus_title))
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            ExamFilter.entries.forEach { f ->
-                FilterChip(
-                    selected = f == filter,
-                    onClick = { onFilter(f) },
-                    label = { Text(if (f == ExamFilter.ALL) stringResource(R.string.filter_all) else f.name) },
-                )
+private fun Header(mask: Int, query: String, onQuery: (String) -> Unit, onExams: () -> Unit) {
+    Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(Modifier.weight(1f)) { ScreenTitle(stringResource(R.string.syllabus_title)) }
+            val label = if (mask == Exam.ALL_MASK) stringResource(R.string.my_exams_all) else ExamSelection.codes(mask).joinToString(" · ")
+            AssistChip(onClick = onExams, label = { Text(stringResource(R.string.my_exams) + ": " + label) })
+        }
+        OutlinedTextField(
+            value = query, onValueChange = { onQuery(it.take(60)) }, singleLine = true, modifier = Modifier.fillMaxWidth(),
+            placeholder = { Text(stringResource(R.string.syllabus_search_hint)) },
+            trailingIcon = { if (query.isNotEmpty()) TextButton(onClick = { onQuery("") }) { Text(stringResource(R.string.clear)) } },
+        )
+        Text(stringResource(R.string.hint_tap_longpress), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+}
+
+@Composable
+private fun SearchResults(hits: List<TopicHit>, modifier: Modifier, onOpen: (String) -> Unit) {
+    if (hits.isEmpty()) {
+        Box(modifier, Alignment.Center) { Text(stringResource(R.string.syllabus_search_none), style = MaterialTheme.typography.bodyLarge) }
+        return
+    }
+    LazyColumn(modifier, contentPadding = PaddingValues(bottom = 16.dp + LocalBottomBarInset.current)) {
+        items(hits, key = { it.topic.id }) { h ->
+            Column(Modifier.fillMaxWidth().combinedClickable(onClick = { onOpen(h.subjectId) }).heightIn(min = 56.dp).padding(horizontal = 16.dp, vertical = 10.dp)) {
+                Text(localized(h.topic.nameEn, h.topic.nameTa), style = MaterialTheme.typography.bodyLarge)
+                Text(localized(h.subjectNameEn, h.subjectNameTa), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
-        Spacer(Modifier.size(8.dp))
-        Text(
-            stringResource(R.string.hint_tap_longpress),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+    }
+}
+
+/** Stacked bar: one segment per revision level (0 = not started, light; higher levels = stronger crimson). Draws nothing odd at 0%. */
+@Composable
+internal fun LevelBar(counts: List<Int>, modifier: Modifier = Modifier) {
+    val total = counts.sum().coerceAtLeast(1)
+    val base = MaterialTheme.colorScheme.primary
+    val colors = listOf(MaterialTheme.colorScheme.outlineVariant) + (1..RevisionLevel.MAX).map { base.copy(alpha = 0.3f + 0.7f * it / RevisionLevel.MAX) }
+    Row(modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(4.dp)).clearAndSetSemantics {}) {
+        counts.forEachIndexed { level, n ->
+            if (n > 0) Box(Modifier.weight(n.toFloat() / total).fillMaxHeight().background(colors.getOrElse(level) { base }))
+        }
     }
 }
 
 @Composable
 private fun SubjectList(
     subjects: List<SubjectUi>, selectedId: String?, onSelect: (String) -> Unit, modifier: Modifier,
+    lastTouched: StudiedTopic?, onContinue: (String) -> Unit,
 ) {
     LazyColumn(modifier, contentPadding = PaddingValues(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 16.dp + LocalBottomBarInset.current), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        val resume = lastTouched?.let { t -> subjects.firstOrNull { it.id == t.subjectId }?.let { subj -> t to subj } }
+        if (resume != null) item(key = "continue") {
+            val (t, subj) = resume
+            Card(onClick = { onContinue(subj.id) }, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)) {
+                Column(Modifier.fillMaxWidth().padding(16.dp)) {
+                    Text(stringResource(R.string.continue_title), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                    Text(localized(t.nameEn, t.nameTa), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                    Text(localized(subj.nameEn, subj.nameTa), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                }
+            }
+        }
         items(subjects, key = { it.id }) { s ->
             val selected = s.id == selectedId
             Card(
@@ -162,12 +217,9 @@ private fun SubjectList(
                         Text(stringResource(R.string.percent_format, s.percent), style = MaterialTheme.typography.titleMedium)
                     }
                     Spacer(Modifier.size(8.dp))
-                    LinearProgressIndicator(
-                        progress = { s.percent / 100f },
-                        modifier = Modifier.fillMaxWidth(),
-                        // Default track is almost the card's own colour, so an empty bar looked like a dot.
-                        trackColor = MaterialTheme.colorScheme.outlineVariant,
-                    )
+                    val started = s.topicCount - s.levelCounts.firstOrNull().let { it ?: 0 }
+                    val barDesc = stringResource(R.string.bar_started, started, s.topicCount)
+                    LevelBar(s.levelCounts, Modifier.semantics { contentDescription = barDesc })
                     Spacer(Modifier.size(6.dp))
                     Text(
                         stringResource(R.string.topic_count, s.topicCount),

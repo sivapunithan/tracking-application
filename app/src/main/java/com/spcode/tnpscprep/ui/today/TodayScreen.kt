@@ -4,6 +4,7 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -55,6 +56,8 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -66,7 +69,6 @@ import com.spcode.tnpscprep.domain.RevisionLevel
 import com.spcode.tnpscprep.domain.RevisionSchedule
 import com.spcode.tnpscprep.ui.affairs.categoryLabelRes
 import com.spcode.tnpscprep.ui.design.AnimatedProgressBar
-import com.spcode.tnpscprep.ui.diary.DiaryHost
 import com.spcode.tnpscprep.ui.design.LevelTrack
 import com.spcode.tnpscprep.ui.design.LocalBottomBarInset
 import com.spcode.tnpscprep.ui.design.PopIn
@@ -78,7 +80,6 @@ import com.spcode.tnpscprep.ui.design.pressScale
 import com.spcode.tnpscprep.ui.localized
 import com.spcode.tnpscprep.ui.mood.MoodAvatar
 import com.spcode.tnpscprep.ui.mood.hasMoodImage
-import com.spcode.tnpscprep.ui.syllabus.ExamFilter
 import com.spcode.tnpscprep.ui.theme.LocalIsDark
 import java.time.Instant
 import java.time.LocalTime
@@ -86,10 +87,12 @@ import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.collectAsState
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun TodayScreen(vm: TodayViewModel) {
+fun TodayScreen(vm: TodayViewModel, onOpenProfile: () -> Unit, onOpenDiary: (String) -> Unit, onOpenFocus: () -> Unit, onOpenStudy: () -> Unit) {
     val ui by vm.ui.collectAsStateWithLifecycle()
     val name by vm.userName.collectAsStateWithLifecycle()
     val heat by vm.heat.collectAsStateWithLifecycle()
@@ -97,7 +100,6 @@ fun TodayScreen(vm: TodayViewModel) {
     val fvm = androidx.lifecycle.viewmodel.compose.viewModel<FoodViewModel>(
         factory = androidx.lifecycle.viewmodel.viewModelFactory { initializer { FoodViewModel(app.container.foodRepository, app.container.settingsStore) } },
     )
-    var diary by rememberSaveable { mutableStateOf<String?>(null) }
     val food by fvm.days.collectAsStateWithLifecycle()
     val strict by fvm.strict.collectAsStateWithLifecycle()
     val lastAlert by fvm.lastAlertStart.collectAsStateWithLifecycle()
@@ -107,153 +109,94 @@ fun TodayScreen(vm: TodayViewModel) {
     }
     val appCtx = androidx.compose.ui.platform.LocalContext.current.applicationContext
     val stepSensor = remember { hasStepSensor(appCtx) }
+    val extras by vm.extras.collectAsStateWithLifecycle()
+    val hvm = androidx.lifecycle.viewmodel.compose.viewModel<HealthViewModel>(
+        factory = androidx.lifecycle.viewmodel.viewModelFactory { initializer { HealthViewModel(app.container.healthRepository, app.container.settingsStore) } },
+    )
+    val healthEntries by hvm.entries.collectAsStateWithLifecycle()
+    val stepsVm = androidx.lifecycle.viewmodel.compose.viewModel<StepsViewModel>(
+        factory = androidx.lifecycle.viewmodel.viewModelFactory { initializer { StepsViewModel(app.container.stepRepository) } },
+    )
+    val stepsWeek by stepsVm.week.collectAsStateWithLifecycle()
+    val settings = app.container.settingsStore
+    val gsDone by settings.gettingStartedDone.collectAsStateWithLifecycle()
+    val diaryItems by remember { app.container.diaryRepository.observe("") }.collectAsState(emptyList())
+    StepsAutoRead() // steps are counted when the app comes to the front, whichever screen she is on
+    val listState = androidx.compose.foundation.lazy.rememberLazyListState()
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
     // Which pop-up is open: null, "date", "due:<id>" or "star:<id>" (saveable, so rotation keeps it).
     var sheet by rememberSaveable { mutableStateOf<String?>(null) }
 
+    // ---- what the guide cards need ----
+    val today = java.time.LocalDate.now()
+    val hour = LocalTime.now().hour
+    val foodLogged = food[foodDay] != null
+    val action = com.spcode.tnpscprep.domain.TodayGuide.nextAction(
+        com.spcode.tnpscprep.domain.NextActionInput(ui.examDate != null, ui.progress.due.size, ui.todayMinutes, hour, foodLogged, extras.nextTopic != null),
+    )
+    val gsItems = com.spcode.tnpscprep.domain.GettingStarted.items(ui.examDate != null, extras.hasAnySession, food.isNotEmpty(), diaryItems.isNotEmpty())
+    val gsComplete = com.spcode.tnpscprep.domain.GettingStarted.isComplete(gsItems)
+    LaunchedEffect(gsComplete) { if (gsComplete && !gsDone) settings.setGettingStartedDone(true) } // once done, never shown again
+    val showGs = !gsDone && !gsComplete
+    val plan = com.spcode.tnpscprep.domain.TodayPlan.build(
+        ui.progress.due.map { it.topicId to (it.affairCategory != null) }, extras.nextTopic?.id, extras.affairToReview?.id, extras.doneToday,
+    )
+    val waterToday = healthEntries.filter { it.kind == com.spcode.tnpscprep.data.HealthKind.WATER && it.date == today.toString() }.sumOf { it.value }.toInt()
+    val stepsToday = if (stepSensor && stepsAllowed(appCtx)) stepsWeek.firstOrNull { it.date == today.toString() }?.steps ?: 0 else null
+    val checkinsIndex = 2 + (if (showGs) 1 else 0) + (if (plan.items.isNotEmpty()) 1 else 0)
+    fun toCheckins() { scope.launch { listState.animateScrollToItem(checkinsIndex) } }
+
     LazyColumn(
         Modifier.fillMaxSize(),
+        state = listState,
         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 16.dp + LocalBottomBarInset.current),
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
-        item { Header(name, ui) }
+        item { Header(name, ui, onOpenProfile) }
 
         item {
-            val evening = com.spcode.tnpscprep.domain.FoodCheckin.eveningPrompt(System.currentTimeMillis(), java.time.ZoneId.systemDefault(), food[foodDay] != null)
-            FoodSection(foodDay, food, evening, onSet = fvm::set, onDay = { sheet = "day:" + it })
-        }
-
-        item { HeroCard(ui, onPickDate = { sheet = "date" }) }
-
-        item {
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                ExamFilter.entries.forEach { f ->
-                    FilterChip(
-                        selected = f == ui.target,
-                        onClick = { vm.setTarget(f) },
-                        label = { Text(if (f == ExamFilter.ALL) stringResource(R.string.filter_all) else f.name) },
-                    )
+            NextActionCard(action, ui.progress.due.firstOrNull(), extras.nextTopic?.let { localized(it.nameEn, it.nameTa) }) {
+                when (action) {
+                    com.spcode.tnpscprep.domain.NextAction.SetExamDate -> sheet = "date"
+                    is com.spcode.tnpscprep.domain.NextAction.Revise -> ui.progress.due.firstOrNull()?.let { sheet = "due:" + it.topicId }
+                    com.spcode.tnpscprep.domain.NextAction.StartFocus -> onOpenFocus()
+                    com.spcode.tnpscprep.domain.NextAction.LogFood -> toCheckins()
+                    com.spcode.tnpscprep.domain.NextAction.NewTopic -> onOpenStudy()
+                    com.spcode.tnpscprep.domain.NextAction.AllCaughtUp -> Unit
                 }
             }
         }
 
-        item { StatsRow(ui) }
+        if (showGs) item {
+            GettingStartedCard(gsItems) { step ->
+                when (step) {
+                    com.spcode.tnpscprep.domain.GettingStartedStep.EXAM_DATE -> sheet = "date"
+                    com.spcode.tnpscprep.domain.GettingStartedStep.FIRST_FOCUS -> onOpenFocus()
+                    com.spcode.tnpscprep.domain.GettingStartedStep.FIRST_FOOD -> toCheckins()
+                    com.spcode.tnpscprep.domain.GettingStartedStep.FIRST_DIARY -> onOpenDiary("new:$foodDay")
+                }
+            }
+        }
+
+        if (plan.items.isNotEmpty()) item {
+            PlanCard(
+                plan, ui.progress.due.associateBy { it.topicId }, extras.nextTopic?.let { localized(it.nameEn, it.nameTa) }, extras.affairToReview?.let { localized(it.titleEn, it.titleTa) },
+                onRevise = vm::markRevised, onReadTopic = vm::readTopic, onReviewAffair = vm::reviseAffair,
+            )
+        }
+
+        item(key = "checkins") {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                SectionTitle(stringResource(R.string.checkin_title))
+                val evening = com.spcode.tnpscprep.domain.FoodCheckin.eveningPrompt(System.currentTimeMillis(), java.time.ZoneId.systemDefault(), foodLogged)
+                FoodSection(foodDay, food, evening, onSet = fvm::set, onDay = { sheet = "day:" + it })
+                WaterRow(waterToday) { hvm.add(com.spcode.tnpscprep.data.HealthKind.WATER, 250.0) }
+            }
+        }
+
+        item { TileRow(ui, stepsToday) }
 
         item { HeatmapSection(heat, food, onDay = { sheet = "day:" + it }) }
-
-        if (stepSensor) item { StepsCard() }
-
-        item {
-            val studyByDate = remember(heat) { heat.weeks.flatten().filterNotNull().associate { it.date to it.minutes } }
-            UsageCard(studyByDate)
-        }
-
-        item {
-            SoftCard(Modifier.fillMaxWidth(), onClick = { diary = "list" }) {
-                Column(Modifier.padding(16.dp)) {
-                    Text(stringResource(R.string.diary_title), style = MaterialTheme.typography.titleSmall)
-                    Text(stringResource(R.string.diary_card_sub), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-            }
-        }
-
-        item {
-            SoftCard(Modifier.fillMaxWidth(), onClick = { sheet = "health" }) {
-                Column(Modifier.padding(16.dp)) {
-                    Text(stringResource(R.string.health_title), style = MaterialTheme.typography.titleSmall)
-                    Text(stringResource(R.string.health_card_sub), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-            }
-        }
-
-        // --- due for revision ---
-        item { SectionTitle(stringResource(R.string.due_title, ui.progress.due.size)) }
-        if (ui.progress.due.isEmpty()) {
-            item { EmptyHint(stringResource(R.string.due_empty)) }
-        } else {
-            itemsIndexed(ui.progress.due, key = { _, d -> "due-" + d.topicId }) { i, d ->
-                PopIn(i) {
-                    val levelName = stringArrayResource(R.array.revision_levels)[RevisionLevel.clamp(d.level)]
-                    SoftCard(Modifier.fillMaxWidth(), onClick = { sheet = "due:" + d.topicId }) {
-                        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                            Box(
-                                Modifier.size(42.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primaryContainer),
-                                contentAlignment = Alignment.Center,
-                            ) { Icon(Icons.Rounded.Schedule, null, tint = MaterialTheme.colorScheme.onPrimaryContainer) }
-                            Spacer(Modifier.width(14.dp))
-                            Column(Modifier.weight(1f)) {
-                                Text(localized(d.nameEn, d.nameTa), style = MaterialTheme.typography.titleSmall, maxLines = 2)
-                                Text(
-                                    levelName,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                            }
-                            Text(
-                                if (d.daysOverdue == 0) stringResource(R.string.due_today)
-                                else pluralStringResource(R.plurals.overdue_days, d.daysOverdue, d.daysOverdue),
-                                style = MaterialTheme.typography.labelMedium,
-                                fontWeight = FontWeight.SemiBold,
-                                color = if (d.daysOverdue > 0) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
-                            )
-                        }
-                    }
-                }
-            }
-        }
-
-        // --- progress by subject (one card, animated bars) ---
-        if (ui.progress.subjects.isNotEmpty()) {
-            item { SectionTitle(stringResource(R.string.subject_progress_title)) }
-            item {
-                SoftCard(Modifier.fillMaxWidth()) {
-                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                        ui.progress.subjects.forEach { sp ->
-                            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Text(localized(sp.nameEn, sp.nameTa), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
-                                    Text(
-                                        stringResource(R.string.percent_format, animatedInt(sp.percent)),
-                                        style = MaterialTheme.typography.labelLarge,
-                                        fontWeight = FontWeight.SemiBold,
-                                    )
-                                }
-                                AnimatedProgressBar(sp.percent / 100f, height = 8.dp)
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        // --- starred (weak) topics ---
-        item { SectionTitle(stringResource(R.string.starred_title, ui.progress.starred.size)) }
-        if (ui.progress.starred.isEmpty()) {
-            item { EmptyHint(stringResource(R.string.starred_empty)) }
-        } else {
-            itemsIndexed(ui.progress.starred, key = { _, s -> "star-" + s.topicId }) { i, st ->
-                PopIn(i) {
-                    SoftCard(Modifier.fillMaxWidth(), onClick = { sheet = "star:" + st.topicId }) {
-                        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Rounded.Star, null, tint = MaterialTheme.colorScheme.tertiary, modifier = Modifier.size(26.dp))
-                            Spacer(Modifier.width(14.dp))
-                            Column(Modifier.weight(1f)) {
-                                Text(localized(st.nameEn, st.nameTa), style = MaterialTheme.typography.titleSmall, maxLines = 2)
-                                Text(
-                                    localized(st.subjectEn, st.subjectTa),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    diary?.let { start ->
-        val studyAll = remember(heat) { heat.weeks.flatten().filterNotNull().associate { it.date to it.minutes } }
-        DiaryHost(start, studyAll, onClose = { diary = null })
     }
 
     // Strict mode: shown ONCE per chain of 3 junk days (the chain's start date is remembered), and only when nothing else is open.
@@ -283,7 +226,7 @@ fun TodayScreen(vm: TodayViewModel) {
                 }
                 current.startsWith("day:") -> {
                     val date = runCatching { java.time.LocalDate.parse(current.removePrefix("day:")) }.getOrNull()
-                    if (date == null) LaunchedEffect(Unit) { dismiss() } else DaySheet(vm, date, dismiss, onDiary = { diary = it; sheet = null })
+                    if (date == null) LaunchedEffect(Unit) { dismiss() } else DaySheet(vm, date, dismiss, onDiary = { sheet = null; onOpenDiary(it) })
                 }
                 current.startsWith("due:") -> {
                     val item = ui.progress.due.firstOrNull { it.topicId == current.removePrefix("due:") }
@@ -299,7 +242,7 @@ fun TodayScreen(vm: TodayViewModel) {
 }
 
 @Composable
-private fun Header(name: String, ui: TodayUiState) {
+private fun Header(name: String, ui: TodayUiState, onProfile: () -> Unit) {
     val hour = remember { LocalTime.now().hour }
     val greeting = stringResource(
         when {
@@ -314,13 +257,30 @@ private fun Header(name: String, ui: TodayUiState) {
     LaunchedEffect(Unit) { delay(80); started = true }
     val scale by animateFloatAsState(if (started) avatarScale else 0.5f, spring(dampingRatio = 0.45f, stiffness = Spring.StiffnessLow), label = "avatarIn")
 
+    val profileDesc = stringResource(R.string.profile_open)
     Row(Modifier.fillMaxWidth().padding(top = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+        Column(Modifier.weight(1f)) {
+            Text(greeting, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(
+                if (name.isBlank()) stringResource(R.string.welcome_back) else stringResource(R.string.hello_name, com.spcode.tnpscprep.ui.properName(name)),
+                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                maxLines = 1,
+            )
+            Text(
+                stringResource(R.string.today_tagline),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Spacer(Modifier.width(12.dp))
         Box(
             Modifier
                 .size(68.dp)
                 .graphicsLayer { scaleX = scale; scaleY = scale }
                 .clip(CircleShape)
-                .background(Brush.linearGradient(listOf(MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.secondaryContainer))),
+                .background(Brush.linearGradient(listOf(MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.secondaryContainer)))
+                .semantics { contentDescription = profileDesc }
+                .clickable(role = androidx.compose.ui.semantics.Role.Button, onClick = onProfile),
         ) {
             val ctx = androidx.compose.ui.platform.LocalContext.current
             val mood = remember(ui.streak, ui.todayMinutes, ui.goalMinutes, ui.daysSinceStudy, ui.progress.due.size, hour) {
@@ -342,125 +302,26 @@ private fun Header(name: String, ui: TodayUiState) {
                 }
             }
         }
-        Spacer(Modifier.width(14.dp))
-        Column(Modifier.weight(1f)) {
-            Text(greeting, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Text(
-                if (name.isBlank()) stringResource(R.string.welcome_back) else stringResource(R.string.hello_name, name),
-                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-                maxLines = 1,
-            )
-            Text(
-                stringResource(R.string.today_tagline),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
+
     }
 }
 
-@Composable
-private fun HeroCard(ui: TodayUiState, onPickDate: () -> Unit) {
-    val dark = LocalIsDark.current
-    val brush = Brush.linearGradient(
-        if (dark) listOf(Color(0xFF9B0F26), Color(0xFF4A0A14)) else listOf(Color(0xFFC8102E), Color(0xFF7A0019)),
-    )
-    val days = ui.daysToExam
-    Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(32.dp)).background(brush).padding(22.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            ProgressRing(ui.progress.readinessPercent / 100f, Modifier.size(116.dp), strokeWidth = 12.dp) {
-                Text(
-                    stringResource(R.string.percent_format, animatedInt(ui.progress.readinessPercent)),
-                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-                    color = Color.White,
-                )
-            }
-            Spacer(Modifier.width(18.dp))
-            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text(stringResource(R.string.readiness_title), style = MaterialTheme.typography.titleMedium, color = Color.White.copy(alpha = 0.92f))
-                Text(
-                    when {
-                        ui.examDate == null -> stringResource(R.string.exam_date_not_set)
-                        days != null && days >= 0 -> pluralStringResource(R.plurals.exam_in_days, days.coerceAtMost(Int.MAX_VALUE.toLong()).toInt(), days.toInt())
-                        else -> stringResource(R.string.exam_date_passed)
-                    },
-                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                    color = Color.White,
-                )
-                Text(
-                    stringResource(R.string.not_started_count, ui.progress.notStarted, ui.progress.totalTopics),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.White.copy(alpha = 0.8f),
-                )
-                Row(
-                    Modifier.clip(RoundedCornerShape(50)).background(Color.White.copy(alpha = 0.2f))
-                        .pressScale(onClick = onPickDate).padding(horizontal = 14.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Icon(Icons.Rounded.CalendarMonth, null, tint = Color.White, modifier = Modifier.size(18.dp))
-                    Spacer(Modifier.width(6.dp))
-                    Text(stringResource(R.string.set_exam_date), style = MaterialTheme.typography.labelLarge, color = Color.White)
-                }
-            }
-        }
-    }
-}
+
 
 @Composable
-private fun StatsRow(ui: TodayUiState) {
-    Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-        SoftCard(Modifier.weight(1f)) {
-            Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                ProgressRing(
-                    (ui.todayMinutes.toFloat() / ui.goalMinutes).coerceIn(0f, 1f), Modifier.size(54.dp), strokeWidth = 7.dp,
-                    track = MaterialTheme.colorScheme.outlineVariant, color = MaterialTheme.colorScheme.secondary,
-                )
-                Spacer(Modifier.width(12.dp))
-                Column {
-                    Text(animatedInt(ui.todayMinutes).toString(), style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold))
-                    Text(
-                        stringResource(R.string.stat_minutes_of, ui.goalMinutes),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-            }
-        }
-        SoftCard(Modifier.weight(1f)) {
-            Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    Icons.Rounded.LocalFireDepartment, null,
-                    tint = if (ui.streak > 0) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.outline,
-                    modifier = Modifier.size(40.dp),
-                )
-                Spacer(Modifier.width(10.dp))
-                Column {
-                    Text(animatedInt(ui.streak).toString(), style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold))
-                    Text(
-                        stringResource(R.string.stat_streak_label),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun SectionTitle(text: String) {
+internal fun SectionTitle(text: String) {
     Text(text, style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold), modifier = Modifier.padding(top = 6.dp))
 }
 
 @Composable
-private fun EmptyHint(text: String) {
+internal fun EmptyHint(text: String) {
     Text(text, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
 }
 
 // ---------------------------------------------------------------- pop-up contents
 
 @Composable
-private fun DueSheet(item: DueItem, onRevised: () -> Unit, dismiss: () -> Unit) {
+internal fun DueSheet(item: DueItem, onRevised: () -> Unit, dismiss: () -> Unit) {
     var done by remember { mutableStateOf(false) }
     val levelNames = stringArrayResource(R.array.revision_levels)
     val nextLevel = (item.level + 1).coerceAtMost(RevisionLevel.MAX)
@@ -514,7 +375,7 @@ private fun DueSheet(item: DueItem, onRevised: () -> Unit, dismiss: () -> Unit) 
 }
 
 @Composable
-private fun StarSheet(item: StarredItem, onUnstar: () -> Unit, dismiss: () -> Unit) {
+internal fun StarSheet(item: StarredItem, onUnstar: () -> Unit, dismiss: () -> Unit) {
     val levelNames = stringArrayResource(R.array.revision_levels)
     Row(verticalAlignment = Alignment.CenterVertically) {
         Icon(Icons.Rounded.Star, null, tint = MaterialTheme.colorScheme.tertiary, modifier = Modifier.size(30.dp))

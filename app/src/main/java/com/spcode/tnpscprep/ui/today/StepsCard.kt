@@ -71,6 +71,8 @@ import kotlinx.coroutines.withTimeoutOrNull
 fun hasStepSensor(ctx: Context): Boolean =
     (ctx.getSystemService(Context.SENSOR_SERVICE) as? SensorManager)?.getDefaultSensor(Sensor.TYPE_STEP_COUNTER) != null
 
+fun stepsAllowed(ctx: Context) = permissionGranted(ctx)
+
 private fun permissionGranted(ctx: Context) =
     Build.VERSION.SDK_INT < Build.VERSION_CODES.Q ||
         ContextCompat.checkSelfPermission(ctx, Manifest.permission.ACTIVITY_RECOGNITION) == PackageManager.PERMISSION_GRANTED
@@ -97,6 +99,18 @@ class StepsViewModel(private val repo: StepRepository) : ViewModel() {
 
     fun record(reading: Long) {
         viewModelScope.launch { repo.record(reading, System.currentTimeMillis() - SystemClock.elapsedRealtime(), LocalDate.now()) }
+    }
+}
+
+/** Takes one step-counter reading whenever the app comes to the front (if the sensor exists and she allowed it). Draws nothing. */
+@Composable
+fun StepsAutoRead() {
+    val ctx = LocalContext.current
+    val app = ctx.applicationContext as TnpscApp
+    val vm = viewModel<StepsViewModel>(factory = viewModelFactory { initializer { StepsViewModel(app.container.stepRepository) } })
+    val scope = rememberCoroutineScope()
+    LifecycleEventEffect(Lifecycle.Event.ON_START) {
+        if (hasStepSensor(ctx) && permissionGranted(ctx)) scope.launch { readOnce(ctx)?.let(vm::record) }
     }
 }
 
