@@ -19,13 +19,15 @@ class DiaryRepository(private val db: AppDatabase, private val now: () -> Long =
     private val dao = db.diaryDao()
 
     private fun rows(f: Flow<List<com.spcode.tnpscprep.data.db.DiaryPreviewRow>>): Flow<List<DiaryItem>> =
-        f.map { l -> l.mapNotNull { r -> runCatching { LocalDate.parse(r.localDate) }.getOrNull()?.let { DiaryItem(r.id, it, r.moodEmojiId, r.preview) } } }
+        f.map { l -> l.mapNotNull { r -> runCatching { LocalDate.parse(r.localDate) }.getOrNull()?.let { DiaryItem(r.id, it, r.moodEmojiId, r.preview, r.pinned) } } }
 
     /** Timeline, or search results when [query] is not blank. */
     fun observe(query: String): Flow<List<DiaryItem>> {
         val p = DiarySearch.likePattern(query) ?: return rows(dao.observePreviews())
         return rows(dao.observeSearch(p, DiaryLimits.SEARCH_LIMIT))
     }
+
+    suspend fun setPinned(id: Long, pinned: Boolean) = dao.setPinned(id, pinned)
 
     fun observeForDate(date: LocalDate): Flow<List<DiaryEntryEntity>> = dao.observeForDate(date.toString())
     suspend fun get(id: Long): DiaryEntryEntity? = dao.get(id)

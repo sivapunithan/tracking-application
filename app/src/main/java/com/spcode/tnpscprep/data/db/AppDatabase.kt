@@ -11,7 +11,7 @@ import androidx.room.RoomDatabase
         TopicProgressEntity::class, StudySessionEntity::class, AppMetaEntity::class, TopicNoteEntity::class,
         CurrentAffairEntity::class, UserAffairEntity::class, AffairStateEntity::class, NewsItemEntity::class, ActivityEventEntity::class, DayNoteEntity::class, HealthEntryEntity::class, StepDayEntity::class, UsageDayEntity::class, UsageTotalEntity::class, DiaryEntryEntity::class,
     ],
-    version = 10,
+    version = 11,
     exportSchema = true,
 )
 abstract class AppDatabase : RoomDatabase() {

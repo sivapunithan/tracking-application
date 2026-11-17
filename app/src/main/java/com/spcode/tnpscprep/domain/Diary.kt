@@ -10,7 +10,7 @@ object DiaryLimits {
 }
 
 /** A timeline row: only a short preview of the text is ever loaded for the list. */
-data class DiaryItem(val id: Long, val date: LocalDate, val mood: String?, val preview: String)
+data class DiaryItem(val id: Long, val date: LocalDate, val mood: String?, val preview: String, val pinned: Boolean = false)
 
 data class MonthGroup(val month: YearMonth, val items: List<DiaryItem>)
 
@@ -71,4 +71,18 @@ object DiaryReview {
         val moods = mine.mapNotNull { it.mood }.groupingBy { it }.eachCount()
         return DiaryWeek(mine.size, moods, days.sumOf { studyMinutesByDate[it] ?: 0 })
     }
+}
+
+/** Writing streak and word count: pure, derived from the dates she wrote on / the text itself. */
+object DiaryStats {
+    /** Consecutive days with at least one entry, ending today. A day not written yet does not break it (the streak may end yesterday). */
+    fun streak(dates: Set<LocalDate>, today: LocalDate): Int {
+        var d = if (today in dates) today else today.minusDays(1)
+        var n = 0
+        while (d in dates) { n++; d = d.minusDays(1) }
+        return n
+    }
+
+    /** Words separated by whitespace: works for Tamil too (it is space-separated). */
+    fun words(text: String): Int = text.trim().split(Regex("\\s+")).count { it.isNotEmpty() }
 }

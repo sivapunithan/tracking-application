@@ -175,7 +175,7 @@
     <string name="heat_title">படிப்பு செயல்பாடு</string>
     <string name="heat_less">குறைவு</string>
     <string name="heat_more">அதிகம்</string>
-    <string name="heat_hint">கடந்த 12 வாரங்கள். ஒரு நாளைத் தொட்டால் அன்று செய்தது தெரியும்.</string>
+    <string name="heat_hint">கடந்த 18 வாரங்கள். ஒரு நாளைத் தொட்டால் அன்று செய்தது தெரியும்.</string>
     <string name="day_nothing">இந்த நாளில் பதிவு எதுவும் இல்லை.</string>
     <string name="day_minutes">%1$d நிமிடம் கவனம்</string>
     <string name="ev_focus">கவனப் பயிற்சி · %1$d நிமிடம்</string>
@@ -340,14 +340,9 @@
     <string name="gs_food">உணவை ஒருமுறை பதிவு செய்யுங்கள்</string>
     <string name="gs_diary">முதல் நாட்குறிப்பை எழுதுங்கள்</string>
     <string name="plan_title">இன்றைய திட்டம்</string>
-    <string name="plan_progress">%1$d / %2$d முடிந்தது</string>
-    <string name="plan_revise">மீள்பார்வை: %1$s</string>
-    <string name="plan_topic">படிக்க: %1$s</string>
-    <string name="plan_affair">பார்வையிட: %1$s</string>
     <string name="checkin_title">விரைவுப் பதிவுகள்</string>
     <string name="water_label">இன்றைய தண்ணீர்</string>
     <string name="water_add">+1 டம்ளர்</string>
-    <string name="tile_study">%1$d நிமிடத்தில்</string>
     <string name="tile_streak">%1$d நாள் தொடர்</string>
     <string name="tile_steps">அடிகள்</string>
     <string name="my_exams">என் தேர்வுகள்</string>
@@ -365,4 +360,20 @@
     <string name="cal_legend">நிறம் = படிப்பு · புள்ளி = உணவு · வளையம் = நாட்குறிப்பு</string>
     <string name="onb_exams_note">நீங்கள் தயாராகும் எல்லா தேர்வுகளையும் தேர்ந்தெடுக்கவும். பின்னர் சுயவிவரத்தில் மாற்றலாம்.</string>
     <string name="onb_date_nudge">தேர்வு தேதியைச் சேர்த்தால் நாள் கணக்கு தெரியும். தவிர்த்துவிட்டு பின்னர் இன்று திரையில் சேர்க்கலாம்.</string>
+    <string name="plan_left">இன்னும் %1$d</string>
+    <string name="plan_complete">திட்டம் முடிந்தது. சிறப்பு!</string>
+    <string name="plan_kind_review">திருப்புதல்</string>
+    <string name="plan_kind_read">படி</string>
+    <string name="plan_kind_news">செய்தி</string>
+    <string name="tile_study_title">இன்றைய படிப்பு</string>
+    <string name="tile_study_of">%2$d நிமிடத்தில் %1$d</string>
+    <string name="diary_pinned">பின் செய்தவை</string>
+    <string name="diary_pin">பதிவை பின் செய்</string>
+    <string name="diary_unpin">பின்னை நீக்கு</string>
+    <string name="diary_streak">தொடர் எழுத்து: %1$d நாட்கள்</string>
+    <string name="diary_words">%1$d சொற்கள்</string>
+    <plurals name="heat_summary">
+        <item quantity="one">%2$d வாரங்களில் %1$d நாள் செயல்பாடு · %3$d ம %4$d நி படித்தீர்கள்</item>
+        <item quantity="other">%2$d வாரங்களில் %1$d நாட்கள் செயல்பாடு · %3$d ம %4$d நி படித்தீர்கள்</item>
+    </plurals>
 </resources>

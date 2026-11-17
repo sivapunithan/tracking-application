@@ -175,7 +175,7 @@
     <string name="heat_title">Study activity</string>
     <string name="heat_less">Less</string>
     <string name="heat_more">More</string>
-    <string name="heat_hint">Last 12 weeks. Tap a day to see what you did.</string>
+    <string name="heat_hint">Last 18 weeks. Tap a day for details.</string>
     <string name="day_nothing">Nothing logged this day.</string>
     <string name="day_minutes">%1$d min focused</string>
     <string name="ev_focus">Focus session · %1$d min</string>
@@ -340,14 +340,9 @@
     <string name="gs_food">Log your food once</string>
     <string name="gs_diary">Write your first diary entry</string>
     <string name="plan_title">Today\'s plan</string>
-    <string name="plan_progress">%1$d of %2$d done</string>
-    <string name="plan_revise">Revise: %1$s</string>
-    <string name="plan_topic">Read: %1$s</string>
-    <string name="plan_affair">Review: %1$s</string>
     <string name="checkin_title">Quick check-ins</string>
     <string name="water_label">Water today</string>
     <string name="water_add">+1 glass</string>
-    <string name="tile_study">of %1$d min</string>
     <string name="tile_streak">%1$d-day streak</string>
     <string name="tile_steps">Steps</string>
     <string name="my_exams">My exams</string>
@@ -365,4 +360,20 @@
     <string name="cal_legend">Colour = study · dot = food · ring = diary</string>
     <string name="onb_exams_note">Pick every exam you are preparing for. You can change this later in Profile.</string>
     <string name="onb_date_nudge">Add your exam date to see a countdown. You can skip it and add it later from Today.</string>
+    <string name="plan_left">%1$d left</string>
+    <string name="plan_complete">Plan complete. Nice work!</string>
+    <string name="plan_kind_review">REVIEW</string>
+    <string name="plan_kind_read">READ</string>
+    <string name="plan_kind_news">NEWS</string>
+    <string name="tile_study_title">Study today</string>
+    <string name="tile_study_of">%1$d of %2$d min</string>
+    <string name="diary_pinned">Pinned</string>
+    <string name="diary_pin">Pin entry</string>
+    <string name="diary_unpin">Unpin entry</string>
+    <string name="diary_streak">Writing streak: %1$d days</string>
+    <string name="diary_words">%1$d words</string>
+    <plurals name="heat_summary">
+        <item quantity="one">%1$d active day in %2$d weeks · %3$dh %4$dm studied</item>
+        <item quantity="other">%1$d active days in %2$d weeks · %3$dh %4$dm studied</item>
+    </plurals>
 </resources>

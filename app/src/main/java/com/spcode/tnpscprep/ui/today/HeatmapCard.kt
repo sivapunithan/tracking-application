@@ -56,7 +56,7 @@ private fun levelColor(level: Int): Color {
 
 /** GitHub-style grid: one column per week (Monday on top), newest week at the right edge. */
 @Composable
-fun HeatmapSection(state: HeatState, food: Map<LocalDate, com.spcode.tnpscprep.domain.FoodState>, onDay: (String) -> Unit, weeks: Int = 12) {
+fun HeatmapSection(state: HeatState, food: Map<LocalDate, com.spcode.tnpscprep.domain.FoodState>, onDay: (String) -> Unit, weeks: Int = 18) {
     val shown = state.weeks.takeLast(weeks)
     val locale = java.util.Locale.getDefault()
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -67,11 +67,18 @@ fun HeatmapSection(state: HeatState, food: Map<LocalDate, com.spcode.tnpscprep.d
         )
         SoftCard(Modifier.fillMaxWidth()) {
             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                val flat = shown.flatten().filterNotNull()
+                val activeDays = flat.count { it.level > 0 }
+                val totalMin = flat.sumOf { it.minutes }
+                Text(
+                    androidx.compose.ui.res.pluralStringResource(R.plurals.heat_summary, activeDays, activeDays, shown.size, totalMin / 60, totalMin % 60),
+                    style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface,
+                )
                 androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxWidth()) {
                     val labelW = 16.dp
                     val gap = 4.dp
                     // the cells share the card width, so 12 weeks fill it without scrolling
-                    val cell = ((maxWidth - labelW - gap * shown.size) / shown.size.coerceAtLeast(1)).coerceIn(12.dp, 28.dp)
+                    val cell = ((maxWidth - labelW - gap * shown.size) / shown.size.coerceAtLeast(1)).coerceIn(10.dp, 16.dp)
                     Row(horizontalArrangement = Arrangement.spacedBy(gap)) {
                         // weekday labels: Monday, Wednesday, Friday
                         Column(Modifier.width(labelW), verticalArrangement = Arrangement.spacedBy(gap)) {
@@ -88,11 +95,14 @@ fun HeatmapSection(state: HeatState, food: Map<LocalDate, com.spcode.tnpscprep.d
                         Column(verticalArrangement = Arrangement.spacedBy(gap)) {
                             // month labels: shown where a new month starts
                             Row(Modifier.height(14.dp), horizontalArrangement = Arrangement.spacedBy(gap)) {
+                                var lastLabelAt = -10
                                 shown.forEachIndexed { i, week ->
                                     val first = week.firstOrNull()?.date
                                     val prev = shown.getOrNull(i - 1)?.firstOrNull()?.date
+                                    val show = first != null && (prev == null || prev.month != first.month) && i - lastLabelAt >= 3
+                                    if (show) lastLabelAt = i
                                     Box(Modifier.width(cell)) {
-                                        if (first != null && (prev == null || prev.month != first.month)) {
+                                        if (show && first != null) {
                                             Text(
                                                 first.month.getDisplayName(java.time.format.TextStyle.SHORT, locale), maxLines = 1, softWrap = false,
                                                 style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant,

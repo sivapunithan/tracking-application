@@ -9,7 +9,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -17,6 +19,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CheckCircle
+import androidx.compose.material.icons.rounded.MenuBook
+import androidx.compose.material.icons.rounded.Newspaper
+import androidx.compose.material.icons.rounded.Replay
 import androidx.compose.material.icons.rounded.LocalFireDepartment
 import androidx.compose.material.icons.rounded.RadioButtonUnchecked
 import androidx.compose.material.icons.rounded.WaterDrop
@@ -134,48 +139,73 @@ fun GettingStartedCard(items: List<GettingStartedItem>, onStep: (GettingStartedS
     }
 }
 
-/** Today's plan: 3-5 checkable items from existing data. Tapping the circle does the action (revise / read / review). */
+/** Today's plan: a few checkable items from existing data. A progress ring in the header, a kind icon + label per row, tapping a row does the action. */
 @Composable
 fun PlanCard(
     plan: PlanSummary, due: Map<String, DueItem>, newTopicName: String?, affairTitle: String?,
     onRevise: (DueItem) -> Unit, onReadTopic: (String) -> Unit, onReviewAffair: (String) -> Unit,
 ) {
     var checked by remember { mutableStateOf(setOf<String>()) }
+    val doneNow = plan.done + checked.size
+    val total = plan.total
+    val allDone = plan.items.isNotEmpty() && checked.size == plan.items.size
     SoftCard(Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(16.dp).animateContentSize(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Column(Modifier.padding(16.dp).animateContentSize(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(stringResource(R.string.plan_title), style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold), modifier = Modifier.weight(1f))
-                Text(stringResource(R.string.plan_progress, plan.done, plan.total), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+                Column(Modifier.weight(1f)) {
+                    Text(stringResource(R.string.plan_title), style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
+                    Text(
+                        stringResource(if (allDone) R.string.plan_complete else R.string.plan_left, plan.items.size - checked.size),
+                        style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                ProgressRing(
+                    (doneNow.toFloat() / total.coerceAtLeast(1)).coerceIn(0f, 1f), Modifier.size(48.dp), strokeWidth = 6.dp,
+                    track = MaterialTheme.colorScheme.outlineVariant, color = MaterialTheme.colorScheme.primary,
+                ) { Text("$doneNow/$total", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), maxLines = 1) }
             }
+            Spacer(Modifier.height(4.dp))
             plan.items.forEach { item ->
                 val key: String
-                val label: String
+                val title: String
+                val kind: Int
+                val icon: androidx.compose.ui.graphics.vector.ImageVector
                 val act: () -> Unit
                 when (item) {
                     is PlanItem.Revise -> {
                         val d = due[item.id]
-                        key = "r-" + item.id
-                        label = stringResource(R.string.plan_revise, d?.let { localized(it.nameEn, it.nameTa) }.orEmpty())
+                        key = "r-" + item.id; kind = R.string.plan_kind_review; icon = Icons.Rounded.Replay
+                        title = d?.let { localized(it.nameEn, it.nameTa) }.orEmpty()
                         act = { d?.let(onRevise) }
                     }
-                    is PlanItem.NewTopic -> { key = "t-" + item.id; label = stringResource(R.string.plan_topic, newTopicName.orEmpty()); act = { onReadTopic(item.id) } }
-                    is PlanItem.ReviewAffair -> { key = "a-" + item.id; label = stringResource(R.string.plan_affair, affairTitle.orEmpty()); act = { onReviewAffair(item.id) } }
+                    is PlanItem.NewTopic -> { key = "t-" + item.id; kind = R.string.plan_kind_read; icon = Icons.Rounded.MenuBook; title = newTopicName.orEmpty(); act = { onReadTopic(item.id) } }
+                    is PlanItem.ReviewAffair -> { key = "a-" + item.id; kind = R.string.plan_kind_news; icon = Icons.Rounded.Newspaper; title = affairTitle.orEmpty(); act = { onReviewAffair(item.id) } }
                 }
                 val done = key in checked
                 Row(
-                    Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).clickable(enabled = !done) { checked = checked + key; act() }.padding(vertical = 6.dp),
+                    Modifier.fillMaxWidth().heightIn(min = 60.dp).clip(RoundedCornerShape(16.dp))
+                        .background(if (done) Color.Transparent else MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f))
+                        .clickable(enabled = !done) { checked = checked + key; act() }.padding(horizontal = 12.dp, vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Icon(
-                        if (done) Icons.Rounded.CheckCircle else Icons.Rounded.RadioButtonUnchecked, null,
-                        tint = if (done) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.outline, modifier = Modifier.size(26.dp),
-                    )
+                    Box(
+                        Modifier.size(38.dp).clip(RoundedCornerShape(12.dp)).background(if (done) MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f) else MaterialTheme.colorScheme.primaryContainer),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(
+                            if (done) Icons.Rounded.CheckCircle else icon, null, modifier = Modifier.size(22.dp),
+                            tint = if (done) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onPrimaryContainer,
+                        )
+                    }
                     Spacer(Modifier.width(12.dp))
-                    Text(
-                        label, style = MaterialTheme.typography.bodyLarge, maxLines = 2,
-                        textDecoration = if (done) TextDecoration.LineThrough else null,
-                        color = if (done) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
-                    )
+                    Column(Modifier.weight(1f)) {
+                        Text(stringResource(kind), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+                        Text(
+                            title, style = MaterialTheme.typography.bodyMedium, maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                            textDecoration = if (done) TextDecoration.LineThrough else null,
+                            color = if (done) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
+                        )
+                    }
                 }
             }
         }
@@ -199,32 +229,45 @@ fun WaterRow(todayMl: Int, onAdd: () -> Unit) {
     }
 }
 
-/** Three compact tiles: study ring, streak, steps. */
+/** Three tiles: a wide study tile (ring + minutes of goal + last 7 days), streak, steps. [week] = study minutes for the last 7 days, oldest first. */
 @Composable
-fun TileRow(ui: TodayUiState, stepsToday: Int?) {
-    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        SoftCard(Modifier.weight(1f)) {
-            Column(Modifier.padding(12.dp).fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                ProgressRing(
-                    (ui.todayMinutes.toFloat() / ui.goalMinutes).coerceIn(0f, 1f), Modifier.size(54.dp), strokeWidth = 7.dp,
-                    track = MaterialTheme.colorScheme.outlineVariant, color = MaterialTheme.colorScheme.secondary,
-                ) { Text(animatedInt(ui.todayMinutes).toString(), style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)) }
-                Text(stringResource(R.string.tile_study, ui.goalMinutes), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-        }
-        SoftCard(Modifier.weight(1f)) {
-            Column(Modifier.padding(12.dp).fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Box(Modifier.size(54.dp), contentAlignment = Alignment.Center) {
-                    Icon(Icons.Rounded.LocalFireDepartment, null, tint = if (ui.streak > 0) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.outline, modifier = Modifier.size(34.dp))
+fun TileRow(ui: TodayUiState, stepsToday: Int?, week: List<Int> = emptyList()) {
+    Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.height(androidx.compose.foundation.layout.IntrinsicSize.Max)) {
+        SoftCard(Modifier.weight(1.7f).fillMaxHeight()) {
+            Column(Modifier.padding(14.dp).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    ProgressRing(
+                        (ui.todayMinutes.toFloat() / ui.goalMinutes).coerceIn(0f, 1f), Modifier.size(64.dp), strokeWidth = 8.dp,
+                        track = MaterialTheme.colorScheme.outlineVariant, color = MaterialTheme.colorScheme.secondary,
+                    ) { Text(animatedInt(ui.todayMinutes).toString(), style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)) }
+                    Spacer(Modifier.width(12.dp))
+                    Column {
+                        Text(stringResource(R.string.tile_study_title), style = MaterialTheme.typography.labelLarge)
+                        Text(stringResource(R.string.tile_study_of, ui.todayMinutes, ui.goalMinutes), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
                 }
-                Text(stringResource(R.string.tile_streak, ui.streak), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                if (week.isNotEmpty()) {
+                    val max = maxOf(week.max(), ui.goalMinutes, 1)
+                    Row(Modifier.fillMaxWidth().height(28.dp), horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.Bottom) {
+                        week.forEachIndexed { i, m ->
+                            Box(
+                                Modifier.weight(1f).height((4 + 24f * m / max).dp).clip(RoundedCornerShape(3.dp))
+                                    .background(if (i == week.lastIndex) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.secondary.copy(alpha = if (m > 0) 0.45f else 0.15f)),
+                            )
+                        }
+                    }
+                }
             }
         }
-        SoftCard(Modifier.weight(1f)) {
+        SoftCard(Modifier.weight(1f).fillMaxHeight()) {
             Column(Modifier.padding(12.dp).fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Box(Modifier.size(54.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primaryContainer), contentAlignment = Alignment.Center) {
+                Box(Modifier.size(40.dp), contentAlignment = Alignment.Center) {
+                    Icon(Icons.Rounded.LocalFireDepartment, null, tint = if (ui.streak > 0) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.outline, modifier = Modifier.size(32.dp))
+                }
+                Text(stringResource(R.string.tile_streak, ui.streak), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                Box(Modifier.size(40.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primaryContainer), contentAlignment = Alignment.Center) {
                     Text(
-                        stepsToday?.let { "~$it" } ?: "–", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                        stepsToday?.let { "~$it" } ?: "–", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                         color = MaterialTheme.colorScheme.onPrimaryContainer, maxLines = 1,
                     )
                 }

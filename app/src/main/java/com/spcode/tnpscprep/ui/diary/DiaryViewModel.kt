@@ -79,6 +79,7 @@ class DiaryViewModel(private val repo: DiaryRepository) : ViewModel() {
 
     suspend fun delete(id: Long) = repo.delete(id)
     fun restore(e: DiaryEntryEntity) { viewModelScope.launch { repo.restore(e) } }
+    fun setPinned(id: Long, pinned: Boolean) { viewModelScope.launch { repo.setPinned(id, pinned) } }
     fun clearUndo() { undo.value = null }
     fun clearNotice() { notice.value = null }
 

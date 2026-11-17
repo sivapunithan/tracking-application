@@ -38,12 +38,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.outlined.PushPin
+import androidx.compose.material.icons.rounded.PushPin
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -213,7 +217,9 @@ private fun TimelinePane(
     val ctx = LocalContext.current
     val items by vm.items.collectAsStateWithLifecycle()
     val query by vm.query.collectAsStateWithLifecycle()
-    val groups = remember(items) { DiaryTimeline.groupByMonth(items) }
+    val pinned = remember(items, query) { if (query.isBlank()) items.filter { it.pinned } else emptyList() }
+    val groups = remember(items, pinned) { DiaryTimeline.groupByMonth(items.filter { it !in pinned }) }
+    val streak = remember(items) { com.spcode.tnpscprep.domain.DiaryStats.streak(items.map { it.date }.toSet(), LogicalDay.of(System.currentTimeMillis(), ZoneId.systemDefault())) }
     val today = remember { LogicalDay.of(System.currentTimeMillis(), ZoneId.systemDefault()) }
     val week = remember(items, studyByDate) { DiaryReview.week(items, today, studyByDate) }
     val scope = rememberCoroutineScope()
@@ -249,7 +255,16 @@ private fun TimelinePane(
                     placeholder = { Text(stringResource(R.string.diary_search_hint)) }, shape = RoundedCornerShape(16.dp),
                 )
             }
-            if (query.isBlank() && items.isNotEmpty()) item { ReviewCard(week) }
+            if (query.isBlank() && items.isNotEmpty()) item { ReviewCard(week, streak) }
+            if (pinned.isNotEmpty()) {
+                item(key = "pinned-h") {
+                    Text(
+                        stringResource(R.string.diary_pinned), style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(top = 10.dp),
+                    )
+                }
+                items(pinned, key = { "p-" + it.id }) { e -> EntryCard(e, onClick = { onOpen(e.id) }, onPin = { vm.setPinned(e.id, false) }) }
+            }
             if (items.isEmpty()) {
                 item {
                     Text(
@@ -266,7 +281,7 @@ private fun TimelinePane(
                         modifier = Modifier.padding(top = 10.dp),
                     )
                 }
-                items(g.items, key = { it.id }) { e -> EntryCard(e, onClick = { onOpen(e.id) }) }
+                items(g.items, key = { it.id }) { e -> EntryCard(e, onClick = { onOpen(e.id) }, onPin = { vm.setPinned(e.id, !e.pinned) }) }
             }
             item {
                 Column(Modifier.padding(top = 18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -286,13 +301,20 @@ private fun TimelinePane(
 }
 
 @Composable
-private fun EntryCard(e: DiaryItem, onClick: () -> Unit) {
-    Surface(Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).clickable(onClick = onClick), shape = RoundedCornerShape(20.dp), color = MaterialTheme.colorScheme.surface, tonalElevation = 1.dp, shadowElevation = 1.dp) {
-        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.Top) {
-            Box(Modifier.size(40.dp), contentAlignment = Alignment.Center) { DiaryMood(e.mood, 40.dp) }
+private fun EntryCard(e: DiaryItem, onClick: () -> Unit, onPin: () -> Unit) {
+    Surface(Modifier.fillMaxWidth().clip(RoundedCornerShape(22.dp)).clickable(onClick = onClick), shape = RoundedCornerShape(22.dp), color = MaterialTheme.colorScheme.surface, tonalElevation = 1.dp, shadowElevation = 2.dp) {
+        Row(Modifier.padding(start = 16.dp, top = 14.dp, bottom = 14.dp, end = 4.dp), verticalAlignment = Alignment.Top) {
+            Box(Modifier.size(48.dp), contentAlignment = Alignment.Center) { DiaryMood(e.mood, 48.dp) }
             Column(Modifier.weight(1f).padding(start = 14.dp)) {
-                Text(e.date.format(DateTimeFormatter.ofPattern("EEE, d MMM", Locale.getDefault())), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
-                Text(e.preview.trim(), style = MaterialTheme.typography.bodyMedium, maxLines = 2, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 2.dp))
+                Text(e.date.format(DateTimeFormatter.ofPattern("EEEE, d MMM yyyy", Locale.getDefault())), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+                Text(e.preview.trim(), style = MaterialTheme.typography.bodyMedium, maxLines = 3, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 4.dp))
+            }
+            val label = stringResource(if (e.pinned) R.string.diary_unpin else R.string.diary_pin)
+            IconButton(onClick = onPin, modifier = Modifier.semantics { contentDescription = label }) {
+                Icon(
+                    if (e.pinned) Icons.Rounded.PushPin else Icons.Outlined.PushPin, null,
+                    tint = if (e.pinned) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
+                )
             }
         }
     }
@@ -300,11 +322,12 @@ private fun EntryCard(e: DiaryItem, onClick: () -> Unit) {
 
 /** Counts only: no claims about feelings, no advice. */
 @Composable
-private fun ReviewCard(w: com.spcode.tnpscprep.domain.DiaryWeek) {
+private fun ReviewCard(w: com.spcode.tnpscprep.domain.DiaryWeek, streak: Int) {
     Surface(Modifier.fillMaxWidth(), shape = RoundedCornerShape(20.dp), color = MaterialTheme.colorScheme.surface, tonalElevation = 1.dp, shadowElevation = 1.dp) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text(stringResource(R.string.diary_review_title), style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold))
             Text(stringResource(R.string.diary_review_entries, w.entries), style = MaterialTheme.typography.bodyMedium)
+            if (streak >= 2) Text(stringResource(R.string.diary_streak, streak), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary)
             if (w.moods.isNotEmpty()) {
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
                     w.moods.entries.sortedByDescending { it.value }.forEach { (m, n) ->
@@ -400,6 +423,13 @@ private fun EditorPane(vm: DiaryViewModel, entryId: Long?, startDate: LocalDate,
                 Box { if (text.isEmpty()) Text(stringResource(R.string.diary_write_hint), style = big.copy(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f))); inner() }
             },
         )
+        if (text.isNotBlank()) {
+            Text(
+                stringResource(R.string.diary_words, com.spcode.tnpscprep.domain.DiaryStats.words(text)),
+                style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.align(Alignment.End).padding(vertical = 6.dp),
+            )
+        }
     }
 
     if (confirmDelete) {

@@ -194,7 +194,14 @@ fun TodayScreen(vm: TodayViewModel, onOpenProfile: () -> Unit, onOpenDiary: (Str
             }
         }
 
-        item { TileRow(ui, stepsToday) }
+        item {
+            // last 7 days of study minutes (oldest first) for the study tile's mini chart, from the same heatmap data
+            val week = remember(heat, foodDay) {
+                val byDate = heat.weeks.flatten().filterNotNull().associate { it.date to it.minutes }
+                (6 downTo 0).map { byDate[foodDay.minusDays(it.toLong())] ?: 0 }
+            }
+            TileRow(ui, stepsToday, week)
+        }
 
         item { HeatmapSection(heat, food, onDay = { sheet = "day:" + it }) }
     }

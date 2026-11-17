@@ -91,3 +91,10 @@ val MIGRATION_9_10 = object : Migration(9, 10) {
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_diary_entry_localDate` ON `diary_entry` (`localDate`)")
     }
 }
+
+val MIGRATION_10_11 = object : Migration(10, 11) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        // diary pin: a plain extra column with a default, so every existing entry stays as it was (unpinned)
+        db.execSQL("ALTER TABLE `diary_entry` ADD COLUMN `pinned` INTEGER NOT NULL DEFAULT 0")
+    }
+}

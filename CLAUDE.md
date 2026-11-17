@@ -317,3 +317,9 @@ reference, write own notes with page refs.
 ## Day-centred restructure: Phase 5 (onboarding + cleanup) - in code, awaiting phone review
 - Welcome flow step 2 now uses the same multi-select `ExamPicker` ("My exams"), a gentle non-blocking nudge under the optional exam-date button, and the daily goal; then the optional PIN; the app opens on Today, whose Getting started card (exam date, first focus, first food, first diary) continues the setup. Existing installs are unaffected (the flow only runs for a new account).
 - Cleanup: the old single-value `ExamFilter` enum is removed (everything uses the `Exam` bitmask / `ExamSelection`); 17 unused strings (settings tab, readiness hero, old diary/health card text, nav_timer, nav_settings ...) deleted from English and Tamil.
+
+## Polish pass 1: Today's plan, study tile, diary
+- Today's plan card: header progress ring + "N left" (or "Plan complete"), each row has a kind icon + label (REVIEW / READ / NEWS), tinted row, 2-line ellipsis. Study tile is now a wide card: ring (minutes), "x of goal min" and a 7-day mini bar chart (from the heatmap data); streak and steps share a narrower tile.
+- Diary: schema v11 = `diary_entry.pinned` (INTEGER NOT NULL DEFAULT 0) + MIGRATION_10_11 (a plain ADD COLUMN, existing rows stay unpinned), `app/schemas/.../11.json` committed. Pinned entries list first under "Pinned" (pin button on each card); bigger cards (48dp mood, full weekday date, 3-line preview); writing streak line in the weekly review (`DiaryStats.streak`: consecutive days ending today, an unwritten today does not break it, tested); word count under the editor.
+- Diary Export/Import files do NOT carry the pinned flag yet (backup format v1 unchanged); importing never changes an existing entry's pin.
+- Not done from the idea list: diary-only PIN lock, "this day last year", photos, tags.
