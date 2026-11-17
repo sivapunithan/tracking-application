@@ -14,6 +14,7 @@ import com.spcode.tnpscprep.data.db.MIGRATION_7_8
 import com.spcode.tnpscprep.data.db.MIGRATION_8_9
 import com.spcode.tnpscprep.data.db.MIGRATION_9_10
 import com.spcode.tnpscprep.data.db.MIGRATION_10_11
+import com.spcode.tnpscprep.data.db.MIGRATION_11_12
 import com.spcode.tnpscprep.data.news.FeedListDto
 import com.spcode.tnpscprep.data.news.FeedPolicy
 import com.spcode.tnpscprep.data.news.HttpFeedSource
@@ -33,7 +34,7 @@ class AppContainer(context: Context) {
 
     val database: AppDatabase by lazy {
         Room.databaseBuilder(appContext, AppDatabase::class.java, "tnpscprep.db")
-            .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11)
+            .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12)
             .build()
     }
 
@@ -46,6 +47,7 @@ class AppContainer(context: Context) {
     val stepRepository by lazy { com.spcode.tnpscprep.data.StepRepository(database) }
     val usageRepository by lazy { com.spcode.tnpscprep.data.UsageRepository(database, appContext) }
     val foodRepository by lazy { com.spcode.tnpscprep.data.FoodRepository(database) }
+    val plannedTaskRepository by lazy { com.spcode.tnpscprep.data.PlannedTaskRepository(database) }
     val diaryRepository by lazy { com.spcode.tnpscprep.data.DiaryRepository(database) }
     val activityRepository by lazy { com.spcode.tnpscprep.data.ActivityRepository(database) }
 
@@ -79,6 +81,7 @@ class AppContainer(context: Context) {
     suspend fun resetEverything() {
         kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { database.clearAllTables() }
         settingsStore.clearAll()
+        com.spcode.tnpscprep.reminder.ReminderScheduler.cancel(appContext)
         seedSyllabus()
         seedAffairs()
     }

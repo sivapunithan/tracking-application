@@ -288,13 +288,13 @@ fun FoodAlertSheet(dismiss: () -> Unit) {
 // ---------------------------------------------------------------- tiny confetti (built-in Canvas, no library)
 
 @Composable
-private fun ConfettiBurst(modifier: Modifier) {
+fun ConfettiBurst(modifier: Modifier, originX: Float = 0.17f) {
     val t = remember { Animatable(0f) }
     LaunchedEffect(Unit) { t.animateTo(1f, tween(800)) }
     val colors = listOf(Color(0xFFF5B301), Color(0xFFC8102E), Color(0xFF800020), Color(0xFFFB923C))
     Canvas(modifier) {
         if (t.value >= 1f) return@Canvas
-        val origin = Offset(size.width * 0.17f, size.height * 0.5f)
+        val origin = Offset(size.width * originX, size.height * 0.5f)
         for (i in 0 until 14) {
             val a = (i / 14f) * 6.2832f
             val dist = (40f + (i % 3) * 22f) * t.value * density

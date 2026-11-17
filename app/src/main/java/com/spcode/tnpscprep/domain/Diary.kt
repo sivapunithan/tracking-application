@@ -10,7 +10,7 @@ object DiaryLimits {
 }
 
 /** A timeline row: only a short preview of the text is ever loaded for the list. */
-data class DiaryItem(val id: Long, val date: LocalDate, val mood: String?, val preview: String, val pinned: Boolean = false)
+data class DiaryItem(val id: Long, val date: LocalDate, val mood: String?, val preview: String, val pinned: Boolean = false, val wrapup: Boolean = false)
 
 data class MonthGroup(val month: YearMonth, val items: List<DiaryItem>)
 

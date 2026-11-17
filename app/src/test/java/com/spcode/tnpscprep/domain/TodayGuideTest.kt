@@ -38,15 +38,43 @@ class TodayGuideTest {
         assertFalse(GettingStarted.isComplete(GettingStarted.items(false, false, false, false)))
     }
 
-    @Test fun planHasAtMostThreeRevisionsPlusOneTopicPlusOneAffair() {
-        val p = TodayPlan.build(listOf("a" to false, "b" to false, "c" to true, "d" to false), "t1", "af1", doneToday = 2)
-        assertEquals(5, p.items.size)
-        assertEquals(PlanItem.Revise("c", true), p.items[2])
-        assertEquals(7, p.total); assertEquals(2, p.done)
+    @Test fun planIsCappedAtThreeWithAtMostTwoRevisionsFirst() {
+        val p = PlanBuilder.build(listOf(DuePick("a", false), DuePick("b", false), DuePick("c", true), DuePick("d", false)), "t1", "af1")
+        assertEquals(listOf(PlanPick(PlanKind.REVISION, "a"), PlanPick(PlanKind.REVISION, "b"), PlanPick(PlanKind.READ, "t1")), p)
     }
 
-    @Test fun planWithNoDataIsEmptyAndDoneNeverNegative() {
-        val p = TodayPlan.build(emptyList(), null, null, doneToday = -3)
-        assertTrue(p.items.isEmpty()); assertEquals(0, p.done); assertEquals(0, p.total)
+    @Test fun planUsesMoreRevisionsWhenNothingIsNew() {
+        val p = PlanBuilder.build(listOf(DuePick("a", false), DuePick("b", false), DuePick("c", true), DuePick("d", false)), null, null)
+        assertEquals(listOf("a", "b", "c"), p.map { it.refId })
+        assertEquals(PlanKind.NEWS, p[2].kind)
+    }
+
+    @Test fun planWithNoDataIsEmptyAndNeverRepeatsAnId() {
+        assertTrue(PlanBuilder.build(emptyList(), null, null).isEmpty())
+        assertEquals(1, PlanBuilder.build(listOf(DuePick("x", false)), "x", "x").size)
+    }
+
+    // ---- evening wrap-up: planned tasks in the rule order ----
+    private val plan = PlannedTaskRef(7, "Read Preamble")
+    private fun withPlan(exam: Boolean = true, due: Int = 0, focus: Int = 30, hour: Int = 10, food: Boolean = true, topic: Boolean = true, p: PlannedTaskRef? = plan) =
+        NextActionInput(exam, due, focus, hour, food, topic, p)
+
+    @Test fun plannedTaskBeatsNewTopic() = assertEquals(NextAction.PlannedTask(7, "Read Preamble"), TodayGuide.nextAction(withPlan()))
+    @Test fun plannedTaskNeverBeatsDueRevision() = assertEquals(NextAction.Revise(1), TodayGuide.nextAction(withPlan(due = 1)))
+    @Test fun plannedTaskNeverBeatsFocusOrFood() {
+        assertEquals(NextAction.StartFocus, TodayGuide.nextAction(withPlan(focus = 0)))
+        assertEquals(NextAction.LogFood, TodayGuide.nextAction(withPlan(hour = 20, food = false)))
+    }
+    @Test fun withoutPlanTheOldOrderIsUnchanged() {
+        assertEquals(NextAction.NewTopic, TodayGuide.nextAction(withPlan(p = null)))
+        assertEquals(NextAction.AllCaughtUp, TodayGuide.nextAction(withPlan(p = null, topic = false)))
+    }
+    @Test fun wrapupCardStates() {
+        assertEquals(WrapupCardState.HIDDEN, WrapupCard.state(15, 18, false))
+        assertEquals(WrapupCardState.INVITE, WrapupCard.state(18, 18, false))
+        assertEquals(WrapupCardState.INVITE, WrapupCard.state(1, 18, false)) // 1 AM is still "tonight"
+        assertEquals(WrapupCardState.HIDDEN, WrapupCard.state(3, 18, false)) // new day after 3 AM
+        assertEquals(WrapupCardState.DONE, WrapupCard.state(21, 18, true))
+        assertEquals(WrapupCardState.HIDDEN, WrapupCard.state(12, 18, true))
     }
 }

@@ -98,3 +98,17 @@ val MIGRATION_10_11 = object : Migration(10, 11) {
         db.execSQL("ALTER TABLE `diary_entry` ADD COLUMN `pinned` INTEGER NOT NULL DEFAULT 0")
     }
 }
+
+/** The v11 -> v12 statements as plain SQL, so a JVM test can run them against a real SQLite (see MigrationV12Test). */
+object Migration11To12 {
+    val statements = listOf(
+        "CREATE TABLE IF NOT EXISTS `planned_task` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `localDate` TEXT NOT NULL, `title` TEXT NOT NULL, `refType` TEXT NOT NULL, `refId` TEXT, `done` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL, `sortOrder` INTEGER NOT NULL)",
+        "CREATE INDEX IF NOT EXISTS `index_planned_task_localDate` ON `planned_task` (`localDate`)",
+        // wrap-up marker on a normal diary entry: nullable, so every existing entry is simply "not a wrap-up"
+        "ALTER TABLE `diary_entry` ADD COLUMN `wrapup` TEXT",
+    )
+}
+
+val MIGRATION_11_12 = object : Migration(11, 12) {
+    override fun migrate(db: SupportSQLiteDatabase) { Migration11To12.statements.forEach(db::execSQL) }
+}

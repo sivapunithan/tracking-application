@@ -128,6 +128,9 @@ interface NewsDao {
 interface ActivityDao {
     @Insert suspend fun insert(event: ActivityEventEntity)
 
+    @Query("SELECT * FROM activity_event WHERE localDate >= :from AND localDate <= :to AND type != 'HEALTH_LOG' ORDER BY timestamp")
+    suspend fun between(from: String, to: String): List<ActivityEventEntity>
+
     @Query("SELECT * FROM activity_event WHERE localDate = :date AND type != 'HEALTH_LOG' ORDER BY timestamp")
     fun observeDay(date: String): Flow<List<ActivityEventEntity>>
 

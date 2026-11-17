@@ -5,6 +5,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -20,6 +21,10 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import com.spcode.tnpscprep.ui.design.SoftCard
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -97,6 +102,7 @@ import com.spcode.tnpscprep.data.db.DiaryEntryEntity
 import com.spcode.tnpscprep.domain.DiaryItem
 import com.spcode.tnpscprep.domain.DiaryLimits
 import com.spcode.tnpscprep.domain.DiaryPrompts
+import com.spcode.tnpscprep.domain.DiaryMemories
 import com.spcode.tnpscprep.domain.DiaryReview
 import com.spcode.tnpscprep.domain.DiaryTimeline
 import com.spcode.tnpscprep.domain.LogicalDay
@@ -119,19 +125,26 @@ private fun paper(): Color = if (LocalIsDark.current) MaterialTheme.colorScheme.
 @Composable
 fun JournalScreen(
     vm: DiaryViewModel, todayVm: com.spcode.tnpscprep.ui.today.TodayViewModel, studyByDate: Map<LocalDate, Int>,
-    onOpen: (Long) -> Unit, onNew: () -> Unit, onNewOn: (String) -> Unit,
+    onOpen: (Long) -> Unit, onNew: () -> Unit, onNewOn: (String) -> Unit, onWrapup: () -> Unit,
 ) {
-    var segment by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableIntStateOf(0) }
-    var dayOpen by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf<String?>(null) }
+    var selectedText by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf<String?>(null) }
     val app = LocalContext.current.applicationContext as com.spcode.tnpscprep.TnpscApp
     val fvm = androidx.lifecycle.viewmodel.compose.viewModel<com.spcode.tnpscprep.ui.today.FoodViewModel>(
         factory = androidx.lifecycle.viewmodel.viewModelFactory { initializer { com.spcode.tnpscprep.ui.today.FoodViewModel(app.container.foodRepository, app.container.settingsStore) } },
     )
     val food by fvm.days.collectAsStateWithLifecycle()
+    val wvm = androidx.lifecycle.viewmodel.compose.viewModel<com.spcode.tnpscprep.ui.wrapup.WrapupStatusViewModel>(
+        factory = androidx.lifecycle.viewmodel.viewModelFactory { initializer { com.spcode.tnpscprep.ui.wrapup.WrapupStatusViewModel(app.container.diaryRepository, app.container.plannedTaskRepository) } },
+    )
+    LaunchedEffect(Unit) { wvm.setDay(LogicalDay.of(System.currentTimeMillis(), ZoneId.systemDefault())) }
+    val wrappedToday by wvm.wrappedToday.collectAsStateWithLifecycle()
+    val lastSeven by wvm.lastSeven.collectAsStateWithLifecycle()
     val year by todayVm.yearHeat.collectAsStateWithLifecycle()
     val diaryItems by vm.items.collectAsStateWithLifecycle()
     val diaryDates = remember(diaryItems) { diaryItems.map { it.date }.toSet() }
     val today = remember { LogicalDay.of(System.currentTimeMillis(), ZoneId.systemDefault()) }
+    val selected = selectedText?.let { runCatching { LocalDate.parse(it) }.getOrNull() } ?: today
+    val moods = remember(diaryItems) { diaryItems.filter { it.mood != null }.groupBy { it.date }.mapValues { it.value.first().mood!! } }
     val undo by vm.undo.collectAsStateWithLifecycle()
     val notice by vm.notice.collectAsStateWithLifecycle()
     LaunchedEffect(undo) { if (undo != null) { delay(5_000); vm.clearUndo() } }
@@ -139,15 +152,11 @@ fun JournalScreen(
     val deletedText = stringResource(R.string.diary_deleted)
     Surface(Modifier.fillMaxSize(), color = paper()) {
       Column(Modifier.fillMaxSize()) {
-        val labels = listOf(R.string.journal_diary, R.string.journal_calendar)
-        androidx.compose.material3.SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 4.dp)) {
-            labels.forEachIndexed { i, res ->
-                SegmentedButton(selected = segment == i, onClick = { segment = i }, shape = SegmentedButtonDefaults.itemShape(i, labels.size)) { Text(stringResource(res)) }
-            }
-        }
         Box(Modifier.fillMaxSize()) {
-            if (segment == 0) TimelinePane(vm, studyByDate, onOpen = onOpen, onNew = onNew)
-            else JournalCalendar(year.weeks, food, diaryDates, today, onDay = { dayOpen = it.toString() })
+            TimelinePane(
+                vm, studyByDate, onOpen = onOpen, onNew = onNew, onNewOn = onNewOn, wrapped = wrappedToday, lastSeven = lastSeven, onWrapup = onWrapup,
+                weeks = year.weeks, food = food, moods = moods, today = today, selected = selected, onSelect = { selectedText = it.toString() },
+            )
             Column(Modifier.align(Alignment.BottomCenter).padding(start = 16.dp, end = 16.dp, bottom = LocalBottomBarInset.current)) {
                 AnimatedVisibility(undo != null, enter = fadeIn(tween(200)), exit = fadeOut(tween(200))) {
                     val u = undo
@@ -167,28 +176,15 @@ fun JournalScreen(
         }
       }
     }
-    val open = dayOpen?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
-    if (open != null) com.spcode.tnpscprep.ui.design.PopSheet(onDismiss = { dayOpen = null }) { dismiss ->
-        Column(Modifier.padding(horizontal = 24.dp, vertical = 8.dp)) {
-            com.spcode.tnpscprep.ui.today.DaySheet(todayVm, open, dismiss, onDiary = { s ->
-                dayOpen = null
-                when {
-                    s.startsWith("entry:") -> s.removePrefix("entry:").toLongOrNull()?.let(onOpen)
-                    s.startsWith("new:") -> onNewOn(s.removePrefix("new:"))
-                    else -> onNew()
-                }
-            })
-        }
-    }
 }
 
 /** One diary entry as a full-screen page. [entryId] = open that entry; otherwise a new entry for [dateArg] (yyyy-MM-dd) or today's logical day. */
 @Composable
-fun JournalEditorScreen(vm: DiaryViewModel, entryId: Long?, dateArg: String?, onDone: (removed: DiaryEntryEntity?) -> Unit) {
+fun JournalEditorScreen(vm: DiaryViewModel, entryId: Long?, dateArg: String?, onDone: (removed: DiaryEntryEntity?) -> Unit, onWrapup: () -> Unit = {}) {
     val date = remember(dateArg) {
         dateArg?.let { runCatching { LocalDate.parse(it) }.getOrNull() } ?: LogicalDay.of(System.currentTimeMillis(), ZoneId.systemDefault())
     }
-    Surface(Modifier.fillMaxSize(), color = paper()) { EditorPane(vm, entryId, date, onDone) }
+    Surface(Modifier.fillMaxSize(), color = paper()) { EditorPane(vm, entryId, date, onDone, onWrapup) }
 }
 
 // ---------------------------------------------------------------- mood emoji (reuses the mood avatars)
@@ -211,7 +207,9 @@ fun DiaryMood(id: String?, size: androidx.compose.ui.unit.Dp, modifier: Modifier
 
 @Composable
 private fun TimelinePane(
-    vm: DiaryViewModel, studyByDate: Map<LocalDate, Int>, onOpen: (Long) -> Unit, onNew: () -> Unit,
+    vm: DiaryViewModel, studyByDate: Map<LocalDate, Int>, onOpen: (Long) -> Unit, onNew: () -> Unit, onNewOn: (String) -> Unit, wrapped: Boolean, lastSeven: Int, onWrapup: () -> Unit,
+    weeks: List<List<com.spcode.tnpscprep.domain.DaySummary?>>, food: Map<LocalDate, com.spcode.tnpscprep.domain.FoodState>, moods: Map<LocalDate, String>,
+    today: LocalDate, selected: LocalDate, onSelect: (LocalDate) -> Unit,
 ) {
     val onNotice: (String) -> Unit = vm::postNotice
     val ctx = LocalContext.current
@@ -220,7 +218,6 @@ private fun TimelinePane(
     val pinned = remember(items, query) { if (query.isBlank()) items.filter { it.pinned } else emptyList() }
     val groups = remember(items, pinned) { DiaryTimeline.groupByMonth(items.filter { it !in pinned }) }
     val streak = remember(items) { com.spcode.tnpscprep.domain.DiaryStats.streak(items.map { it.date }.toSet(), LogicalDay.of(System.currentTimeMillis(), ZoneId.systemDefault())) }
-    val today = remember { LogicalDay.of(System.currentTimeMillis(), ZoneId.systemDefault()) }
     val week = remember(items, studyByDate) { DiaryReview.week(items, today, studyByDate) }
     val scope = rememberCoroutineScope()
     val exportDone = stringResource(R.string.diary_export_done)
@@ -249,6 +246,17 @@ private fun TimelinePane(
             item {
                 Text(stringResource(R.string.nav_journal), style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold), modifier = Modifier.padding(top = 4.dp))
             }
+            item(key = "wrapup-btn") {
+                com.spcode.tnpscprep.ui.wrapup.WrapupCardView(if (wrapped) com.spcode.tnpscprep.domain.WrapupCardState.DONE else com.spcode.tnpscprep.domain.WrapupCardState.INVITE, onWrapup, lastSeven)
+            }
+            if (query.isBlank()) {
+                val memories = DiaryMemories.onThisDay(items, today)
+                if (memories.isNotEmpty()) item(key = "memories") { MemoryCard(memories, onOpen) }
+                item(key = "calendar") { JournalCalendarCard(weeks, food, moods, items.map { it.date }.toSet(), today, selected, onSelect) }
+                item(key = "daystory") {
+                    DayStory(selected, today, items.filter { it.date == selected }, onOpen = onOpen, onWrite = { onNewOn(it.toString()) }, onWrapup = onWrapup, wrapped = wrapped)
+                }
+            }
             item {
                 OutlinedTextField(
                     value = query, onValueChange = { vm.query.value = it }, singleLine = true, modifier = Modifier.fillMaxWidth(),
@@ -273,6 +281,9 @@ private fun TimelinePane(
                     )
                 }
             }
+            if (items.isNotEmpty() && query.isBlank()) item(key = "all-h") {
+                Text(stringResource(R.string.cal_all_entries), style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold), modifier = Modifier.padding(top = 8.dp))
+            }
             groups.forEach { g ->
                 item(key = "m-" + g.month) {
                     Text(
@@ -281,7 +292,7 @@ private fun TimelinePane(
                         modifier = Modifier.padding(top = 10.dp),
                     )
                 }
-                items(g.items, key = { it.id }) { e -> EntryCard(e, onClick = { onOpen(e.id) }, onPin = { vm.setPinned(e.id, !e.pinned) }) }
+                itemsIndexed(g.items, key = { _, it -> it.id }) { i, e -> com.spcode.tnpscprep.ui.design.PopIn(i) { EntryCard(e, onClick = { onOpen(e.id) }, onPin = { vm.setPinned(e.id, !e.pinned) }) } }
             }
             item {
                 Column(Modifier.padding(top = 18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -302,21 +313,105 @@ private fun TimelinePane(
 
 @Composable
 private fun EntryCard(e: DiaryItem, onClick: () -> Unit, onPin: () -> Unit) {
+    // the pin gives a small wiggle when it changes (not on first show)
+    val wiggle = remember { androidx.compose.animation.core.Animatable(0f) }
+    var first by remember { mutableStateOf(true) }
+    LaunchedEffect(e.pinned) {
+        if (first) { first = false; return@LaunchedEffect }
+        wiggle.animateTo(-28f, tween(90)); wiggle.animateTo(0f, androidx.compose.animation.core.spring(dampingRatio = 0.3f, stiffness = 400f))
+    }
     Surface(Modifier.fillMaxWidth().clip(RoundedCornerShape(22.dp)).clickable(onClick = onClick), shape = RoundedCornerShape(22.dp), color = MaterialTheme.colorScheme.surface, tonalElevation = 1.dp, shadowElevation = 2.dp) {
         Row(Modifier.padding(start = 16.dp, top = 14.dp, bottom = 14.dp, end = 4.dp), verticalAlignment = Alignment.Top) {
             Box(Modifier.size(48.dp), contentAlignment = Alignment.Center) { DiaryMood(e.mood, 48.dp) }
             Column(Modifier.weight(1f).padding(start = 14.dp)) {
-                Text(e.date.format(DateTimeFormatter.ofPattern("EEEE, d MMM yyyy", Locale.getDefault())), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(e.date.format(DateTimeFormatter.ofPattern("EEEE, d MMM yyyy", Locale.getDefault())), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary, modifier = Modifier.weight(1f, fill = false))
+                    if (e.wrapup) Surface(shape = RoundedCornerShape(50), color = MaterialTheme.colorScheme.primaryContainer) {
+                        Text(stringResource(R.string.diary_wrapup_tag), Modifier.padding(horizontal = 8.dp, vertical = 2.dp), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                    }
+                }
                 Text(e.preview.trim(), style = MaterialTheme.typography.bodyMedium, maxLines = 3, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 4.dp))
             }
             val label = stringResource(if (e.pinned) R.string.diary_unpin else R.string.diary_pin)
             IconButton(onClick = onPin, modifier = Modifier.semantics { contentDescription = label }) {
                 Icon(
-                    if (e.pinned) Icons.Rounded.PushPin else Icons.Outlined.PushPin, null,
+                    if (e.pinned) Icons.Rounded.PushPin else Icons.Outlined.PushPin, null, modifier = Modifier.graphicsLayer { rotationZ = wiggle.value },
                     tint = if (e.pinned) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
                 )
             }
         }
+    }
+}
+
+/** "On this day": what she wrote on this date in earlier years. Hidden when there is nothing. */
+@Composable
+private fun MemoryCard(memories: List<com.spcode.tnpscprep.domain.Memory>, onOpen: (Long) -> Unit) {
+    com.spcode.tnpscprep.ui.design.PopIn(0) {
+        SoftCard(Modifier.fillMaxWidth()) {
+            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(stringResource(R.string.memory_title), style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
+                memories.forEach { m ->
+                    Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).clickable { onOpen(m.item.id) }.padding(vertical = 4.dp), verticalAlignment = Alignment.Top) {
+                        DiaryMood(m.item.mood, 40.dp)
+                        Column(Modifier.weight(1f).padding(start = 12.dp)) {
+                            Text(androidx.compose.ui.res.pluralStringResource(R.plurals.memory_years_ago, m.yearsAgo, m.yearsAgo), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+                            Text(m.item.preview.trim(), style = MaterialTheme.typography.bodyMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/** The selected day in one place: what she did (study, food, steps), her diary entries and a way to write about it. */
+@Composable
+private fun DayStory(date: LocalDate, today: LocalDate, entries: List<DiaryItem>, onOpen: (Long) -> Unit, onWrite: (LocalDate) -> Unit, onWrapup: () -> Unit, wrapped: Boolean) {
+    val app = LocalContext.current.applicationContext as com.spcode.tnpscprep.TnpscApp
+    var recap by remember(date) { mutableStateOf<com.spcode.tnpscprep.domain.DayRecap?>(null) }
+    LaunchedEffect(date) {
+        recap = com.spcode.tnpscprep.domain.RecapBuilder.build(
+            date, app.container.activityRepository.recapEvents(date), app.container.settingsStore.dailyGoalMinutes.value, emptyMap(), ZoneId.systemDefault(),
+        )
+    }
+    val r = recap
+    SoftCard(Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(16.dp).animateContentSize(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Text(
+                date.format(DateTimeFormatter.ofPattern("EEEE, d MMMM", Locale.getDefault())) + if (date == today) " · " + stringResource(R.string.cal_today) else "",
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+            )
+            if (r != null && !r.isEmpty) {
+                @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+                androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    if (r.studyMinutes > 0) StoryChip(stringResource(R.string.story_study, r.studyMinutes))
+                    if (r.topicsAdvancedCount > 0) StoryChip(stringResource(R.string.story_topics, r.topicsAdvancedCount))
+                    if (r.affairsRevised > 0) StoryChip(stringResource(R.string.story_news, r.affairsRevised))
+                    r.food?.let { f -> StoryChip(stringResource(R.string.ev_food, stringResource(when (f) { com.spcode.tnpscprep.domain.FoodState.HEALTHY -> R.string.food_healthy; com.spcode.tnpscprep.domain.FoodState.JUNK -> R.string.food_junk; com.spcode.tnpscprep.domain.FoodState.MIXED -> R.string.food_mixed }))) }
+                    r.steps?.let { StoryChip(stringResource(R.string.story_steps, it)) }
+                }
+            }
+            if (entries.isEmpty()) {
+                Text(stringResource(R.string.story_empty), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            } else entries.forEach { e ->
+                Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).clickable { onOpen(e.id) }.padding(vertical = 4.dp), verticalAlignment = Alignment.Top) {
+                    DiaryMood(e.mood, 36.dp)
+                    Text(e.preview.trim(), style = MaterialTheme.typography.bodyMedium, maxLines = 2, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f).padding(start = 12.dp, top = 2.dp))
+                    if (e.wrapup) Text(stringResource(R.string.diary_wrapup_tag), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(start = 8.dp, top = 4.dp))
+                }
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(onClick = { onWrite(date) }, modifier = Modifier.weight(1f)) { Text(stringResource(R.string.diary_write_about)) }
+                if (date == today && !wrapped) OutlinedButton(onClick = onWrapup) { Text(stringResource(R.string.wrap_card_start)) }
+            }
+        }
+    }
+}
+
+@Composable
+private fun StoryChip(text: String) {
+    Surface(shape = RoundedCornerShape(50), color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f)) {
+        Text(text, Modifier.padding(horizontal = 12.dp, vertical = 5.dp), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onPrimaryContainer)
     }
 }
 
@@ -345,7 +440,7 @@ private fun ReviewCard(w: com.spcode.tnpscprep.domain.DiaryWeek, streak: Int) {
 // ---------------------------------------------------------------- editor
 
 @Composable
-private fun EditorPane(vm: DiaryViewModel, entryId: Long?, startDate: LocalDate, onDone: (removed: DiaryEntryEntity?) -> Unit) {
+private fun EditorPane(vm: DiaryViewModel, entryId: Long?, startDate: LocalDate, onDone: (removed: DiaryEntryEntity?) -> Unit, onWrapup: () -> Unit) {
     val scope = rememberCoroutineScope()
     val haptic = LocalHapticFeedback.current
     val session = remember { EditorSession(null, null, null) }
@@ -388,20 +483,33 @@ private fun EditorPane(vm: DiaryViewModel, entryId: Long?, startDate: LocalDate,
         lineHeightStyle = LineHeightStyle(LineHeightStyle.Alignment.Center, LineHeightStyle.Trim.None), // Tamil signs are not clipped
     )
 
+    val tint by androidx.compose.animation.animateColorAsState(com.spcode.tnpscprep.ui.wrapup.moodTint(mood), tween(500), label = "editorTint")
+    Box(Modifier.fillMaxSize().background(tint)) {
     Column(Modifier.fillMaxSize().navigationBarsPadding().imePadding().padding(horizontal = 20.dp)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = ::leave) { Icon(Icons.AutoMirrored.Rounded.ArrowBack, stringResource(R.string.sheet_close)) }
             Text(date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)), style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
+            // the chosen mood reacts (its own effect) right in the header
+            val heroMood = mood?.let { n -> Mood.entries.firstOrNull { it.name == n } }
+            AnimatedVisibility(heroMood != null, enter = androidx.compose.animation.scaleIn(androidx.compose.animation.core.spring(dampingRatio = 0.4f, stiffness = Spring.StiffnessMedium)) + fadeIn(tween(150)), exit = fadeOut(tween(150))) {
+                if (heroMood != null) com.spcode.tnpscprep.ui.mood.MoodAvatar(heroMood, size = 56.dp)
+            }
             AnimatedVisibility(saved, enter = fadeIn(tween(200)), exit = fadeOut(tween(400))) {
                 Text(stringResource(R.string.diary_saved), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             if (session.id != null) IconButton(onClick = { confirmDelete = true }) { Icon(Icons.Rounded.Delete, stringResource(R.string.diary_delete_title)) }
         }
+        // one writing page, two modes: free writing (this page) or the guided evening wrap-up
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            androidx.compose.material3.FilterChip(selected = true, onClick = {}, label = { Text(stringResource(R.string.editor_mode_free)) })
+            androidx.compose.material3.FilterChip(selected = false, onClick = { scope.launch { vm.persist(session, date, text, mood, 0, leaving = true); onWrapup() } }, label = { Text(stringResource(R.string.editor_mode_wrapup)) })
+        }
         Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(vertical = 6.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             Mood.entries.forEach { m ->
                 val sel = mood == m.name
+                val pop by androidx.compose.animation.core.animateFloatAsState(if (sel) 1.2f else 1f, androidx.compose.animation.core.spring(dampingRatio = 0.35f, stiffness = Spring.StiffnessMedium), label = "moodPop")
                 Box(
-                    Modifier.size(52.dp).clip(CircleShape)
+                    Modifier.size(52.dp).graphicsLayer { scaleX = pop; scaleY = pop }.clip(CircleShape)
                         .border(BorderStroke(if (sel) 3.dp else 1.dp, if (sel) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant), CircleShape)
                         .clickable { mood = if (sel) null else m.name },
                     contentAlignment = Alignment.Center,
@@ -430,6 +538,7 @@ private fun EditorPane(vm: DiaryViewModel, entryId: Long?, startDate: LocalDate,
                 modifier = Modifier.align(Alignment.End).padding(vertical = 6.dp),
             )
         }
+    }
     }
 
     if (confirmDelete) {

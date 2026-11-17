@@ -5,6 +5,8 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- Optional step counter: only asked for after a plain explanation screen; the app works without it. -->
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
+    <!-- Optional evening wrap-up reminder (OFF by default): asked for only when she switches the reminder on. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-feature android:name="android.hardware.sensor.stepcounter" android:required="false" />
     <!-- Optional phone-usage view: she switches "Usage access" on in system settings; read only on app open, kept on this phone. -->
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" tools:ignore="ProtectedPermissions" />
@@ -32,6 +34,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <receiver android:name=".reminder.ReminderReceiver" android:exported="false" />
 
         <!-- Persists the in-app language on Android 8-12 (API < 33 has no system store for per-app locales). -->
         <service

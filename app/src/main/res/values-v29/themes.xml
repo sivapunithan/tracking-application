@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Same as values/themes.xml, plus: do NOT let the phone's "dark mode for all apps" repaint our UI. The app has its own Light / Dark / System
+         setting (Profile > Appearance); when it says Light, the phone must not darken it behind her back. -->
+    <style name="Theme.TnpscPrep" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowBackground">@color/window_background</item>
+        <item name="android:forceDarkAllowed">false</item>
+    </style>
+</resources>

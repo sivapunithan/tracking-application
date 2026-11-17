@@ -44,12 +44,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.spcode.tnpscprep.R
 import com.spcode.tnpscprep.domain.GettingStartedItem
 import com.spcode.tnpscprep.domain.GettingStartedStep
 import com.spcode.tnpscprep.domain.NextAction
-import com.spcode.tnpscprep.domain.PlanItem
-import com.spcode.tnpscprep.domain.PlanSummary
+import com.spcode.tnpscprep.data.db.PlannedTaskEntity
 import com.spcode.tnpscprep.ui.design.ProgressRing
 import com.spcode.tnpscprep.ui.design.SoftCard
 import com.spcode.tnpscprep.ui.design.animatedInt
@@ -76,6 +76,7 @@ fun NextActionCard(action: NextAction, firstDue: DueItem?, nextTopicName: String
         }
         NextAction.StartFocus -> { title = stringResource(R.string.na_focus_title); body = stringResource(R.string.na_focus_body); cta = stringResource(R.string.na_focus_cta); art = "CHEER" }
         NextAction.LogFood -> { title = stringResource(R.string.food_question); body = stringResource(R.string.na_food_body); cta = stringResource(R.string.na_food_cta); art = "LAUGH" }
+        is NextAction.PlannedTask -> { title = stringResource(R.string.na_planned_title); body = action.title; cta = stringResource(R.string.na_planned_cta); art = "PROUD" }
         NextAction.NewTopic -> { title = stringResource(R.string.na_topic_title); body = nextTopicName.orEmpty(); cta = stringResource(R.string.na_topic_cta); art = "PROUD" }
         NextAction.AllCaughtUp -> { title = stringResource(R.string.na_done_title); body = stringResource(R.string.na_done_body); cta = null; art = "CELEBRATE" }
     }
@@ -139,69 +140,53 @@ fun GettingStartedCard(items: List<GettingStartedItem>, onStep: (GettingStartedS
     }
 }
 
-/** Today's plan: a few checkable items from existing data. A progress ring in the header, a kind icon + label per row, tapping a row does the action. */
+/**
+ * Today's plan: the day's STORED list (planned_task), at most three lines. A progress ring counts only these lines; ticking one does its action
+ * (revise / read / review) and it stays in the list, ticked. A line also shows as done when she did that work elsewhere (e.g. in the Study tab).
+ */
 @Composable
-fun PlanCard(
-    plan: PlanSummary, due: Map<String, DueItem>, newTopicName: String?, affairTitle: String?,
-    onRevise: (DueItem) -> Unit, onReadTopic: (String) -> Unit, onReviewAffair: (String) -> Unit,
-) {
-    var checked by remember { mutableStateOf(setOf<String>()) }
-    val doneNow = plan.done + checked.size
-    val total = plan.total
-    val allDone = plan.items.isNotEmpty() && checked.size == plan.items.size
+fun PlanCard(tasks: List<PlannedTaskEntity>, doneRefs: Set<String>, onTick: (PlannedTaskEntity) -> Unit) {
+    fun isDone(t: PlannedTaskEntity) = t.done || (t.refId != null && t.refId in doneRefs)
+    val doneNow = tasks.count(::isDone)
+    val total = tasks.size
+    val allDone = total > 0 && doneNow == total
     SoftCard(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp).animateContentSize(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
                     Text(stringResource(R.string.plan_title), style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
                     Text(
-                        stringResource(if (allDone) R.string.plan_complete else R.string.plan_left, plan.items.size - checked.size),
+                        stringResource(if (allDone) R.string.plan_complete else R.string.plan_left, total - doneNow),
                         style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
                 ProgressRing(
-                    (doneNow.toFloat() / total.coerceAtLeast(1)).coerceIn(0f, 1f), Modifier.size(48.dp), strokeWidth = 6.dp,
+                    (doneNow.toFloat() / total.coerceAtLeast(1)).coerceIn(0f, 1f), Modifier.size(52.dp), strokeWidth = 6.dp,
                     track = MaterialTheme.colorScheme.outlineVariant, color = MaterialTheme.colorScheme.primary,
-                ) { Text("$doneNow/$total", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), maxLines = 1) }
+                ) { Text("$doneNow/$total", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), maxLines = 1) }
             }
             Spacer(Modifier.height(4.dp))
-            plan.items.forEach { item ->
-                val key: String
-                val title: String
-                val kind: Int
-                val icon: androidx.compose.ui.graphics.vector.ImageVector
-                val act: () -> Unit
-                when (item) {
-                    is PlanItem.Revise -> {
-                        val d = due[item.id]
-                        key = "r-" + item.id; kind = R.string.plan_kind_review; icon = Icons.Rounded.Replay
-                        title = d?.let { localized(it.nameEn, it.nameTa) }.orEmpty()
-                        act = { d?.let(onRevise) }
-                    }
-                    is PlanItem.NewTopic -> { key = "t-" + item.id; kind = R.string.plan_kind_read; icon = Icons.Rounded.MenuBook; title = newTopicName.orEmpty(); act = { onReadTopic(item.id) } }
-                    is PlanItem.ReviewAffair -> { key = "a-" + item.id; kind = R.string.plan_kind_news; icon = Icons.Rounded.Newspaper; title = affairTitle.orEmpty(); act = { onReviewAffair(item.id) } }
-                }
-                val done = key in checked
+            tasks.forEach { t ->
+                val done = isDone(t)
+                val kind = when (t.refType) { "REVISION" -> R.string.plan_kind_review; "TOPIC" -> R.string.plan_kind_read; "CURRENT_AFFAIRS" -> R.string.plan_kind_news; else -> R.string.plan_kind_custom }
+                val icon = when (t.refType) { "REVISION" -> Icons.Rounded.Replay; "TOPIC" -> Icons.Rounded.MenuBook; "CURRENT_AFFAIRS" -> Icons.Rounded.Newspaper; else -> Icons.Rounded.RadioButtonUnchecked }
                 Row(
                     Modifier.fillMaxWidth().heightIn(min = 60.dp).clip(RoundedCornerShape(16.dp))
                         .background(if (done) Color.Transparent else MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f))
-                        .clickable(enabled = !done) { checked = checked + key; act() }.padding(horizontal = 12.dp, vertical = 8.dp),
+                        .clickable(enabled = !done) { onTick(t) }.padding(horizontal = 12.dp, vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Box(
                         Modifier.size(38.dp).clip(RoundedCornerShape(12.dp)).background(if (done) MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f) else MaterialTheme.colorScheme.primaryContainer),
                         contentAlignment = Alignment.Center,
                     ) {
-                        Icon(
-                            if (done) Icons.Rounded.CheckCircle else icon, null, modifier = Modifier.size(22.dp),
-                            tint = if (done) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onPrimaryContainer,
-                        )
+                        Icon(if (done) Icons.Rounded.CheckCircle else icon, null, modifier = Modifier.size(22.dp), tint = if (done) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onPrimaryContainer)
                     }
                     Spacer(Modifier.width(12.dp))
                     Column(Modifier.weight(1f)) {
                         Text(stringResource(kind), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
                         Text(
-                            title, style = MaterialTheme.typography.bodyMedium, maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                            t.title, style = MaterialTheme.typography.bodyMedium, maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                             textDecoration = if (done) TextDecoration.LineThrough else null,
                             color = if (done) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
                         )

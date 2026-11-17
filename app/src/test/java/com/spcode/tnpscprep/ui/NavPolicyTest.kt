@@ -12,6 +12,7 @@ class NavPolicyTest {
     @Test fun focusProfileAndTheEditorHideTheBar() {
         assertTrue(NavPolicy.isFullScreen("focus"))
         assertTrue(NavPolicy.isFullScreen("profile"))
+        assertTrue(NavPolicy.isFullScreen("wrapup"))
         assertTrue(NavPolicy.isFullScreen("journal/editor?id={id}&date={date}"))
         assertTrue(NavPolicy.isFullScreen("journal/editor"))
     }

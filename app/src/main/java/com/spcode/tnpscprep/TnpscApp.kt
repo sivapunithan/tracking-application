@@ -16,6 +16,8 @@ class TnpscApp : Application() {
     override fun onCreate() {
         super.onCreate()
         container = AppContainer(this)
+        // Alarms do not survive a phone restart: re-arm (or clear) the optional reminder whenever the app starts.
+        com.spcode.tnpscprep.reminder.ReminderScheduler.sync(this, container.settingsStore.reminderEnabled.value, container.settingsStore.reminderMinutes.value)
         // Seeds on first launch; later launches (or an older asset version) are a cheap no-op.
         // Independent: a problem in one file must not stop the other from loading.
         appScope.launch {

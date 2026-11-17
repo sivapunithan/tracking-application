@@ -52,6 +52,8 @@ data class TodayExtras(
     val nextTopic: TopicWithLevel? = null,
     /** The newest curated current-affairs item she has not revised yet, or null. */
     val affairToReview: AffairUi? = null,
+    /** Topic / affair ids she already moved forward or revised today (so a plan line for them shows as done however she did it). */
+    val doneRefs: Set<String> = emptySet(),
 )
 
 const val HEAT_WEEKS = 26
@@ -125,11 +127,11 @@ class TodayViewModel(
         dayFlow.flatMapLatest { d -> activity.observeDay(d) }.map { events ->
             // distinct items, so tapping the same topic several times still counts as one piece of work
             events.filter { it.type == ActivityType.AFFAIR_REVISED.name || (it.type == ActivityType.TOPIC_PROGRESS.name && !it.details.contains("\"to\":0")) }
-                .map { it.refId }.distinct().size
+                .mapNotNull { it.refId }.toSet()
         },
         target.flatMapLatest { f -> repo.observeTopics(f) }.map { all -> all.firstOrNull { it.level == 0 } },
         latestAffair,
-    ) { any, done, topic, affair -> TodayExtras(any, done, topic, affair) }
+    ) { any, done, topic, affair -> TodayExtras(any, done.size, topic, affair, done) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), TodayExtras())
 
     val userName: StateFlow<String> = settings.userName

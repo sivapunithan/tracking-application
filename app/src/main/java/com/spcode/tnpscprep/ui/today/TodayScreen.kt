@@ -92,7 +92,7 @@ import androidx.compose.runtime.collectAsState
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun TodayScreen(vm: TodayViewModel, onOpenProfile: () -> Unit, onOpenDiary: (String) -> Unit, onOpenFocus: () -> Unit, onOpenStudy: () -> Unit) {
+fun TodayScreen(vm: TodayViewModel, onOpenProfile: () -> Unit, onOpenDiary: (String) -> Unit, onOpenFocus: () -> Unit, onOpenStudy: () -> Unit, onOpenWrapup: () -> Unit) {
     val ui by vm.ui.collectAsStateWithLifecycle()
     val name by vm.userName.collectAsStateWithLifecycle()
     val heat by vm.heat.collectAsStateWithLifecycle()
@@ -119,6 +119,15 @@ fun TodayScreen(vm: TodayViewModel, onOpenProfile: () -> Unit, onOpenDiary: (Str
     )
     val stepsWeek by stepsVm.week.collectAsStateWithLifecycle()
     val settings = app.container.settingsStore
+    val wvm = androidx.lifecycle.viewmodel.compose.viewModel<com.spcode.tnpscprep.ui.wrapup.WrapupStatusViewModel>(
+        factory = androidx.lifecycle.viewmodel.viewModelFactory { initializer { com.spcode.tnpscprep.ui.wrapup.WrapupStatusViewModel(app.container.diaryRepository, app.container.plannedTaskRepository) } },
+    )
+    LaunchedEffect(foodDay) { wvm.setDay(foodDay) }
+    val wrapped by wvm.wrappedToday.collectAsStateWithLifecycle()
+    val lastSeven by wvm.lastSeven.collectAsStateWithLifecycle()
+    val plannedToday by wvm.todayTasks.collectAsStateWithLifecycle()
+    val plannedTomorrow by wvm.tomorrowTasks.collectAsStateWithLifecycle()
+    val wrapHour by settings.wrapupHour.collectAsStateWithLifecycle()
     val gsDone by settings.gettingStartedDone.collectAsStateWithLifecycle()
     val diaryItems by remember { app.container.diaryRepository.observe("") }.collectAsState(emptyList())
     StepsAutoRead() // steps are counted when the app comes to the front, whichever screen she is on
@@ -132,18 +141,42 @@ fun TodayScreen(vm: TodayViewModel, onOpenProfile: () -> Unit, onOpenDiary: (Str
     val hour = LocalTime.now().hour
     val foodLogged = food[foodDay] != null
     val action = com.spcode.tnpscprep.domain.TodayGuide.nextAction(
-        com.spcode.tnpscprep.domain.NextActionInput(ui.examDate != null, ui.progress.due.size, ui.todayMinutes, hour, foodLogged, extras.nextTopic != null),
+        com.spcode.tnpscprep.domain.NextActionInput(ui.examDate != null, ui.progress.due.size, ui.todayMinutes, hour, foodLogged, extras.nextTopic != null,
+            plannedToday.firstOrNull { !it.done && (it.refId == null || it.refId !in extras.doneRefs) }?.let { com.spcode.tnpscprep.domain.PlannedTaskRef(it.id, it.title) }),
     )
     val gsItems = com.spcode.tnpscprep.domain.GettingStarted.items(ui.examDate != null, extras.hasAnySession, food.isNotEmpty(), diaryItems.isNotEmpty())
     val gsComplete = com.spcode.tnpscprep.domain.GettingStarted.isComplete(gsItems)
     LaunchedEffect(gsComplete) { if (gsComplete && !gsDone) settings.setGettingStartedDone(true) } // once done, never shown again
     val showGs = !gsDone && !gsComplete
-    val plan = com.spcode.tnpscprep.domain.TodayPlan.build(
-        ui.progress.due.map { it.topicId to (it.affairCategory != null) }, extras.nextTopic?.id, extras.affairToReview?.id, extras.doneToday,
-    )
+    // ---- today's plan: built ONCE per day from existing data, then stored (so it is finite and a ticked line stays) ----
+    val dueNow = ui.progress.due
+    val nextTopicName = extras.nextTopic?.let { localized(it.nameEn, it.nameTa) }
+    val affairName = extras.affairToReview?.let { localized(it.titleEn, it.titleTa) }
+    val names = HashMap<String, String>().apply {
+        dueNow.forEach { put(it.topicId, localized(it.nameEn, it.nameTa)) }
+        extras.nextTopic?.let { t -> nextTopicName?.let { put(t.id, it) } }
+        extras.affairToReview?.let { a -> affairName?.let { put(a.id, it) } }
+    }
+    val picks = com.spcode.tnpscprep.domain.PlanBuilder.build(dueNow.map { com.spcode.tnpscprep.domain.DuePick(it.topicId, it.affairCategory != null) }, extras.nextTopic?.id, extras.affairToReview?.id)
+    val planDraft = picks.mapNotNull { p ->
+        names[p.refId]?.let { n ->
+            com.spcode.tnpscprep.data.PlanDraftItem(n, when (p.kind) {
+                com.spcode.tnpscprep.domain.PlanKind.REVISION -> com.spcode.tnpscprep.data.PlanRefType.REVISION
+                com.spcode.tnpscprep.domain.PlanKind.READ -> com.spcode.tnpscprep.data.PlanRefType.TOPIC
+                com.spcode.tnpscprep.domain.PlanKind.NEWS -> com.spcode.tnpscprep.data.PlanRefType.CURRENT_AFFAIRS
+            }, p.refId)
+        }
+    }
+    // wait until the data has settled (several flows feed it), then store; a no-op when the day already has a plan
+    LaunchedEffect(foodDay, planDraft.map { it.refId }) { delay(900); if (planDraft.isNotEmpty()) wvm.generate(foodDay, planDraft) }
+    val tickPlan: (com.spcode.tnpscprep.data.db.PlannedTaskEntity) -> Unit = { t ->
+        wvm.setDone(t.id, true)
+        t.refId?.let { id -> when (t.refType) { "TOPIC", "REVISION" -> vm.readTopic(id); "CURRENT_AFFAIRS" -> vm.reviseAffair(id) } }
+    }
     val waterToday = healthEntries.filter { it.kind == com.spcode.tnpscprep.data.HealthKind.WATER && it.date == today.toString() }.sumOf { it.value }.toInt()
     val stepsToday = if (stepSensor && stepsAllowed(appCtx)) stepsWeek.firstOrNull { it.date == today.toString() }?.steps ?: 0 else null
-    val checkinsIndex = 2 + (if (showGs) 1 else 0) + (if (plan.items.isNotEmpty()) 1 else 0)
+    val wrapState = com.spcode.tnpscprep.domain.WrapupCard.state(hour, wrapHour, wrapped)
+    val checkinsIndex = 2 + (if (showGs) 1 else 0) + (if (wrapState != com.spcode.tnpscprep.domain.WrapupCardState.HIDDEN) 1 else 0) + (if (plannedToday.isNotEmpty()) 1 else 0)
     fun toCheckins() { scope.launch { listState.animateScrollToItem(checkinsIndex) } }
 
     LazyColumn(
@@ -161,6 +194,7 @@ fun TodayScreen(vm: TodayViewModel, onOpenProfile: () -> Unit, onOpenDiary: (Str
                     is com.spcode.tnpscprep.domain.NextAction.Revise -> ui.progress.due.firstOrNull()?.let { sheet = "due:" + it.topicId }
                     com.spcode.tnpscprep.domain.NextAction.StartFocus -> onOpenFocus()
                     com.spcode.tnpscprep.domain.NextAction.LogFood -> toCheckins()
+                    is com.spcode.tnpscprep.domain.NextAction.PlannedTask -> plannedToday.firstOrNull { it.id == action.taskId }?.let(tickPlan) ?: Unit
                     com.spcode.tnpscprep.domain.NextAction.NewTopic -> onOpenStudy()
                     com.spcode.tnpscprep.domain.NextAction.AllCaughtUp -> Unit
                 }
@@ -178,12 +212,9 @@ fun TodayScreen(vm: TodayViewModel, onOpenProfile: () -> Unit, onOpenDiary: (Str
             }
         }
 
-        if (plan.items.isNotEmpty()) item {
-            PlanCard(
-                plan, ui.progress.due.associateBy { it.topicId }, extras.nextTopic?.let { localized(it.nameEn, it.nameTa) }, extras.affairToReview?.let { localized(it.titleEn, it.titleTa) },
-                onRevise = vm::markRevised, onReadTopic = vm::readTopic, onReviewAffair = vm::reviseAffair,
-            )
-        }
+        if (wrapState != com.spcode.tnpscprep.domain.WrapupCardState.HIDDEN) item(key = "wrapup") { com.spcode.tnpscprep.ui.wrapup.WrapupCardView(wrapState, onOpenWrapup, lastSeven, plannedTomorrow.map { it.title }.take(3)) }
+
+        if (plannedToday.isNotEmpty()) item(key = "plan") { PlanCard(plannedToday, extras.doneRefs, tickPlan) }
 
         item(key = "checkins") {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {

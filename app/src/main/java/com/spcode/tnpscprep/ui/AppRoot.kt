@@ -101,6 +101,7 @@ private object Dest {
     const val JOURNAL_EDITOR = "journal/editor?id={id}&date={date}"
     const val FOCUS = "focus"
     const val PROFILE = "profile"
+    const val WRAPUP = "wrapup"
 }
 
 private class Tab(val graph: String, val labelRes: Int, val icon: ImageVector)
@@ -218,6 +219,7 @@ fun AppRoot(
                             todayVm,
                             onOpenProfile = { open(Dest.PROFILE) },
                             onOpenFocus = { open(Dest.FOCUS) },
+                            onOpenWrapup = { open(Dest.WRAPUP) },
                             onOpenStudy = { goTab(Graph.STUDY) },
                             onOpenDiary = { start ->
                                 when {
@@ -237,7 +239,7 @@ fun AppRoot(
                 }
                 navigation(startDestination = Dest.JOURNAL, route = Graph.JOURNAL) {
                     composable(Dest.JOURNAL) {
-                        JournalScreen(diaryVm, todayVm, studyByDate, onOpen = { id -> open("journal/editor?id=$id") }, onNew = { open("journal/editor") }, onNewOn = { d -> open("journal/editor?date=$d") })
+                        JournalScreen(diaryVm, todayVm, studyByDate, onOpen = { id -> open("journal/editor?id=$id") }, onNew = { open("journal/editor") }, onNewOn = { d -> open("journal/editor?date=$d") }, onWrapup = { open(Dest.WRAPUP) })
                     }
                     composable(
                         Dest.JOURNAL_EDITOR,
@@ -251,9 +253,11 @@ fun AppRoot(
                             entryId = e.arguments?.getLong("id")?.takeIf { it >= 0 },
                             dateArg = e.arguments?.getString("date"),
                             onDone = { removed -> if (removed != null) diaryVm.showUndo(removed); nav.popBackStack() },
+                            onWrapup = { nav.popBackStack(); open(Dest.WRAPUP) },
                         )
                     }
                 }
+                composable(Dest.WRAPUP) { com.spcode.tnpscprep.ui.wrapup.WrapupScreen(todayVm, onClose = { nav.popBackStack() }) }
                 composable(Dest.FOCUS) { TimerScreen(timerVm, onClose = { nav.popBackStack() }) }
                 composable(Dest.PROFILE) { ProfileScreen(headlinesVm, authVm, studyByDate, onBack = { nav.popBackStack() }) }
             }

@@ -23,6 +23,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -83,6 +84,14 @@ fun ProfileScreen(headlines: HeadlinesViewModel, auth: AuthViewModel, studyByDat
             Switch(checked = strictFood, onCheckedChange = foodSettings::setStrictFood)
         }
         Text(stringResource(R.string.settings_strict_note), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        val wrapHour by foodSettings.wrapupHour.collectAsStateWithLifecycle()
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(stringResource(R.string.profile_wrap_time), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+            OutlinedButton(onClick = { foodSettings.setWrapupHour(wrapHour - 1) }, enabled = wrapHour > 15) { Text("−") }
+            Text(stringResource(R.string.wrap_hour_fmt, wrapHour), Modifier.padding(horizontal = 12.dp), style = MaterialTheme.typography.titleMedium)
+            OutlinedButton(onClick = { foodSettings.setWrapupHour(wrapHour + 1) }, enabled = wrapHour < 23) { Text("+") }
+        }
+        ReminderSection(foodSettings)
 
         // ---- Appearance ----
         Spacer(Modifier.height(12.dp))
@@ -190,4 +199,58 @@ fun ProfileScreen(headlines: HeadlinesViewModel, auth: AuthViewModel, studyByDat
 @Composable
 private fun SectionLabel(text: String) {
     Text(text, style = MaterialTheme.typography.titleMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold), color = MaterialTheme.colorScheme.primary)
+}
+
+/** Optional evening reminder: OFF by default, asks for the notification permission only when she switches it on. */
+@Composable
+private fun ReminderSection(settings: com.spcode.tnpscprep.data.SettingsStore) {
+    val ctx = androidx.compose.ui.platform.LocalContext.current
+    val on by settings.reminderEnabled.collectAsStateWithLifecycle()
+    val minutes by settings.reminderMinutes.collectAsStateWithLifecycle()
+    var denied by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf(false) }
+    var guide by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf(false) }
+    fun apply(enabled: Boolean, m: Int) {
+        settings.setReminderEnabled(enabled); settings.setReminderMinutes(m)
+        com.spcode.tnpscprep.reminder.ReminderScheduler.sync(ctx.applicationContext, enabled, m)
+    }
+    val ask = androidx.activity.compose.rememberLauncherForActivityResult(androidx.activity.result.contract.ActivityResultContracts.RequestPermission()) { ok ->
+        if (ok) { denied = false; apply(true, minutes) } else denied = true
+    }
+    fun turnOn() {
+        val needs = android.os.Build.VERSION.SDK_INT >= 33 &&
+            androidx.core.content.ContextCompat.checkSelfPermission(ctx, android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED
+        if (needs) ask.launch(android.Manifest.permission.POST_NOTIFICATIONS) else { denied = false; apply(true, minutes) }
+    }
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(stringResource(R.string.reminder_switch), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+        Switch(checked = on, onCheckedChange = { if (it) turnOn() else apply(false, minutes) })
+    }
+    if (on) Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(stringResource(R.string.reminder_time), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+        OutlinedButton(onClick = { apply(true, minutes - com.spcode.tnpscprep.domain.ReminderTime.STEP) }) { Text("−") }
+        Text(String.format("%02d:%02d", minutes / 60, minutes % 60), Modifier.padding(horizontal = 12.dp), style = MaterialTheme.typography.titleMedium)
+        OutlinedButton(onClick = { apply(true, minutes + com.spcode.tnpscprep.domain.ReminderTime.STEP) }) { Text("+") }
+    }
+    if (denied) {
+        Text(stringResource(R.string.reminder_denied), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.error)
+        TextButton(onClick = {
+            ctx.startActivity(android.content.Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(android.provider.Settings.EXTRA_APP_PACKAGE, ctx.packageName).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK))
+        }) { Text(stringResource(R.string.reminder_open_settings)) }
+    }
+    Text(stringResource(R.string.reminder_note), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    TextButton(onClick = { guide = true }) { Text(stringResource(R.string.reminder_guide_link)) }
+    if (guide) com.spcode.tnpscprep.ui.design.PopSheet(onDismiss = { guide = false }) { dismiss ->
+        Column(Modifier.padding(horizontal = 24.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Text(stringResource(R.string.reminder_guide_title), style = MaterialTheme.typography.titleLarge)
+            Text(stringResource(R.string.reminder_guide_1)); Text(stringResource(R.string.reminder_guide_2))
+            Text(stringResource(R.string.reminder_guide_3)); Text(stringResource(R.string.reminder_guide_4))
+            OutlinedButton(onClick = {
+                val i = android.content.Intent(android.provider.Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                runCatching { ctx.startActivity(i) }.onFailure {
+                    ctx.startActivity(android.content.Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS, android.net.Uri.parse("package:" + ctx.packageName)).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK))
+                }
+            }, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.reminder_open_battery)) }
+            TextButton(onClick = dismiss, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.sheet_close)) }
+        }
+    }
 }

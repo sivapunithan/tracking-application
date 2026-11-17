@@ -54,4 +54,19 @@ class DiaryBackupTest {
         val second = DiaryBackup.plan(afterFirst, file)
         assertTrue(second.inserts.isEmpty() && second.updates.isEmpty()); assertEquals(2, second.unchanged)
     }
+
+    @Test fun v2CarriesPinsAndWrapupsAndV1FilesStillImport() {
+        val wr = com.spcode.tnpscprep.domain.Wrapup.encode(com.spcode.tnpscprep.domain.WrapupContent(well = "x"))
+        val src = listOf(DiaryDto("2026-11-17", "a", "PROUD", 1000, 1000, pinned = true, wrapup = wr))
+        val ok = DiaryBackup.parse(DiaryBackup.encode(src, 1)) as ParseResult.Ok
+        assertEquals(src, ok.entries)
+        // an old (version 1) file has no such fields: defaults apply
+        val v1 = DiaryBackup.parse("""{"app":"TnpscPrep","version":1,"diary":[{"localDate":"2026-11-17","text":"t","createdAt":5,"updatedAt":5}]}""") as ParseResult.Ok
+        assertEquals(false, v1.entries[0].pinned); assertEquals(null, v1.entries[0].wrapup)
+    }
+
+    @Test fun brokenWrapupJsonRejectsTheFile() {
+        val bad = DiaryBackup.encode(listOf(DiaryDto("2026-11-17", "a", null, 1000, 1000, wrapup = "not json")), 1)
+        assertTrue(DiaryBackup.parse(bad) is ParseResult.Bad)
+    }
 }

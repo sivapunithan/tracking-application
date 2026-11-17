@@ -11,11 +11,14 @@ import kotlinx.serialization.json.Json
  */
 @Serializable
 data class DiaryBackupFile(val app: String = APP, val version: Int = VERSION, val exportedAt: Long = 0, val diary: List<DiaryDto> = emptyList()) {
-    companion object { const val APP = "TnpscPrep"; const val VERSION = 1 }
+    companion object { const val APP = "TnpscPrep"; const val VERSION = 2 /* v2 adds pinned + wrapup; v1 files still import */ }
 }
 
 @Serializable
-data class DiaryDto(val localDate: String, val text: String, val moodEmojiId: String? = null, val createdAt: Long, val updatedAt: Long)
+data class DiaryDto(val localDate: String, val text: String, val moodEmojiId: String? = null, val createdAt: Long, val updatedAt: Long,
+    /** v2: pinned entries stay pinned on the other phone. */ val pinned: Boolean = false,
+    /** v2: the evening wrap-up JSON (non-null = this entry is a wrap-up). */ val wrapup: String? = null,
+)
 
 /** What an existing row looks like to the merge (its identity is localDate + createdAt, because ids differ between phones). */
 data class ExistingDiary(val id: Long, val localDate: String, val createdAt: Long, val updatedAt: Long)
@@ -38,11 +41,12 @@ object DiaryBackup {
         if (text.length > MAX_FILE_CHARS) return ParseResult.Bad("too_big")
         val file = runCatching { json.decodeFromString(DiaryBackupFile.serializer(), text) }.getOrElse { return ParseResult.Bad("not_a_backup") }
         if (file.app != DiaryBackupFile.APP) return ParseResult.Bad("not_a_backup")
-        if (file.version != DiaryBackupFile.VERSION) return ParseResult.Bad("version")
+        if (file.version !in 1..DiaryBackupFile.VERSION) return ParseResult.Bad("version")
         for (e in file.diary) {
             if (runCatching { LocalDate.parse(e.localDate) }.isFailure) return ParseResult.Bad("bad_entry")
             if (e.text.length > DiaryLimits.MAX_CHARS || e.createdAt <= 0 || e.updatedAt < 0) return ParseResult.Bad("bad_entry")
             if (e.moodEmojiId != null && e.moodEmojiId.length > 20) return ParseResult.Bad("bad_entry")
+            if (e.wrapup != null && (e.wrapup.length > 60_000 || com.spcode.tnpscprep.domain.Wrapup.decode(e.wrapup) == null)) return ParseResult.Bad("bad_entry")
         }
         // The same entry twice in one file: keep the later-updated copy.
         val deduped = file.diary.groupBy { it.localDate to it.createdAt }.map { (_, g) -> g.maxBy { it.updatedAt } }

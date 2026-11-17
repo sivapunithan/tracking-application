@@ -14,6 +14,10 @@ class ActivityRepository(db: AppDatabase) {
     fun observeHeatEvents(from: LocalDate): Flow<List<HeatEvent>> =
         dao.observeSince(from.toString()).map { l -> l.map { HeatEvent(it.localDate, it.type, it.details) } }
 
+    /** The day and the next calendar date (events after midnight but before the 3 AM rollover still belong to [date]); RecapBuilder picks what belongs. */
+    suspend fun recapEvents(date: LocalDate): List<com.spcode.tnpscprep.domain.RecapEvent> =
+        dao.between(date.toString(), date.plusDays(1).toString()).map { com.spcode.tnpscprep.domain.RecapEvent(it.timestamp, it.localDate, it.type, it.refId, it.details) }
+
     fun observeDay(date: LocalDate) = dao.observeDay(date.toString())
     fun observeNote(date: LocalDate): Flow<String> = dao.observeNote(date.toString()).map { it?.note.orEmpty() }
     fun observeNoteDates(from: LocalDate): Flow<Set<LocalDate>> =

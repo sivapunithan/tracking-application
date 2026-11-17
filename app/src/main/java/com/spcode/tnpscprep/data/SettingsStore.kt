@@ -86,6 +86,24 @@ class SettingsStore(context: Context) {
     // ---- Getting started checklist: once completed it never comes back ----
     private val _gsDone = MutableStateFlow(prefs.getBoolean(K_GS_DONE, false))
     val gettingStartedDone: StateFlow<Boolean> = _gsDone.asStateFlow()
+    private val _wrapHour = MutableStateFlow(prefs.getInt(K_WRAP_HOUR, com.spcode.tnpscprep.domain.TodayGuide.EVENING_HOUR).coerceIn(15, 23))
+    /** From which hour (15..23) the Today screen invites her to the evening wrap-up. */
+    val wrapupHour: StateFlow<Int> = _wrapHour.asStateFlow()
+    fun setWrapupHour(h: Int) { val v = h.coerceIn(15, 23); prefs.edit().putInt(K_WRAP_HOUR, v).apply(); _wrapHour.value = v }
+
+    private val _remOn = MutableStateFlow(prefs.getBoolean(K_REM_ON, false))
+    private val _remMin = MutableStateFlow(com.spcode.tnpscprep.domain.ReminderTime.clamp(prefs.getInt(K_REM_MIN, com.spcode.tnpscprep.domain.ReminderTime.DEFAULT_MINUTES)))
+    /** Optional evening wrap-up reminder: OFF by default. */
+    val reminderEnabled: StateFlow<Boolean> = _remOn.asStateFlow()
+    /** Reminder time as minutes after midnight. */
+    val reminderMinutes: StateFlow<Int> = _remMin.asStateFlow()
+    fun setReminderEnabled(v: Boolean) { prefs.edit().putBoolean(K_REM_ON, v).apply(); _remOn.value = v }
+    fun setReminderMinutes(m: Int) { val v = com.spcode.tnpscprep.domain.ReminderTime.clamp(m); prefs.edit().putInt(K_REM_MIN, v).apply(); _remMin.value = v }
+
+    /** Unfinished wrap-up draft (JSON, one day only). See domain/WrapupDrafts. */
+    fun wrapupDraft(): String? = prefs.getString(K_WRAP_DRAFT, null)
+    fun setWrapupDraft(json: String?) { prefs.edit().apply { if (json == null) remove(K_WRAP_DRAFT) else putString(K_WRAP_DRAFT, json) }.apply() }
+
     fun setGettingStartedDone(v: Boolean) { prefs.edit().putBoolean(K_GS_DONE, v).apply(); _gsDone.value = v }
 
     // ---- phone usage (opt-in, off by default) ----
@@ -116,7 +134,7 @@ class SettingsStore(context: Context) {
     fun clearAll() {
         prefs.edit().clear().apply()
         _focus.value = 25; _break.value = 5; _goal.value = 60
-        _targetExam.value = "ALL"; _examMask.value = com.spcode.tnpscprep.domain.Exam.ALL_MASK; _examDay.value = NO_DATE
+        _wrapHour.value = com.spcode.tnpscprep.domain.TodayGuide.EVENING_HOUR; _remOn.value = false; _remMin.value = com.spcode.tnpscprep.domain.ReminderTime.DEFAULT_MINUTES; _targetExam.value = "ALL"; _examMask.value = com.spcode.tnpscprep.domain.Exam.ALL_MASK; _examDay.value = NO_DATE
         _newsEnabled.value = true; _newsLast.value = 0L
         _theme.value = "LIGHT"; _name.value = ""; _account.value = false
         _health.value = HealthProfile(); _usage.value = false; _gsDone.value = false; _strictFood.value = false; _foodAlert.value = ""
@@ -155,6 +173,10 @@ class SettingsStore(context: Context) {
         private const val K_STRICT = "food_strict"
         private const val K_FOOD_ALERT = "food_alert_start"
         private const val K_GS_DONE = "getting_started_done"
+        private const val K_WRAP_DRAFT = "wrapup_draft"
+        private const val K_WRAP_HOUR = "wrapup_hour"
+        private const val K_REM_ON = "reminder_on"
+        private const val K_REM_MIN = "reminder_minutes"
         private const val K_USAGE = "usage_enabled"
         private const val K_NAME = "user_name"
         private const val K_NEWS = "news_enabled"
