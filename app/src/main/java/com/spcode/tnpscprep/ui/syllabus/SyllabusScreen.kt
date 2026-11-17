@@ -63,7 +63,7 @@ import com.spcode.tnpscprep.ui.localized
 
 /** [twoPane] = list + detail side by side (tablet/wide); otherwise list -> detail with Back (phone). */
 @Composable
-fun SyllabusScreen(viewModel: SyllabusViewModel, twoPane: Boolean) {
+fun SyllabusScreen(viewModel: SyllabusViewModel, twoPane: Boolean, initialSubject: String? = null, onHome: (() -> Unit)? = null) {
     val subjects by viewModel.subjects.collectAsStateWithLifecycle()
     val examMask by viewModel.examMask.collectAsStateWithLifecycle()
     val lastTouched by viewModel.lastTouched.collectAsStateWithLifecycle()
@@ -71,7 +71,7 @@ fun SyllabusScreen(viewModel: SyllabusViewModel, twoPane: Boolean) {
     var showExams by rememberSaveable { mutableStateOf(false) }
     val hits = remember(subjects, query) { searchTopics(subjects, query) }
     // rememberSaveable: survives rotation AND process death (ColorOS kills background apps).
-    var selectedId by rememberSaveable { mutableStateOf<String?>(null) }
+    var selectedId by rememberSaveable { mutableStateOf(initialSubject) }
     // Note dialog state is saveable too, so rotating while typing doesn't lose the text.
     var noteTopicId by rememberSaveable { mutableStateOf<String?>(null) }
     var noteText by rememberSaveable { mutableStateOf("") }
@@ -100,8 +100,9 @@ fun SyllabusScreen(viewModel: SyllabusViewModel, twoPane: Boolean) {
             }
             current == null -> SubjectList(subjects, null, { selectedId = it }, Modifier.fillMaxSize(), lastTouched) { selectedId = it }
             else -> {
-                BackHandler { selectedId = null }
-                SubjectDetail(current, viewModel, onOpenNote, showBack = true, onBack = { selectedId = null }, Modifier.fillMaxSize())
+                val back: () -> Unit = { if (onHome != null) onHome() else selectedId = null }
+                BackHandler(onBack = back)
+                SubjectDetail(current, viewModel, onOpenNote, showBack = true, onBack = back, Modifier.fillMaxSize())
             }
         }
     }

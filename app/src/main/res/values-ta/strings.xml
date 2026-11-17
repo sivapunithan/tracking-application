@@ -123,7 +123,6 @@
     <string name="greet_evening">மாலை வணக்கம்</string>
     <string name="welcome_back">மீண்டும் வருக</string>
     <string name="hello_name">வணக்கம், %1$s</string>
-    <string name="today_tagline">இன்றைய நாளைப் பயனுள்ளதாக்குவோம்</string>
     <string name="sheet_close">மூடு</string>
     <string name="sheet_remove_star">குறியை நீக்கு</string>
     <string name="sheet_no_note">இன்னும் குறிப்பு இல்லை. பாடப் பகுதியில் சேர்க்கலாம்.</string>
@@ -482,4 +481,33 @@
     <string name="water_target_default">பொதுவான இலக்கு. எடையைப் பதிவு செய்தால் உங்களுக்கேற்ப மாறும்.</string>
     <string name="care_private_title">உடல் மற்றும் மாதவிடாய்</string>
     <string name="care_private_sub">தனிப்பட்டது. திறக்கத் தொடுங்கள்.</string>
+    <string name="profile_pg_study">படிப்பு</string>
+    <string name="profile_pg_evening">மாலை மற்றும் நினைவூட்டல்</string>
+    <string name="profile_pg_food">உணவு</string>
+    <string name="profile_pg_look">தோற்றம் மற்றும் மொழி</string>
+    <string name="profile_pg_privacy">தனியுரிமை மற்றும் பாதுகாப்பு</string>
+    <string name="profile_pg_data">தரவு மற்றும் தகவல்</string>
+    <string name="profile_goal">தினசரி படிப்பு இலக்கு</string>
+    <string name="profile_min_fmt">%1$d நிமிடம்</string>
+    <string name="exam_all">அனைத்துத் தேர்வுகள்</string>
+    <string name="state_on">இயக்கத்தில்</string>
+    <string name="state_off">நிறுத்தம்</string>
+    <string name="profile_sub_study">%1$s · தினமும் %2$d நிமிடம்</string>
+    <string name="profile_sub_evening">சுருக்கம் %1$d:00 முதல் · நினைவூட்டல்: %2$s</string>
+    <string name="profile_sub_food">கண்டிப்பு முறை: %1$s</string>
+    <string name="profile_sub_look">%1$s · %2$s</string>
+    <string name="profile_sub_privacy">PIN பூட்டு, தலைப்புச் செய்திகள், தொலைபேசி பயன்பாடு</string>
+    <string name="profile_sub_data">என் தரவை அழி, பாடத்திட்டம் பற்றி</string>
+    <string name="study_title">படிப்பு</string>
+    <string name="study_progress_title">உங்கள் முன்னேற்றம் · %1$s</string>
+    <string name="study_started_fmt">%2$d தலைப்புகளில் %1$d தொடங்கியுள்ளீர்கள்</string>
+    <string name="study_continue_fmt">தொடருங்கள்: %1$s</string>
+    <string name="study_due_fmt">இன்று %1$d மீள்பார்வை</string>
+    <string name="study_due_none">மீள்பார்வை எதுவும் இல்லை</string>
+    <string name="study_news_sub">தலைப்புச் செய்திகளும் குறிப்புகளும்</string>
+    <string name="study_subjects">பாடங்கள்</string>
+    <plurals name="today_exam_days">
+        <item quantity="one">தேர்வுக்கு %1$d நாள்</item>
+        <item quantity="other">தேர்வுக்கு %1$d நாட்கள்</item>
+    </plurals>
 </resources>

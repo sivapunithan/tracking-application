@@ -99,6 +99,34 @@ fun NextActionCard(action: NextAction, firstDue: DueItem?, nextTopicName: String
     }
 }
 
+/** Compact first-run strip (replaces the big checklist card): dots for the four steps + the next undone one. Tap = do it. */
+@Composable
+fun GettingStartedStrip(items: List<GettingStartedItem>, onStep: (GettingStartedStep) -> Unit) {
+    val next = items.firstOrNull { !it.done } ?: return
+    SoftCard(Modifier.fillMaxWidth(), onClick = { onStep(next.step) }) {
+        Row(Modifier.padding(horizontal = 16.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                    Text(stringResource(R.string.gs_title), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+                    items.forEach { Box(Modifier.size(8.dp).clip(CircleShape).background(if (it.done) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.outlineVariant)) }
+                }
+                Text(
+                    stringResource(
+                        when (next.step) {
+                            GettingStartedStep.EXAM_DATE -> R.string.gs_exam
+                            GettingStartedStep.FIRST_FOCUS -> R.string.gs_focus
+                            GettingStartedStep.FIRST_FOOD -> R.string.gs_food
+                            GettingStartedStep.FIRST_DIARY -> R.string.gs_diary
+                        },
+                    ),
+                    style = MaterialTheme.typography.bodyLarge,
+                )
+            }
+            Text("›", style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    }
+}
+
 /** First-run checklist: disappears for good once all four steps are done. */
 @Composable
 fun GettingStartedCard(items: List<GettingStartedItem>, onStep: (GettingStartedStep) -> Unit) {

@@ -374,3 +374,17 @@ reference, write own notes with page refs.
 - Care, top to bottom: **Hero** (crimson gradient like Next best step; today's mood picture big and animated via `MoodAvatar`, tap = mood sheet; glance tiles for food picture, water ml/target, steps) -> **Mood** (7-day strip of mood pictures, tap ANY day to set/clear it; 30-day counts per mood, counts only) -> **Food** (`FoodHistoryCard`: 30-day counts + 5-week grid now showing each day's food PICTURE; tap a day to set/clear) -> **Water** (ring, 7-day bars, +250 / +500 / Undo) -> **Steps** (existing card) -> **Body and cycle** (private; collapsed behind a lock icon, opens the existing `HealthSheet(showTitle = false)`). Cards enter with a staggered `PopIn`.
 - Pure helpers `domain/CareStats` (water target = 35 ml/kg of the latest weight else 2000, per-day water sums, ring fraction), tested. The mood/food sheets are shared with Today (`MoodPickSheet`, `FoodPickSheet`).
 - Removed dead code: `FoodSection` and its private pieces, `WaterRow`, 13 unused strings. No schema / activity_event change.
+
+## Restructure of Profile / Study / Today: Phase 1 (Profile hub) - verified on the phone (EN + TA)
+- Profile is a hub (`ui/settings/ProfileScreen`): top card (initial, name field, My exams) + six rows with one-line summaries, each opening one short page (Study: My exams + daily goal stepper; Evening and reminders; Food: strict mode; Look and language; Privacy and security: PIN, headlines, phone usage; Data and about: syllabus note, Erase all). Open page is `rememberSaveable`; Back goes page -> hub -> out. Exam date is still set from Today. No schema / permission change.
+- Next: Phase 2 Study home page (continue card, progress, due revision card, news card, subject grid; Subject/Revise/News as drill-in pages), Phase 3 Today (Now / Plan / Check-in / Progress blocks).
+
+## Restructure Phase 2 (Study home) - verified on the phone (EN + TA)
+- Study tab is a HOME page (`ui/study/StudyScreen`): progress card for My exams (overall %, white started-topics bar, "x of y started", Continue button for the last touched topic), Revise tile ("n due today", highlighted) and News tile, a Search button, then a 2-column subject grid with level bars. Syllabus (subject detail / search), Revise and News open as pages with a Back arrow; page + subject are rememberSaveable; tablets keep list+detail inside the syllabus page.
+- `SyllabusScreen(vm, twoPane, initialSubject, onHome)`: Back from a subject returns to the Study home when onHome is set. No schema / permission change.
+- Next: Phase 3 Today (Now / Plan / Check-in / Progress blocks).
+
+## Restructure Phase 3 (Today) - verified on the phone (EN + TA)
+- Header: greeting + name, date line and an exam-countdown chip (plural `today_exam_days`; no exam date -> "Set exam date", tap opens the date sheet). The old tagline is removed.
+- Order: [evening and not wrapped up: wrap-up card FIRST] -> Next best step -> slim Getting-started strip (4 dots + next undone step, replaces the big checklist card; `GettingStartedStrip`) -> Today's plan -> How are you today? -> numbers tiles -> heatmap -> [wrapped up: the "Wrapped up tonight" card at the bottom]. Logic, data and plan storage unchanged; no schema/permission change.
+- The old `GettingStartedCard` is now unused (kept for now).

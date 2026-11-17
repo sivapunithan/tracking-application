@@ -189,7 +189,10 @@ fun TodayScreen(vm: TodayViewModel, onOpenProfile: () -> Unit, onOpenDiary: (Str
         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 16.dp + LocalBottomBarInset.current),
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
-        item { Header(name, ui, onOpenProfile) }
+        item { Header(name, ui, onOpenProfile) { sheet = "date" } }
+
+        // Evening, not yet wrapped up: the wrap-up IS the thing to do now, so it leads. Once done it moves to the bottom.
+        if (wrapState == com.spcode.tnpscprep.domain.WrapupCardState.INVITE) item(key = "wrapup") { com.spcode.tnpscprep.ui.wrapup.WrapupCardView(wrapState, onOpenWrapup, lastSeven, plannedTomorrow.map { it.title }.take(3)) }
 
         item {
             NextActionCard(action, ui.progress.due.firstOrNull(), extras.nextTopic?.let { localized(it.nameEn, it.nameTa) }) {
@@ -206,7 +209,7 @@ fun TodayScreen(vm: TodayViewModel, onOpenProfile: () -> Unit, onOpenDiary: (Str
         }
 
         if (showGs) item {
-            GettingStartedCard(gsItems) { step ->
+            GettingStartedStrip(gsItems) { step ->
                 when (step) {
                     com.spcode.tnpscprep.domain.GettingStartedStep.EXAM_DATE -> sheet = "date"
                     com.spcode.tnpscprep.domain.GettingStartedStep.FIRST_FOCUS -> onOpenFocus()
@@ -216,7 +219,6 @@ fun TodayScreen(vm: TodayViewModel, onOpenProfile: () -> Unit, onOpenDiary: (Str
             }
         }
 
-        if (wrapState != com.spcode.tnpscprep.domain.WrapupCardState.HIDDEN) item(key = "wrapup") { com.spcode.tnpscprep.ui.wrapup.WrapupCardView(wrapState, onOpenWrapup, lastSeven, plannedTomorrow.map { it.title }.take(3)) }
 
         if (plannedToday.isNotEmpty()) item(key = "plan") { PlanCard(plannedToday, extras.doneRefs, tickPlan) }
 
@@ -243,6 +245,8 @@ fun TodayScreen(vm: TodayViewModel, onOpenProfile: () -> Unit, onOpenDiary: (Str
         }
 
         item { HeatmapSection(heat, food, onDay = { sheet = "day:" + it }) }
+
+        if (wrapState == com.spcode.tnpscprep.domain.WrapupCardState.DONE) item(key = "wrapup") { com.spcode.tnpscprep.ui.wrapup.WrapupCardView(wrapState, onOpenWrapup, lastSeven, plannedTomorrow.map { it.title }.take(3)) }
     }
 
     // Strict mode: shown ONCE per chain of 3 junk days (the chain's start date is remembered), and only when nothing else is open.
@@ -290,7 +294,7 @@ fun TodayScreen(vm: TodayViewModel, onOpenProfile: () -> Unit, onOpenDiary: (Str
 }
 
 @Composable
-private fun Header(name: String, ui: TodayUiState, onProfile: () -> Unit) {
+private fun Header(name: String, ui: TodayUiState, onProfile: () -> Unit, onExamDate: () -> Unit) {
     val hour = remember { LocalTime.now().hour }
     val greeting = stringResource(
         when {
@@ -314,11 +318,18 @@ private fun Header(name: String, ui: TodayUiState, onProfile: () -> Unit) {
                 style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
                 maxLines = 1,
             )
-            Text(
-                stringResource(R.string.today_tagline),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 4.dp)) {
+                Text(
+                    java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("EEE, d MMM", java.util.Locale.getDefault())),
+                    style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                val days = ui.daysToExam
+                Text(
+                    if (days != null && days >= 0) pluralStringResource(R.plurals.today_exam_days, days.toInt(), days.toInt()) else stringResource(R.string.set_exam_date),
+                    style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.clip(RoundedCornerShape(50)).background(MaterialTheme.colorScheme.primaryContainer).clickable(onClick = onExamDate).padding(horizontal = 10.dp, vertical = 4.dp),
+                )
+            }
         }
         Spacer(Modifier.width(12.dp))
         Box(

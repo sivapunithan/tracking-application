@@ -50,7 +50,7 @@
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
     <string name="due_title">Due for revision (%1$d)</string>
-    <string name="due_empty">Nothing is due. Read a new topic from the Syllabus tab, or come back tomorrow.</string>
+    <string name="due_empty">Nothing is due. Read a new topic from the Study page, or come back tomorrow.</string>
     <string name="due_today">due today</string>
     <string name="revised">Revised</string>
     <plurals name="exam_in_days">
@@ -68,7 +68,7 @@
     <string name="a11y_unstar">Remove the star</string>
     <string name="subject_progress_title">Progress by subject</string>
     <string name="starred_title">Starred topics (%1$d)</string>
-    <string name="starred_empty">Star a topic in the Syllabus tab to find it here quickly.</string>
+    <string name="starred_empty">Star a topic in the Syllabus to find it here quickly.</string>
     <string name="tab_affairs">Current affairs</string>
     <string name="ca_compiled">Compiled up to %1$s</string>
     <string name="ca_disclaimer">Short notes in our own words, each with a source link. Not independently verified and far from complete: check anything important against an official source. Add your own entries with the button below.</string>
@@ -123,10 +123,9 @@
     <string name="greet_evening">Good evening</string>
     <string name="welcome_back">Welcome back</string>
     <string name="hello_name">Hi, %1$s</string>
-    <string name="today_tagline">Let\'s make today count</string>
     <string name="sheet_close">Close</string>
     <string name="sheet_remove_star">Remove star</string>
-    <string name="sheet_no_note">No note yet. Add one from the Syllabus tab.</string>
+    <string name="sheet_no_note">No note yet. Add one from the Study page.</string>
     <plurals name="sheet_next_review">
         <item quantity="one">Press Revised and it comes back in %d day.</item>
         <item quantity="other">Press Revised and it comes back in %d days.</item>
@@ -482,4 +481,33 @@
     <string name="water_target_default">A general target. Log your weight to personalise it.</string>
     <string name="care_private_title">Body and cycle</string>
     <string name="care_private_sub">Private. Tap to open.</string>
+    <string name="profile_pg_study">Study</string>
+    <string name="profile_pg_evening">Evening and reminders</string>
+    <string name="profile_pg_food">Food</string>
+    <string name="profile_pg_look">Look and language</string>
+    <string name="profile_pg_privacy">Privacy and security</string>
+    <string name="profile_pg_data">Data and about</string>
+    <string name="profile_goal">Daily study goal</string>
+    <string name="profile_min_fmt">%1$d min</string>
+    <string name="exam_all">All exams</string>
+    <string name="state_on">On</string>
+    <string name="state_off">Off</string>
+    <string name="profile_sub_study">%1$s · %2$d min a day</string>
+    <string name="profile_sub_evening">Wrap-up from %1$d:00 · Reminder %2$s</string>
+    <string name="profile_sub_food">Strict mode: %1$s</string>
+    <string name="profile_sub_look">%1$s · %2$s</string>
+    <string name="profile_sub_privacy">PIN lock, headlines, phone usage</string>
+    <string name="profile_sub_data">Erase my data, about the syllabus</string>
+    <string name="study_title">Study</string>
+    <string name="study_progress_title">Your progress · %1$s</string>
+    <string name="study_started_fmt">%1$d of %2$d topics started</string>
+    <string name="study_continue_fmt">Continue: %1$s</string>
+    <string name="study_due_fmt">%1$d due today</string>
+    <string name="study_due_none">Nothing due</string>
+    <string name="study_news_sub">Headlines and notes</string>
+    <string name="study_subjects">Subjects</string>
+    <plurals name="today_exam_days">
+        <item quantity="one">%1$d day to exam</item>
+        <item quantity="other">%1$d days to exam</item>
+    </plurals>
 </resources>
