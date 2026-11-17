@@ -176,3 +176,46 @@ data class NewsItemEntity(
     val language: String,
     val fetchedAt: Long,
 )
+
+// ---- ACTIVITY LOG (event sourcing) ----
+
+/**
+ * Append-only: one row per thing she did. Every day-level view (heatmap, "what did I do on day X", streaks) is DERIVED from this
+ * table instead of from stored daily totals, so a new view never needs a data migration and any day can be recomputed.
+ * [localDate] is fixed at write time in the device zone, so travelling or changing time zone never moves old events to another day.
+ */
+@Entity(tableName = "activity_event", indices = [Index("localDate"), Index("type")])
+data class ActivityEventEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val timestamp: Long,
+    val localDate: String,
+    val type: String,
+    val refId: String?,
+    /** Small JSON object, e.g. {"minutes":25}. */
+    val details: String,
+)
+
+/** Her optional one-line note for a calendar day (ISO date). No foreign keys, like every user-data table. */
+@Entity(tableName = "day_note")
+data class DayNoteEntity(@PrimaryKey val date: String, val note: String, val updatedAt: Long)
+
+/** One private health reading (kind = WEIGHT_KG, WAIST_CM, HIP_CM, WATER_ML, PERIOD_START). On-device only, deletable. */
+@Entity(tableName = "health_entry", indices = [Index("date")])
+data class HealthEntryEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val date: String,
+    val kind: String,
+    val value: Double,
+    val createdAt: Long,
+)
+
+/** Step state per day (see domain/StepCounter). Approximate: only updated when the app is opened. */
+@Entity(tableName = "step_day")
+data class StepDayEntity(
+    @PrimaryKey val date: String,
+    val baseline: Long,
+    val lastReading: Long,
+    val steps: Int,
+    val bootMs: Long,
+    val updatedAt: Long,
+)

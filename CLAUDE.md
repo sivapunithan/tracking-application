@@ -186,3 +186,62 @@ reference, write own notes with page refs.
 - Source art + prompts live in the git-ignored `design-src/` (portrait cut-out, sliced moods, prompt file).
 - Open owner decisions: "login" = local profile (recommended) vs real accounts; make the GitHub repo private?
 - Slicing lesson: split a sheet by the characters' OWN outlines (connected components on the whole sheet), never at fixed column lines: a raised fist crossed the line once and left a stray hand in a neighbour. Outer hair gaps are cleared; eyes/teeth are protected by only clearing enclosed white at the left/right edges.
+
+## Local account + palette (increment 10 continued)
+- Palette changed by the owner (dislikes blue): CRIMSON #C8102E primary, MAROON #800020 secondary, gold accent, warm off-white background; dark scheme is a wine-black.
+  Blue survives ONLY in the crying tears/puddle (owner asked for blue water). Launcher background is maroon (#7A0019).
+- "Login" = a LOCAL account (owner's decision): name + exam + optional exam date + daily goal + OPTIONAL 4-digit PIN. No server, no email, no password database.
+  `ui/auth`: AuthGate decides NEEDS_ACCOUNT -> WelcomeFlow (3 steps), LOCKED -> LoginScreen (PIN pad), UNLOCKED -> the app (not even composed while locked).
+  `domain/PinSecurity`: PIN = exactly 4 digits; salted PBKDF2-HMAC-SHA256 (120k iterations); constant-time verify; after 5 wrong PINs a wait that doubles (cap 15 min),
+  persisted so restarting the app does not reset it. It is a PRIVACY lock, not bank-grade security (10,000 combinations). Re-locks after 5 minutes away
+  (rotation/language-change restarts do not count) and on cold start.
+- Forgot PIN = no recovery (nothing leaves the phone): the only way in is "Erase and start over" (database + settings wiped, packs re-seeded: `AppContainer.resetEverything`).
+  Settings > Account: set / change / remove PIN, lock now, delete account and data.
+- Existing installs (before accounts) see the Welcome flow once; their data is kept.
+- Artwork for these screens is looked up by name at runtime, like the moods (git-ignored): `login_wave` (welcome/login hero) and `app_logo`. Stand-ins until supplied.
+- Not done: fingerprint unlock (androidx.biometric could be added), multiple profiles.
+- Assets delivered and wired: `login_wave` + `login_vanakkam` (welcome/login hero; Tamil UI shows Vanakkam, others the wave; GIT-IGNORED, a real person's likeness) and the
+  `app_logo` brand mark (crimson/maroon/gold book + check + star; TRACKED in git, it is not personal). Launcher icon = adaptive: cream background + `ic_launcher_foreground`
+  (logo at 58% of the 108dp canvas = inside the safe zone) + `ic_launcher_monochrome` for Android 13 themed icons. The logo's thin white separators are kept by an
+  "opening" trick (only the wide outside area is made transparent). The logo sits on a white badge top-left of the crimson header (crimson-on-crimson would vanish).
+- Verified on the phone before this: Welcome steps 1-2 (placeholder hero). NOT yet seen with the final pictures: the phone was locked.
+
+## Increment A1: activity log (event sourcing)
+- Schema v5: `activity_event(id, timestamp, localDate, type, refId, details JSON)` + indexes on localDate and type; `domain/ActivityType` (stable names; MOCK_TEST and
+  HEALTH_LOG reserved). All day-level views (heatmap next, day sheet, streaks) are meant to be DERIVED from this table, not from stored daily totals.
+- Events are written INSIDE the same Room transaction as the change they describe (topic level change/reset, note, focus session, revised/added current-affairs item),
+  so an action and its event can never disagree. `localDate` is fixed at write time in the device zone. Builder: `data/ActivityEvents` (pure, tested).
+- MIGRATION_4_5 creates the table and BACKFILLS: every study_session -> FOCUS_SESSION, every topic with level > 0 -> one TOPIC_PROGRESS at its last-touched time
+  (older topic history was never stored). Backfilled rows have "backfilled":true.
+- NOT yet verified on a device (adb became unauthorized); 157 unit tests pass. Next: heatmap UI + day bottom sheet with an optional daily note.
+
+## Increment A2: activity heatmap
+- Schema v6: `day_note(date PK, note, updatedAt)` + MIGRATION_5_6 (no FKs). `domain/Heatmap` (pure, tested): per-day minutes from FOCUS_SESSION events, level 0..4
+  (1 = any activity under 1/3 of the daily goal, 4 = goal reached), Monday-first week grid for the last 26 weeks, no future days.
+- Heatmap is DERIVED from `activity_event` (ActivityRepository), shown on the Today tab (`ui/today/HeatmapCard`). Tap a day -> pop-up with that day's events
+  (backfilled rows show no clock time) + optional one-line note (max 200 chars; a dot-ringed cell has a note).
+- Builds, unit tests pass. NOT seen on the phone: the app was at the PIN lock screen (owner's PIN is unknown to me).
+
+## Increment B1: health maths (domain only so far)
+- `domain/Health` (BMI + WHO bands, Mifflin-St Jeor BMR, TDEE, waist-hip ratio, water ~35 ml/kg), `Cycle` (estimated next period / ovulation / fertile window; average length from logged starts),
+  `BreakNudge`. Pure + unit-tested (167 tests). ALL outputs are general ESTIMATES: the UI must say so. No UI, no storage yet.
+- Next (B2): Health screen behind the PIN lock, entries stored as HEALTH_LOG activity events (private, deletable), break nudge in the timer.
+
+## Increment B2: health toolkit UI
+- Schema v7: `health_entry(id, date, kind, value, createdAt)` + MIGRATION_6_7. Kinds: WEIGHT_KG, WAIST_CM, HIP_CM, WATER_ML, PERIOD_START (`data/HealthRepository.HealthKind`).
+  Profile (height, age, sex, activity, cycle length) lives in SettingsStore (`HealthProfile`), wiped by clearAll.
+- Each entry also writes a HEALTH_LOG activity event holding ONLY the kind (never the value). Heatmap and day sheet queries EXCLUDE HEALTH_LOG so private data never shows there.
+- UI: "Health (private)" card on the Today tab -> pop-up (`ui/today/HealthSheet`): profile, log, estimates (BMI, BMR/TDEE, WHR, water, next period / fertile window, all labelled estimates),
+  history with per-entry delete, and "Delete all health data" (two taps; also removes HEALTH_LOG events). Behind the app's PIN lock like everything else.
+- Timer: after 50+ focus minutes without starting a break, a soft hint is shown on the Timer tab (`TimerViewModel.breakNudge`). No notification (ColorOS kills background work).
+- Built, 167 tests pass; NOT yet seen on the phone (PIN lock). Tamil strings are DRAFT.
+
+## Increment S1: step counter (approximate, opt-in)
+- `domain/StepCounter` (pure, 10 tests): TYPE_STEP_COUNTER is a running total since boot, read ONLY when the app comes to the front (one-shot listener, no service/job).
+  Each read adds `reading - lastReading` to the current day. Reboot = reading < lastReading OR estimated boot time (now - elapsedRealtime) moved > 2 min; then the whole reading is new. Never negative.
+  Next-day read credits the steps since the last open to the new day (approximate). Gap of more than 1 day: fresh baseline, nothing guessed.
+- Schema v8: `step_day(date PK, baseline, lastReading, steps, bootMs, updatedAt)` + MIGRATION_7_8. `ActivityType.STEPS`: ONE event per day (refId = date), replaced on each read in the same transaction;
+  excluded from the heatmap query (walking must not colour a study day) but shown in the day sheet.
+- Feature hidden when `getDefaultSensor(TYPE_STEP_COUNTER)` is null. Manifest: ACTIVITY_RECOGNITION (runtime prompt only on API 29+, after a plain explanation pop-up; permanently denied -> "Open phone settings").
+  UI: `ui/today/StepsCard` (today's steps + 7-day bars, labelled approximate). No Health Connect, no INTERNET use.
+- NOT yet seen on the phone (PIN lock). 177 unit tests.

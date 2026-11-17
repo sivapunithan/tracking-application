@@ -16,6 +16,8 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.spcode.tnpscprep.ui.AppRoot
 import com.spcode.tnpscprep.ui.affairs.AffairsViewModel
+import com.spcode.tnpscprep.ui.auth.AuthGate
+import com.spcode.tnpscprep.ui.auth.AuthViewModel
 import com.spcode.tnpscprep.ui.affairs.HeadlinesViewModel
 import com.spcode.tnpscprep.ui.syllabus.SyllabusViewModel
 import com.spcode.tnpscprep.ui.theme.ThemeMode
@@ -36,28 +38,33 @@ class MainActivity : AppCompatActivity() {
             val themeMode by c.settingsStore.themeMode.collectAsStateWithLifecycle()
             TnpscTheme(ThemeMode.fromName(themeMode)) {
                 Surface(color = MaterialTheme.colorScheme.background) {
-                    val syllabusVm = viewModel<SyllabusViewModel>(
-                        factory = viewModelFactory { initializer { SyllabusViewModel(c.syllabusRepository) } },
+                    val authVm = viewModel<AuthViewModel>(
+                        factory = viewModelFactory { initializer { AuthViewModel(c.settingsStore, eraseData = c::resetEverything) } },
                     )
-                    val timerVm = viewModel<TimerViewModel>(
-                        factory = viewModelFactory {
-                            initializer { TimerViewModel(c.sessionRepository, c.settingsStore, c.syllabusRepository) }
-                        },
-                    )
-                    val todayVm = viewModel<TodayViewModel>(
-                        factory = viewModelFactory {
-                            initializer { TodayViewModel(c.syllabusRepository, c.affairRepository, c.newsRepository, c.sessionRepository, c.settingsStore) }
-                        },
-                    )
-                    val affairsVm = viewModel<AffairsViewModel>(
-                        factory = viewModelFactory { initializer { AffairsViewModel(c.affairRepository) } },
-                    )
-                    val headlinesVm = viewModel<HeadlinesViewModel>(
-                        factory = viewModelFactory {
-                            initializer { HeadlinesViewModel(c.newsRepository, c.affairRepository, c.settingsStore) }
-                        },
-                    )
-                    AppRoot(todayVm, syllabusVm, affairsVm, headlinesVm, timerVm, twoPane = widthClass != WindowWidthSizeClass.Compact)
+                    AuthGate(authVm) {
+                        val syllabusVm = viewModel<SyllabusViewModel>(
+                            factory = viewModelFactory { initializer { SyllabusViewModel(c.syllabusRepository) } },
+                        )
+                        val timerVm = viewModel<TimerViewModel>(
+                            factory = viewModelFactory {
+                                initializer { TimerViewModel(c.sessionRepository, c.settingsStore, c.syllabusRepository) }
+                            },
+                        )
+                        val todayVm = viewModel<TodayViewModel>(
+                            factory = viewModelFactory {
+                                initializer { TodayViewModel(c.syllabusRepository, c.affairRepository, c.newsRepository, c.sessionRepository, c.activityRepository, c.settingsStore) }
+                            },
+                        )
+                        val affairsVm = viewModel<AffairsViewModel>(
+                            factory = viewModelFactory { initializer { AffairsViewModel(c.affairRepository) } },
+                        )
+                        val headlinesVm = viewModel<HeadlinesViewModel>(
+                            factory = viewModelFactory {
+                                initializer { HeadlinesViewModel(c.newsRepository, c.affairRepository, c.settingsStore) }
+                            },
+                        )
+                        AppRoot(todayVm, syllabusVm, affairsVm, headlinesVm, authVm, timerVm, twoPane = widthClass != WindowWidthSizeClass.Compact)
+                    }
                 }
             }
         }

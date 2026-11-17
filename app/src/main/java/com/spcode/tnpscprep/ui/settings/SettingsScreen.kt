@@ -25,6 +25,8 @@ import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import android.text.format.DateUtils
 import com.spcode.tnpscprep.ui.affairs.HeadlinesViewModel
+import com.spcode.tnpscprep.ui.auth.AccountSection
+import com.spcode.tnpscprep.ui.auth.AuthViewModel
 import com.spcode.tnpscprep.ui.design.LocalBottomBarInset
 import com.spcode.tnpscprep.ui.design.ScreenTitle
 import com.spcode.tnpscprep.ui.mood.MoodLabSheet
@@ -41,7 +43,7 @@ import androidx.compose.ui.unit.dp
 import com.spcode.tnpscprep.R
 
 @Composable
-fun SettingsScreen(headlines: HeadlinesViewModel) {
+fun SettingsScreen(headlines: HeadlinesViewModel, auth: AuthViewModel) {
     var selected by remember { mutableStateOf(AppLocale.current()) }
     val newsOn by headlines.enabled.collectAsStateWithLifecycle()
     val lastMs by headlines.lastRefreshMs.collectAsStateWithLifecycle()
@@ -81,6 +83,8 @@ fun SettingsScreen(headlines: HeadlinesViewModel) {
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
         )
+        AccountSection(auth)
+        Spacer(Modifier.height(8.dp))
         var showMoods by rememberSaveable { mutableStateOf(false) }
         OutlinedButton(onClick = { showMoods = true }) { Text(stringResource(R.string.mood_lab_button)) }
         if (showMoods) MoodLabSheet(onDismiss = { showMoods = false })

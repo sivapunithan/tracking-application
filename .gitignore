@@ -14,3 +14,4 @@ release/
 # Personal artwork (a real person's likeness): keep OUT of the public repo
 design-src/
 app/src/main/res/drawable-nodpi/mood_*
+app/src/main/res/drawable-nodpi/login_*

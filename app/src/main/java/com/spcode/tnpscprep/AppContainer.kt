@@ -7,6 +7,10 @@ import com.spcode.tnpscprep.data.db.AppDatabase
 import com.spcode.tnpscprep.data.db.MIGRATION_1_2
 import com.spcode.tnpscprep.data.db.MIGRATION_2_3
 import com.spcode.tnpscprep.data.db.MIGRATION_3_4
+import com.spcode.tnpscprep.data.db.MIGRATION_4_5
+import com.spcode.tnpscprep.data.db.MIGRATION_5_6
+import com.spcode.tnpscprep.data.db.MIGRATION_6_7
+import com.spcode.tnpscprep.data.db.MIGRATION_7_8
 import com.spcode.tnpscprep.data.news.FeedListDto
 import com.spcode.tnpscprep.data.news.FeedPolicy
 import com.spcode.tnpscprep.data.news.HttpFeedSource
@@ -26,7 +30,7 @@ class AppContainer(context: Context) {
 
     val database: AppDatabase by lazy {
         Room.databaseBuilder(appContext, AppDatabase::class.java, "tnpscprep.db")
-            .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+            .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8)
             .build()
     }
 
@@ -34,6 +38,10 @@ class AppContainer(context: Context) {
 
     val sessionRepository by lazy { com.spcode.tnpscprep.data.SessionRepository(database) }
     val settingsStore by lazy { com.spcode.tnpscprep.data.SettingsStore(appContext) }
+
+    val healthRepository by lazy { com.spcode.tnpscprep.data.HealthRepository(database) }
+    val stepRepository by lazy { com.spcode.tnpscprep.data.StepRepository(database) }
+    val activityRepository by lazy { com.spcode.tnpscprep.data.ActivityRepository(database) }
 
     val affairRepository by lazy { com.spcode.tnpscprep.data.AffairRepository(database) }
 
@@ -56,5 +64,16 @@ class AppContainer(context: Context) {
     suspend fun seedAffairs(): SeedResult {
         val text = appContext.assets.open("current_affairs.json").bufferedReader().use { it.readText() }
         return affairSeeder.seedIfNeeded(text)
+    }
+
+    /**
+     * "Delete account": wipe the database (progress, notes, sessions, bookmarks, headlines) and every setting,
+     * then load the syllabus and current-affairs packs again so the app is usable as on first launch.
+     */
+    suspend fun resetEverything() {
+        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { database.clearAllTables() }
+        settingsStore.clearAll()
+        seedSyllabus()
+        seedAffairs()
     }
 }

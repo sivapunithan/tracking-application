@@ -56,6 +56,7 @@ import com.spcode.tnpscprep.R
 import com.spcode.tnpscprep.ui.affairs.AffairsTab
 import com.spcode.tnpscprep.ui.affairs.AffairsViewModel
 import com.spcode.tnpscprep.ui.affairs.HeadlinesViewModel
+import com.spcode.tnpscprep.ui.auth.AuthViewModel
 import com.spcode.tnpscprep.ui.design.FloatingNavBar
 import com.spcode.tnpscprep.ui.design.LocalBottomBarInset
 import com.spcode.tnpscprep.ui.design.NavItem
@@ -110,7 +111,7 @@ private fun AnimatedContentTransitionScope<NavBackStackEntry>.tabExit(): ExitTra
 @Composable
 fun AppRoot(
     todayVm: TodayViewModel, syllabusVm: SyllabusViewModel, affairsVm: AffairsViewModel, headlinesVm: HeadlinesViewModel,
-    timerVm: TimerViewModel, twoPane: Boolean,
+    authVm: AuthViewModel, timerVm: TimerViewModel, twoPane: Boolean,
 ) {
     val nav = rememberNavController()
     val route = nav.currentBackStackEntryAsState().value?.destination?.route ?: Routes.TODAY
@@ -158,7 +159,7 @@ fun AppRoot(
                 composable(Routes.SYLLABUS) { SyllabusScreen(syllabusVm, twoPane) }
                 composable(Routes.AFFAIRS) { AffairsTab(affairsVm, headlinesVm) }
                 composable(Routes.TIMER) { TimerScreen(timerVm) }
-                composable(Routes.SETTINGS) { SettingsScreen(headlinesVm) }
+                composable(Routes.SETTINGS) { SettingsScreen(headlinesVm, authVm) }
             }
         }
         Box(

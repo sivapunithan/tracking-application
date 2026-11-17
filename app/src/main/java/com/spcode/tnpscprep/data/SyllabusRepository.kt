@@ -4,7 +4,9 @@ import androidx.room.withTransaction
 import com.spcode.tnpscprep.data.db.AppDatabase
 import com.spcode.tnpscprep.data.db.TopicNoteEntity
 import com.spcode.tnpscprep.data.db.TopicProgressEntity
+import com.spcode.tnpscprep.domain.ActivityType
 import com.spcode.tnpscprep.domain.RevisionLevel
+import kotlinx.serialization.json.put
 import kotlinx.coroutines.flow.Flow
 
 /** What the UI talks to (Spring: the service layer over DAOs). */
@@ -15,6 +17,7 @@ class SyllabusRepository(
     private val syllabus = db.syllabusDao()
     private val progress = db.progressDao()
     private val notes = db.noteDao()
+    private val activity = db.activityDao()
 
     fun observeSubjects() = syllabus.observeSubjects()
     fun observeUnits() = syllabus.observeUnits()
@@ -31,6 +34,7 @@ class SyllabusRepository(
 
     suspend fun saveNote(topicId: String, text: String) = db.withTransaction {
         writeNote(topicId, text.trim(), starred = notes.get(topicId)?.starred ?: false)
+        if (text.isNotBlank()) activity.insert(ActivityEvents.build(ActivityType.NOTE, topicId, now()) { put("chars", text.trim().length) })
     }
 
     /** A row exists only while there is something to keep (a note or a star). */
@@ -48,8 +52,15 @@ class SyllabusRepository(
         val current = progress.getLevel(topicId) ?: RevisionLevel.NOT_STARTED
         val next = RevisionLevel.advance(current)
         progress.upsert(TopicProgressEntity(topicId, next, now()))
+        activity.insert(ActivityEvents.build(ActivityType.TOPIC_PROGRESS, topicId, now()) { put("from", current); put("to", next) })
     }
 
     /** Long-press: delete the row (no row == Not started). */
-    suspend fun reset(topicId: String) = progress.reset(topicId)
+    suspend fun reset(topicId: String) = db.withTransaction {
+        val before = progress.getLevel(topicId) ?: RevisionLevel.NOT_STARTED
+        progress.reset(topicId)
+        if (before != RevisionLevel.NOT_STARTED) {
+            activity.insert(ActivityEvents.build(ActivityType.TOPIC_PROGRESS, topicId, now()) { put("from", before); put("to", 0) })
+        }
+    }
 }

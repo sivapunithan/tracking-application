@@ -69,6 +69,10 @@ class TimerViewModel(
     private val _notice = MutableStateFlow<TimerNotice>(TimerNotice.None)
     private val _completions = MutableStateFlow(0)
     private var focusStartedAt = 0L
+    private var focusRun = 0
+    private val _breakNudge = MutableStateFlow(false)
+    /** True after 50+ focus minutes with no break taken: the screen shows a gentle "stand up" hint (no notification). */
+    val breakNudge: StateFlow<Boolean> = _breakNudge.asStateFlow()
     private var tickerJob: Job? = null
 
     /** Cheap, separate flows for the app root (keep-screen-on, haptic) so it doesn't recompose every tick. */
@@ -118,6 +122,7 @@ class TimerViewModel(
             _state.value = PomodoroLogic.pause(s, clock())
         } else {
             if (s.phase == Phase.FOCUS && focusStartedAt == 0L) focusStartedAt = wallClock()
+            if (s.phase == Phase.BREAK) { focusRun = 0; _breakNudge.value = false } // she is taking the break
             _state.value = PomodoroLogic.start(s, clock())
             _notice.value = TimerNotice.None
             startTicker()
@@ -125,6 +130,7 @@ class TimerViewModel(
     }
 
     fun onReset() {
+        focusRun = 0; _breakNudge.value = false
         _state.value = PomodoroLogic.reset(_state.value, config)
         focusStartedAt = 0L
         _notice.value = TimerNotice.None
@@ -191,5 +197,7 @@ class TimerViewModel(
         viewModelScope.launch { sessions.logFocus(minutes, subject, startedAt, day) }
         _notice.value = TimerNotice.Logged(minutes)
         _completions.value += 1
+        focusRun += minutes
+        _breakNudge.value = com.spcode.tnpscprep.domain.BreakNudge.due(focusRun)
     }
 }

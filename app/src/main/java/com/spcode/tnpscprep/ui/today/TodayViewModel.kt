@@ -2,7 +2,10 @@ package com.spcode.tnpscprep.ui.today
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.spcode.tnpscprep.data.ActivityRepository
 import com.spcode.tnpscprep.data.AffairRepository
+import com.spcode.tnpscprep.domain.DaySummary
+import com.spcode.tnpscprep.domain.Heatmap
 import com.spcode.tnpscprep.data.NewsRepository
 import com.spcode.tnpscprep.data.SessionRepository
 import com.spcode.tnpscprep.data.SettingsStore
@@ -38,12 +41,17 @@ data class TodayUiState(
     val daysSinceStudy: Int? = null,
 )
 
+const val HEAT_WEEKS = 26
+
+data class HeatState(val weeks: List<List<DaySummary?>> = emptyList(), val noteDates: Set<LocalDate> = emptySet())
+
 @OptIn(ExperimentalCoroutinesApi::class)
 class TodayViewModel(
     private val repo: SyllabusRepository,
     private val affairs: AffairRepository,
     news: NewsRepository,
     sessions: SessionRepository,
+    private val activity: ActivityRepository,
     private val settings: SettingsStore,
     today: () -> LocalDate = LocalDate::now,
     private val zone: ZoneId = ZoneId.systemDefault(),
@@ -73,6 +81,18 @@ class TodayViewModel(
     private val stats = combine(sessions.observeDayTotals(), dayFlow, settings.dailyGoalMinutes) { totals, day, goal ->
         Pair(buildDayStats(totals, goal, day), goal)
     }
+
+    /** Heatmap: last [HEAT_WEEKS] weeks, derived from activity_event (never from stored daily totals). */
+    val heat: StateFlow<HeatState> = dayFlow.flatMapLatest { day ->
+        combine(
+            activity.observeHeatEvents(Heatmap.firstDate(day, HEAT_WEEKS)), settings.dailyGoalMinutes,
+            activity.observeNoteDates(Heatmap.firstDate(day, HEAT_WEEKS)),
+        ) { events, goal, notes -> HeatState(Heatmap.grid(Heatmap.summarise(events, goal), day, HEAT_WEEKS), notes) }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HeatState())
+
+    fun dayEvents(date: LocalDate) = activity.observeDay(date)
+    fun dayNote(date: LocalDate) = activity.observeNote(date)
+    fun saveDayNote(date: LocalDate, text: String) { viewModelScope.launch { activity.saveNote(date, text) } }
 
     val userName: StateFlow<String> = settings.userName
 

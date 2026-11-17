@@ -196,7 +196,7 @@ private fun DrawScope.puddle(t: Float) {
     drawPath(path, Brush.verticalGradient(listOf(Blue.copy(alpha = 0.65f), DeepBlue.copy(alpha = 0.8f)), startY = base * s, endY = s))
 }
 
-private val ConfettiColors = listOf(Color(0xFFF59E0B), Color(0xFF4F46E5), Color(0xFF0D9488), Color(0xFFEF4444), Color(0xFFEC4899))
+private val ConfettiColors = listOf(Color(0xFFF5B301), Color(0xFFC8102E), Color(0xFF800020), Color(0xFFFB923C), Color(0xFFF472B6))
 
 private fun DrawScope.confetti(t: Float, count: Int) {
     val s = size.minDimension

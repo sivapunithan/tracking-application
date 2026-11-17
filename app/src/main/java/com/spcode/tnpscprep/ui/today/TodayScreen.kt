@@ -58,6 +58,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.initializer
 import com.spcode.tnpscprep.R
 import com.spcode.tnpscprep.domain.MoodEngine
 import com.spcode.tnpscprep.domain.MoodInput
@@ -90,6 +91,9 @@ import kotlinx.coroutines.delay
 fun TodayScreen(vm: TodayViewModel) {
     val ui by vm.ui.collectAsStateWithLifecycle()
     val name by vm.userName.collectAsStateWithLifecycle()
+    val heat by vm.heat.collectAsStateWithLifecycle()
+    val appCtx = androidx.compose.ui.platform.LocalContext.current.applicationContext
+    val stepSensor = remember { hasStepSensor(appCtx) }
     // Which pop-up is open: null, "date", "due:<id>" or "star:<id>" (saveable, so rotation keeps it).
     var sheet by rememberSaveable { mutableStateOf<String?>(null) }
 
@@ -115,6 +119,19 @@ fun TodayScreen(vm: TodayViewModel) {
         }
 
         item { StatsRow(ui) }
+
+        item { HeatmapSection(heat, onDay = { sheet = "day:" + it }) }
+
+        if (stepSensor) item { StepsCard() }
+
+        item {
+            SoftCard(Modifier.fillMaxWidth(), onClick = { sheet = "health" }) {
+                Column(Modifier.padding(16.dp)) {
+                    Text(stringResource(R.string.health_title), style = MaterialTheme.typography.titleSmall)
+                    Text(stringResource(R.string.health_card_sub), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
+        }
 
         // --- due for revision ---
         item { SectionTitle(stringResource(R.string.due_title, ui.progress.due.size)) }
@@ -208,6 +225,19 @@ fun TodayScreen(vm: TodayViewModel) {
         PopSheet(onDismiss = { sheet = null }) { dismiss ->
             when {
                 current == "date" -> ExamDateSheet(ui, onSave = { vm.setExamDate(it); dismiss() }, onClear = { vm.clearExamDate(); dismiss() }, onCancel = dismiss)
+                current == "health" -> {
+                    val app = androidx.compose.ui.platform.LocalContext.current.applicationContext as com.spcode.tnpscprep.TnpscApp
+                    val hvm = androidx.lifecycle.viewmodel.compose.viewModel<HealthViewModel>(
+                        factory = androidx.lifecycle.viewmodel.viewModelFactory {
+                            initializer { HealthViewModel(app.container.healthRepository, app.container.settingsStore) }
+                        },
+                    )
+                    HealthSheet(hvm, dismiss)
+                }
+                current.startsWith("day:") -> {
+                    val date = runCatching { java.time.LocalDate.parse(current.removePrefix("day:")) }.getOrNull()
+                    if (date == null) LaunchedEffect(Unit) { dismiss() } else DaySheet(vm, date, dismiss)
+                }
                 current.startsWith("due:") -> {
                     val item = ui.progress.due.firstOrNull { it.topicId == current.removePrefix("due:") }
                     if (item == null) LaunchedEffect(Unit) { dismiss() } else DueSheet(item, onRevised = { vm.markRevised(item) }, dismiss = dismiss)
@@ -286,7 +316,7 @@ private fun Header(name: String, ui: TodayUiState) {
 private fun HeroCard(ui: TodayUiState, onPickDate: () -> Unit) {
     val dark = LocalIsDark.current
     val brush = Brush.linearGradient(
-        if (dark) listOf(Color(0xFF3730A3), Color(0xFF0F766E)) else listOf(Color(0xFF4F46E5), Color(0xFF0D9488)),
+        if (dark) listOf(Color(0xFF9B0F26), Color(0xFF4A0A14)) else listOf(Color(0xFFC8102E), Color(0xFF7A0019)),
     )
     val days = ui.daysToExam
     Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(32.dp)).background(brush).padding(22.dp)) {

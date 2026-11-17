@@ -123,3 +123,45 @@ interface NewsDao {
     @Query("DELETE FROM news_item WHERE publishedAt < :cutoff AND ('news-' || id) NOT IN (SELECT itemId FROM ca_state)")
     suspend fun prune(cutoff: Long): Int
 }
+
+@Dao
+interface ActivityDao {
+    @Insert suspend fun insert(event: ActivityEventEntity)
+
+    @Query("SELECT * FROM activity_event WHERE localDate = :date AND type != 'HEALTH_LOG' ORDER BY timestamp")
+    fun observeDay(date: String): Flow<List<ActivityEventEntity>>
+
+    @Query("SELECT COUNT(*) FROM activity_event") suspend fun count(): Int
+
+    @Query("DELETE FROM activity_event WHERE type = :type AND refId = :refId") suspend fun deleteByRef(type: String, refId: String)
+
+    @Query("DELETE FROM activity_event WHERE type = :type") suspend fun deleteType(type: String)
+
+    @Query("SELECT * FROM activity_event WHERE localDate >= :from AND type NOT IN ('HEALTH_LOG', 'STEPS') ORDER BY timestamp")
+    fun observeSince(from: String): Flow<List<ActivityEventEntity>>
+
+    @Query("SELECT * FROM day_note WHERE date = :date")
+    fun observeNote(date: String): Flow<DayNoteEntity?>
+
+    @Insert(onConflict = androidx.room.OnConflictStrategy.REPLACE) suspend fun putNote(n: DayNoteEntity)
+
+    @Query("DELETE FROM day_note WHERE date = :date") suspend fun deleteNote(date: String)
+
+    @Query("SELECT date FROM day_note WHERE date >= :from")
+    fun observeNoteDates(from: String): Flow<List<String>>
+}
+
+@Dao
+interface HealthDao {
+    @Insert suspend fun insert(e: HealthEntryEntity)
+    @Query("SELECT * FROM health_entry ORDER BY date DESC, id DESC") fun observeAll(): Flow<List<HealthEntryEntity>>
+    @Query("DELETE FROM health_entry WHERE id = :id") suspend fun delete(id: Long)
+    @Query("DELETE FROM health_entry") suspend fun deleteAll()
+}
+
+@Dao
+interface StepDao {
+    @Query("SELECT * FROM step_day ORDER BY date DESC LIMIT 1") suspend fun latest(): StepDayEntity?
+    @Insert(onConflict = androidx.room.OnConflictStrategy.REPLACE) suspend fun upsert(e: StepDayEntity)
+    @Query("SELECT * FROM step_day WHERE date >= :from ORDER BY date") fun observeSince(from: String): Flow<List<StepDayEntity>>
+}

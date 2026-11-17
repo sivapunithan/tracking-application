@@ -77,6 +77,9 @@ fun TimerScreen(vm: TimerViewModel) {
             TextButton(onClick = vm::onSkip) { Text(stringResource(R.string.skip)) }
         }
 
+        val nudge by vm.breakNudge.collectAsStateWithLifecycle()
+        if (nudge) Text(stringResource(R.string.break_nudge), color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.bodyMedium)
+
         when (val n = ui.notice) {
             TimerNotice.None -> Unit
             TimerNotice.LeftApp -> Text(stringResource(R.string.notice_left_app), color = MaterialTheme.colorScheme.error)

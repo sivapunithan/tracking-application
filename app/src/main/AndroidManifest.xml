@@ -3,6 +3,9 @@
     <!-- The ONLY permission. Used solely by the optional "Latest headlines" feature (HttpFeedSource);
          it can be switched off in Settings, and all traffic is https to the hosts listed in assets/feeds.json. -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Optional step counter: only asked for after a plain explanation screen; the app works without it. -->
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
+    <uses-feature android:name="android.hardware.sensor.stepcounter" android:required="false" />
     <application
         android:name=".TnpscApp"
         android:allowBackup="false"
