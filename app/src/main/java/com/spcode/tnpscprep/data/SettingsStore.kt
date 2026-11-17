@@ -104,6 +104,11 @@ class SettingsStore(context: Context) {
     fun wrapupDraft(): String? = prefs.getString(K_WRAP_DRAFT, null)
     fun setWrapupDraft(json: String?) { prefs.edit().apply { if (json == null) remove(K_WRAP_DRAFT) else putString(K_WRAP_DRAFT, json) }.apply() }
 
+    private val _lastBackup = MutableStateFlow(prefs.getLong(K_LAST_BACKUP, 0L))
+    /** Epoch millis of the last backup file she saved (0 = never). Not part of the backup itself. */
+    val lastBackupMs: StateFlow<Long> = _lastBackup.asStateFlow()
+    fun setLastBackupMs(v: Long) { prefs.edit().putLong(K_LAST_BACKUP, v).apply(); _lastBackup.value = v }
+
     fun setGettingStartedDone(v: Boolean) { prefs.edit().putBoolean(K_GS_DONE, v).apply(); _gsDone.value = v }
 
     // ---- phone usage (opt-in, off by default) ----
@@ -135,7 +140,7 @@ class SettingsStore(context: Context) {
         prefs.edit().clear().apply()
         _focus.value = 25; _break.value = 5; _goal.value = 60
         _wrapHour.value = com.spcode.tnpscprep.domain.TodayGuide.EVENING_HOUR; _remOn.value = false; _remMin.value = com.spcode.tnpscprep.domain.ReminderTime.DEFAULT_MINUTES; _targetExam.value = "ALL"; _examMask.value = com.spcode.tnpscprep.domain.Exam.ALL_MASK; _examDay.value = NO_DATE
-        _newsEnabled.value = true; _newsLast.value = 0L
+        _newsEnabled.value = true; _newsLast.value = 0L; _lastBackup.value = 0L
         _theme.value = "LIGHT"; _name.value = ""; _account.value = false
         _health.value = HealthProfile(); _usage.value = false; _gsDone.value = false; _strictFood.value = false; _foodAlert.value = ""
     }
@@ -182,6 +187,7 @@ class SettingsStore(context: Context) {
         private const val K_NEWS = "news_enabled"
         private const val K_NEWS_LAST = "news_last_refresh"
         private const val K_EXAM_DAY = "exam_epoch_day"
+        private const val K_LAST_BACKUP = "last_backup_ms"
     }
 }
 

@@ -83,8 +83,13 @@ class DiaryRepository(private val db: AppDatabase, private val now: () -> Long =
     /** Merge-only import in ONE transaction: adds new entries, updates a match only if the file's copy is newer, never deletes. */
     suspend fun importJson(text: String): Result<ImportOutcome> {
         val entries = when (val r = DiaryBackup.parse(text)) { is ParseResult.Ok -> r.entries; is ParseResult.Bad -> return Result.failure(IllegalArgumentException(r.reason)) }
-        return runCatching {
-            db.withTransaction {
+        return runCatching { db.withTransaction { mergeEntries(entries) } }
+    }
+
+    /** The merge step alone, so the full restore can run it inside its own single transaction (Room allows nesting). */
+    suspend fun mergeEntries(entries: List<DiaryDto>): ImportOutcome {
+        return run {
+            run {
                 val plan = DiaryBackup.plan(dao.all().map { ExistingDiary(it.id, it.localDate, it.createdAt, it.updatedAt) }, entries)
                 plan.inserts.forEach { e ->
                     val id = dao.insert(DiaryEntryEntity(localDate = e.localDate, text = e.text, moodEmojiId = e.moodEmojiId, createdAt = e.createdAt, updatedAt = e.updatedAt, pinned = e.pinned, wrapup = e.wrapup))

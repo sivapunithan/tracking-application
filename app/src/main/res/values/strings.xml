@@ -534,4 +534,15 @@
         <item quantity="one">%1$d day to go</item>
         <item quantity="other">%1$d days to go</item>
     </plurals>
+    <string name="bk_title">Back up and restore</string>
+    <string name="bk_note">Back up saves everything (study progress, notes, check-ins, diary, health log and your settings) into one file you choose where to keep. It is NOT encrypted, so keep it somewhere private. It never includes your PIN. Restore only adds and updates; it never deletes anything.</string>
+    <string name="bk_save">Back up everything</string>
+    <string name="bk_restore">Restore from a file</string>
+    <string name="bk_last">Last backed up: %1$s</string>
+    <string name="bk_never">Not backed up yet</string>
+    <string name="bk_saved">Backup saved.</string>
+    <string name="bk_save_failed">Could not save the file.</string>
+    <string name="bk_restored">Restored. Added %1$d, updated %2$d.</string>
+    <string name="bk_bad">That file is not a valid Mathi backup. Nothing was changed.</string>
+    <string name="bk_busy">Working…</string>
 </resources>

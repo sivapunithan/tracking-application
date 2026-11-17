@@ -41,6 +41,9 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -263,7 +266,51 @@ private fun DataPage(auth: AuthViewModel) {
     Text(stringResource(R.string.syllabus_source_title), style = MaterialTheme.typography.titleMedium)
     Text(stringResource(R.string.syllabus_source_note), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
     Spacer(Modifier.height(8.dp))
+    BackupSection()
+    Spacer(Modifier.height(8.dp))
     AccountSection(auth, showSecurity = false)
+}
+
+/** Full backup / restore through Android's file pickers (no permission). The result of a restore is all-or-nothing. */
+@Composable
+private fun BackupSection() {
+    val ctx = androidx.compose.ui.platform.LocalContext.current
+    val container = (ctx.applicationContext as com.spcode.tnpscprep.TnpscApp).container
+    val repo = container.backupRepository
+    val last by container.settingsStore.lastBackupMs.collectAsStateWithLifecycle()
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
+    var notice by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf<String?>(null) }
+    var busy by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf(false) }
+    val saved = stringResource(R.string.bk_saved); val saveFail = stringResource(R.string.bk_save_failed)
+    val bad = stringResource(R.string.bk_bad); val restoredFmt = stringResource(R.string.bk_restored)
+    val save = androidx.activity.compose.rememberLauncherForActivityResult(androidx.activity.result.contract.ActivityResultContracts.CreateDocument("application/json")) { uri ->
+        if (uri != null) { busy = true; scope.launch {
+            val ok = runCatching {
+                val text = repo.exportJson()
+                withContext(Dispatchers.IO) { ctx.contentResolver.openOutputStream(uri, "wt")!!.use { it.write(text.toByteArray(Charsets.UTF_8)) } }
+            }.isSuccess
+            if (ok) repo.markBackedUp()
+            notice = if (ok) saved else saveFail; busy = false
+        } }
+    }
+    val restore = androidx.activity.compose.rememberLauncherForActivityResult(androidx.activity.result.contract.ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) { busy = true; scope.launch {
+            val text = runCatching { withContext(Dispatchers.IO) { ctx.contentResolver.openInputStream(uri)!!.use { it.readBytes() }.toString(Charsets.UTF_8) } }.getOrNull()
+            val r = if (text == null || text.length > com.spcode.tnpscprep.data.AppBackup.MAX_FILE_CHARS) null else repo.restore(text).getOrNull()
+            notice = if (r == null) bad else String.format(restoredFmt, r.added, r.updated); busy = false
+        } }
+    }
+    val lastText = if (last <= 0L) stringResource(R.string.bk_never)
+        else stringResource(R.string.bk_last, java.time.Instant.ofEpochMilli(last).atZone(java.time.ZoneId.systemDefault()).toLocalDate().format(java.time.format.DateTimeFormatter.ofLocalizedDate(java.time.format.FormatStyle.MEDIUM)))
+    Text(stringResource(R.string.bk_title), style = MaterialTheme.typography.titleMedium)
+    Text(stringResource(R.string.bk_note), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    Text(lastText, style = MaterialTheme.typography.bodyMedium)
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        androidx.compose.material3.Button(enabled = !busy, onClick = { save.launch("mathi-backup-" + java.time.LocalDate.now() + ".json") }) { Text(stringResource(R.string.bk_save)) }
+        androidx.compose.material3.OutlinedButton(enabled = !busy, onClick = { restore.launch(arrayOf("application/json", "text/plain", "application/octet-stream")) }) { Text(stringResource(R.string.bk_restore)) }
+    }
+    if (busy) Text(stringResource(R.string.bk_busy), style = MaterialTheme.typography.bodySmall)
+    notice?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary) }
 }
 
 

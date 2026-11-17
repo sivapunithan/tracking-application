@@ -131,7 +131,7 @@ object AppBackup {
      * Activity events. Identity = type + refId + timestamp. One-per-day check-ins (FOOD/MOOD/STEPS: refId = the date) keep only the
      * NEWER row per (type, refId), so a restore never gives a day two food answers.
      */
-    private val ONE_PER_REF = setOf(ActivityType.FOOD_CHECKIN.name, ActivityType.MOOD_CHECKIN.name, ActivityType.STEPS.name)
+    val ONE_PER_REF = setOf(ActivityType.FOOD_CHECKIN.name, ActivityType.MOOD_CHECKIN.name, ActivityType.STEPS.name)
     fun eventsToAdd(local: Set<Triple<String, String?, Long>>, localLatestByRef: Map<Pair<String, String>, Long>, incoming: List<EventDto>): List<EventDto> {
         val (single, many) = incoming.partition { it.type in ONE_PER_REF && it.refId != null }
         val newestSingle = newest(single, { it.type to it.refId }, { it.timestamp }).filter { e -> localLatestByRef[e.type to e.refId!!]?.let { e.timestamp > it } ?: true }
