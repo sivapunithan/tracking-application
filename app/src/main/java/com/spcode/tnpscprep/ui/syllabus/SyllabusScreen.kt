@@ -20,16 +20,19 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -42,6 +45,8 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.spcode.tnpscprep.R
@@ -56,6 +61,15 @@ fun SyllabusScreen(viewModel: SyllabusViewModel, twoPane: Boolean) {
     val filter by viewModel.filter.collectAsStateWithLifecycle()
     // rememberSaveable: survives rotation AND process death (ColorOS kills background apps).
     var selectedId by rememberSaveable { mutableStateOf<String?>(null) }
+    // Note dialog state is saveable too, so rotating while typing doesn't lose the text.
+    var noteTopicId by rememberSaveable { mutableStateOf<String?>(null) }
+    var noteText by rememberSaveable { mutableStateOf("") }
+    var noteLoaded by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(noteTopicId) {
+        val id = noteTopicId
+        if (id != null && !noteLoaded) { noteText = viewModel.loadNote(id); noteLoaded = true }
+    }
+    val onOpenNote: (String) -> Unit = { id -> noteText = ""; noteLoaded = false; noteTopicId = id }
 
     val current = subjects.firstOrNull { it.id == selectedId }
         ?: if (twoPane) subjects.firstOrNull() else null
@@ -70,14 +84,37 @@ fun SyllabusScreen(viewModel: SyllabusViewModel, twoPane: Boolean) {
             twoPane -> Row(Modifier.fillMaxSize()) {
                 SubjectList(subjects, current?.id, { selectedId = it }, Modifier.weight(0.4f).fillMaxHeight())
                 VerticalDivider()
-                if (current != null) SubjectDetail(current, viewModel, showBack = false, onBack = {}, Modifier.weight(0.6f).fillMaxHeight())
+                if (current != null) SubjectDetail(current, viewModel, onOpenNote, showBack = false, onBack = {}, Modifier.weight(0.6f).fillMaxHeight())
             }
             current == null -> SubjectList(subjects, null, { selectedId = it }, Modifier.fillMaxSize())
             else -> {
                 BackHandler { selectedId = null }
-                SubjectDetail(current, viewModel, showBack = true, onBack = { selectedId = null }, Modifier.fillMaxSize())
+                SubjectDetail(current, viewModel, onOpenNote, showBack = true, onBack = { selectedId = null }, Modifier.fillMaxSize())
             }
         }
+    }
+
+    val noteTopic = subjects.asSequence().flatMap { it.units }.flatMap { it.topics }.firstOrNull { it.id == noteTopicId }
+    if (noteTopic != null && noteLoaded) {
+        AlertDialog(
+            onDismissRequest = { noteTopicId = null },
+            title = { Text(localized(noteTopic.nameEn, noteTopic.nameTa), style = MaterialTheme.typography.titleMedium) },
+            text = {
+                OutlinedTextField(
+                    value = noteText,
+                    onValueChange = { noteText = it },
+                    placeholder = { Text(stringResource(R.string.note_hint)) },
+                    minLines = 4,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = { viewModel.onSaveNote(noteTopic.id, noteText); noteTopicId = null }) {
+                    Text(stringResource(R.string.save))
+                }
+            },
+            dismissButton = { TextButton(onClick = { noteTopicId = null }) { Text(stringResource(R.string.cancel)) } },
+        )
     }
 }
 
@@ -142,7 +179,7 @@ private fun SubjectList(
 
 @Composable
 private fun SubjectDetail(
-    subject: SubjectUi, vm: SyllabusViewModel, showBack: Boolean, onBack: () -> Unit, modifier: Modifier,
+    subject: SubjectUi, vm: SyllabusViewModel, onOpenNote: (String) -> Unit, showBack: Boolean, onBack: () -> Unit, modifier: Modifier,
 ) {
     LazyColumn(modifier, contentPadding = PaddingValues(bottom = 24.dp)) {
         item {
@@ -161,7 +198,13 @@ private fun SubjectDetail(
                 )
             }
             items(unit.topics, key = { it.id }) { t ->
-                TopicRow(t, onTap = { vm.onTopicTap(t.id) }, onLongPress = { vm.onTopicLongPress(t.id) })
+                TopicRow(
+                    t,
+                    onTap = { vm.onTopicTap(t.id) },
+                    onLongPress = { vm.onTopicLongPress(t.id) },
+                    onStar = { vm.onToggleStar(t.id) },
+                    onNote = { onOpenNote(t.id) },
+                )
             }
         }
     }
@@ -169,7 +212,7 @@ private fun SubjectDetail(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun TopicRow(t: TopicUi, onTap: () -> Unit, onLongPress: () -> Unit) {
+private fun TopicRow(t: TopicUi, onTap: () -> Unit, onLongPress: () -> Unit, onStar: () -> Unit, onNote: () -> Unit) {
     val haptic = LocalHapticFeedback.current
     val levelName = stringArrayResource(R.array.revision_levels)[RevisionLevel.clamp(t.level)]
     val exams = Exam.entries.filter { t.exams and it.bit != 0 }.joinToString(" · ") { it.code }
@@ -194,7 +237,24 @@ private fun TopicRow(t: TopicUi, onTap: () -> Unit, onLongPress: () -> Unit) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
-        Spacer(Modifier.width(12.dp))
+        Spacer(Modifier.width(4.dp))
+        // Weak-topic star and own note. Text glyphs instead of an icon library: no extra dependency.
+        val starLabel = stringResource(if (t.starred) R.string.a11y_unstar else R.string.a11y_star)
+        TextButton(
+            onClick = onStar, contentPadding = PaddingValues(0.dp),
+            modifier = Modifier.size(44.dp).semantics { contentDescription = starLabel },
+        ) { Text(if (t.starred) "★" else "☆", style = MaterialTheme.typography.titleLarge) }
+        val noteLabel = stringResource(R.string.note_title)
+        TextButton(
+            onClick = onNote, contentPadding = PaddingValues(0.dp),
+            modifier = Modifier.size(44.dp).semantics { contentDescription = noteLabel },
+        ) {
+            Text(
+                "✎", style = MaterialTheme.typography.titleLarge,
+                color = if (t.hasNote) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Spacer(Modifier.width(4.dp))
         // Decorative: the text label above already says the level, so hide the dots from screen readers.
         Row(Modifier.clearAndSetSemantics {}, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
             repeat(RevisionLevel.MAX) { i ->

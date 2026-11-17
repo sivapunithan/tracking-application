@@ -32,4 +32,7 @@ class SyllabusViewModel(private val repo: SyllabusRepository) : ViewModel() {
     fun setFilter(f: ExamFilter) { _filter.value = f }
     fun onTopicTap(topicId: String) { viewModelScope.launch { repo.advance(topicId) } }
     fun onTopicLongPress(topicId: String) { viewModelScope.launch { repo.reset(topicId) } }
+    fun onToggleStar(topicId: String) { viewModelScope.launch { repo.toggleStar(topicId) } }
+    fun onSaveNote(topicId: String, text: String) { viewModelScope.launch { repo.saveNote(topicId, text) } }
+    suspend fun loadNote(topicId: String): String = repo.getNote(topicId)
 }

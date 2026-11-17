@@ -70,6 +70,18 @@ data class StudySessionEntity(
     val subjectId: String?,
 )
 
+/**
+ * Her own notes + "weak topic" star. Like topic_progress: NO foreign key to `topic`, so a syllabus
+ * update can never delete what she wrote. A row exists only if there is a note or a star.
+ */
+@Entity(tableName = "topic_note")
+data class TopicNoteEntity(
+    @PrimaryKey val topicId: String,
+    val note: String,
+    val starred: Boolean,
+    val updatedAt: Long,
+)
+
 @Entity(tableName = "app_meta")
 data class AppMetaEntity(
     @PrimaryKey val key: String,
@@ -85,6 +97,8 @@ data class TopicWithLevel(
     val nameTa: String,
     val exams: Int,
     val level: Int,
+    val starred: Boolean = false,
+    val hasNote: Boolean = false,
 )
 
 data class DayTotal(val date: String, val minutes: Int)
@@ -97,4 +111,13 @@ data class StudiedTopic(
     val nameTa: String,
     val level: Int,
     val lastUpdated: Long,
+)
+
+data class StarredTopic(
+    val topicId: String,
+    val subjectId: String,
+    val nameEn: String,
+    val nameTa: String,
+    val level: Int,
+    val note: String,
 )

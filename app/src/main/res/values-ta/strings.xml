@@ -67,4 +67,12 @@
         <item quantity="one">%d நாள் தாமதம்</item>
         <item quantity="other">%d நாள்கள் தாமதம்</item>
     </plurals>
+    <string name="note_title">என் குறிப்புகள்</string>
+    <string name="note_hint">இந்தத் தலைப்புக்கான உங்கள் சொந்தக் குறிப்புகளை எழுதுங்கள்</string>
+    <string name="save">சேமி</string>
+    <string name="a11y_star">கடினமான தலைப்பு எனக் குறியிடு</string>
+    <string name="a11y_unstar">குறியை நீக்கு</string>
+    <string name="subject_progress_title">பாடவாரி முன்னேற்றம்</string>
+    <string name="starred_title">குறியிட்ட தலைப்புகள் (%1$d)</string>
+    <string name="starred_empty">பாடத்திட்டப் பகுதியில் ஒரு தலைப்பை ☆ குறியிட்டால் இங்கே விரைவாகக் காணலாம்.</string>
 </resources>

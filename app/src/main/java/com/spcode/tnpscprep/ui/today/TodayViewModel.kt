@@ -48,8 +48,9 @@ class TodayViewModel(
 
     private val progress = target.flatMapLatest { f ->
         combine(
-            repo.observeStudied(f.mask), repo.observeTopics(f.mask), repo.observeSubjects(), dayFlow,
-        ) { studied, all, subjects, day -> buildTodayProgress(studied, all, subjects, day, zone) }
+            repo.observeStudied(f.mask), repo.observeTopics(f.mask), repo.observeSubjects(),
+            repo.observeStarred(f.mask), dayFlow,
+        ) { studied, all, subjects, starred, day -> buildTodayProgress(studied, all, subjects, day, zone, starred) }
     }
 
     private val stats = combine(sessions.observeDayTotals(), dayFlow, settings.dailyGoalMinutes) { totals, day, goal ->
@@ -75,4 +76,6 @@ class TodayViewModel(
 
     /** "Revised": raises the level by one (or just refreshes the date at the top level), restarting the interval. */
     fun markRevised(topicId: String) { viewModelScope.launch { repo.advance(topicId) } }
+
+    fun toggleStar(topicId: String) { viewModelScope.launch { repo.toggleStar(topicId) } }
 }

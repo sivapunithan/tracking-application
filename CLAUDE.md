@@ -11,7 +11,7 @@ The app is for **REVISION + a progress TRACKER + real CURRENT AFFAIRS**. It is N
 
 ## Roadmap (current)
 6. [DONE, 64 unit tests; Today screen + date picker seen on phone; due list verified by unit tests only] Revision engine: due-for-revision queue (3/7/21/60-day intervals by level), Today screen, exam date countdown, readiness %.
-7. Tracker views: readiness per exam/subject, stale topics, starred (weak) topics, per-topic own notes.
+7. [DONE: notes+star (schema v2, MIGRATION_1_2 verified on phone over a v1 DB), progress by subject, starred list; 67 unit tests] Tracker views: readiness per exam/subject, stale topics, starred (weak) topics, per-topic own notes.
 8. Current affairs: real dated items from official/open sources (own words + source + verified flag), monthly browse,
    bookmarks/revised flag on the same revision queue, user-added entries.
 9. Release: signed APK, README (EN+TA), handover notes, keystore backup instructions.
@@ -124,3 +124,11 @@ Topic IDs are stable: never renumber, only append. Bump `version` on every chang
 Copyright stance: syllabus = official public document; do NOT copy coaching-site content; previous papers only from tnpsc.gov.in with
 source/year labels (reuse terms unconfirmed); TN State Board textbooks are free to download but redistribution terms unconfirmed -> use as
 reference, write own notes with page refs.
+
+## Decisions added in increment 7
+- Schema v2: `topic_note(topicId PK, note, starred, updatedAt)`, NO FK to `topic` (same rule as progress). `MIGRATION_1_2` in
+  `data/db/Migrations.kt`; never use fallbackToDestructiveMigration. Every schema change = version bump + Migration + committed `app/schemas/<n>.json`.
+- A topic_note row exists only while there is a note or a star (otherwise deleted).
+- Star/note buttons use text glyphs (☆ ★ ✎), no icon library. Note dialog state is rememberSaveable.
+- Today tab also shows progress by subject (for the target exam) and the starred (weak) list with note previews.
+- Known gap: allowBackup=false and no export, so uninstalling loses progress/notes. Consider an export/import file in the release increment.

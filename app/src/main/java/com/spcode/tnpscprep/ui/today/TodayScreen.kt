@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
@@ -163,9 +164,76 @@ fun TodayScreen(vm: TodayViewModel) {
                 }
             }
         }
+
+        // --- progress by subject ---
+        if (ui.progress.subjects.isNotEmpty()) {
+            item {
+                Text(
+                    stringResource(R.string.subject_progress_title),
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(top = 8.dp),
+                )
+            }
+            items(ui.progress.subjects, key = { "subj-" + it.subjectId }) { sp ->
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(localized(sp.nameEn, sp.nameTa), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
+                        Text(stringResource(R.string.percent_format, sp.percent), style = MaterialTheme.typography.bodyMedium)
+                    }
+                    LinearProgressIndicator(
+                        progress = { sp.percent / 100f },
+                        modifier = Modifier.fillMaxWidth(),
+                        trackColor = MaterialTheme.colorScheme.outlineVariant,
+                    )
+                }
+            }
+        }
+
+        // --- starred (weak) topics ---
+        item {
+            Text(
+                stringResource(R.string.starred_title, ui.progress.starred.size),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(top = 8.dp),
+            )
+        }
+        if (ui.progress.starred.isEmpty()) {
+            item {
+                Text(
+                    stringResource(R.string.starred_empty),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        } else {
+            items(ui.progress.starred, key = { "star-" + it.topicId }) { st ->
+                val levelName = stringArrayResource(R.array.revision_levels)[RevisionLevel.clamp(st.level)]
+                Card(Modifier.fillMaxWidth()) {
+                    Row(
+                        Modifier.fillMaxWidth().heightIn(min = 64.dp).padding(start = 16.dp, top = 8.dp, bottom = 8.dp, end = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Column(Modifier.weight(1f)) {
+                            Text(localized(st.nameEn, st.nameTa), style = MaterialTheme.typography.bodyLarge)
+                            Text(
+                                localized(st.subjectEn, st.subjectTa) + "  ·  " + levelName,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            if (st.note.isNotBlank()) {
+                                Text(st.note, style = MaterialTheme.typography.bodySmall, maxLines = 2)
+                            }
+                        }
+                        TextButton(onClick = { vm.toggleStar(st.topicId) }, modifier = Modifier.size(48.dp), contentPadding = PaddingValues(0.dp)) {
+                            Text("★", style = MaterialTheme.typography.titleLarge)
+                        }
+                    }
+                }
+            }
+        }
     }
 
-    if (showPicker) {
+    if (showPicker) {  // (date picker, below the list)
         val state = rememberDatePickerState(
             initialSelectedDateMillis = ui.examDate?.atStartOfDay(ZoneOffset.UTC)?.toInstant()?.toEpochMilli(),
         )

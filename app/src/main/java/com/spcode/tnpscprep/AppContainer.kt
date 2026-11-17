@@ -3,6 +3,7 @@ package com.spcode.tnpscprep
 import android.content.Context
 import androidx.room.Room
 import com.spcode.tnpscprep.data.db.AppDatabase
+import com.spcode.tnpscprep.data.db.MIGRATION_1_2
 import com.spcode.tnpscprep.data.seed.RoomSyllabusStore
 import com.spcode.tnpscprep.data.seed.SeedResult
 import com.spcode.tnpscprep.data.seed.SyllabusSeeder
@@ -15,7 +16,9 @@ class AppContainer(context: Context) {
     private val appContext = context.applicationContext
 
     val database: AppDatabase by lazy {
-        Room.databaseBuilder(appContext, AppDatabase::class.java, "tnpscprep.db").build()
+        Room.databaseBuilder(appContext, AppDatabase::class.java, "tnpscprep.db")
+            .addMigrations(MIGRATION_1_2)
+            .build()
     }
 
     val syllabusRepository by lazy { com.spcode.tnpscprep.data.SyllabusRepository(database) }

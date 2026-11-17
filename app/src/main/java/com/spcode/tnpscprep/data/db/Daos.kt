@@ -31,8 +31,12 @@ interface SyllabusDao {
     /** LEFT JOIN: topics with no progress row come back as level 0. mask = Exam bits; ALL_MASK = everything. */
     @Query(
         """SELECT t.id, t.subjectId, t.unitId, t.nameEn, t.nameTa, t.exams,
-                  COALESCE(p.level, 0) AS level
-           FROM topic t LEFT JOIN topic_progress p ON p.topicId = t.id
+                  COALESCE(p.level, 0) AS level,
+                  COALESCE(n.starred, 0) AS starred,
+                  CASE WHEN n.note IS NOT NULL AND n.note != '' THEN 1 ELSE 0 END AS hasNote
+           FROM topic t
+           LEFT JOIN topic_progress p ON p.topicId = t.id
+           LEFT JOIN topic_note n ON n.topicId = t.id
            WHERE (t.exams & :mask) != 0
            ORDER BY t.subjectId, t.unitId, t.sortOrder"""
     )
@@ -60,4 +64,22 @@ interface SessionDao {
 
     @Query("SELECT date, SUM(minutes) AS minutes FROM study_session GROUP BY date")
     fun observeDayTotals(): Flow<List<DayTotal>>
+}
+
+@Dao
+interface NoteDao {
+    @Query("SELECT * FROM topic_note WHERE topicId = :topicId") suspend fun get(topicId: String): TopicNoteEntity?
+    @Upsert suspend fun upsert(note: TopicNoteEntity)
+    @Query("DELETE FROM topic_note WHERE topicId = :topicId") suspend fun delete(topicId: String)
+
+    @Query(
+        """SELECT t.id AS topicId, t.subjectId AS subjectId, t.nameEn AS nameEn, t.nameTa AS nameTa,
+                  COALESCE(p.level, 0) AS level, n.note AS note
+           FROM topic_note n
+           JOIN topic t ON t.id = n.topicId
+           LEFT JOIN topic_progress p ON p.topicId = t.id
+           WHERE n.starred = 1 AND (t.exams & :mask) != 0
+           ORDER BY t.subjectId, t.unitId, t.sortOrder"""
+    )
+    fun observeStarred(mask: Int): Flow<List<StarredTopic>>
 }

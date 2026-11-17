@@ -67,4 +67,12 @@
         <item quantity="one">%d day overdue</item>
         <item quantity="other">%d days overdue</item>
     </plurals>
+    <string name="note_title">My notes</string>
+    <string name="note_hint">Write your own notes for this topic</string>
+    <string name="save">Save</string>
+    <string name="a11y_star">Star as a weak topic</string>
+    <string name="a11y_unstar">Remove the star</string>
+    <string name="subject_progress_title">Progress by subject</string>
+    <string name="starred_title">Starred topics (%1$d)</string>
+    <string name="starred_empty">Star a topic in the Syllabus tab to find it here quickly.</string>
 </resources>

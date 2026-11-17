@@ -2,6 +2,7 @@ package com.spcode.tnpscprep.data
 
 import androidx.room.withTransaction
 import com.spcode.tnpscprep.data.db.AppDatabase
+import com.spcode.tnpscprep.data.db.TopicNoteEntity
 import com.spcode.tnpscprep.data.db.TopicProgressEntity
 import com.spcode.tnpscprep.domain.RevisionLevel
 import kotlinx.coroutines.flow.Flow
@@ -13,11 +14,30 @@ class SyllabusRepository(
 ) {
     private val syllabus = db.syllabusDao()
     private val progress = db.progressDao()
+    private val notes = db.noteDao()
 
     fun observeSubjects() = syllabus.observeSubjects()
     fun observeUnits() = syllabus.observeUnits()
     fun observeTopics(mask: Int) = syllabus.observeTopics(mask)
     fun observeStudied(mask: Int) = progress.observeStudied(mask)
+    fun observeStarred(mask: Int) = notes.observeStarred(mask)
+
+    suspend fun getNote(topicId: String): String = notes.get(topicId)?.note.orEmpty()
+
+    suspend fun toggleStar(topicId: String) = db.withTransaction {
+        val cur = notes.get(topicId)
+        writeNote(topicId, cur?.note.orEmpty(), starred = !(cur?.starred ?: false))
+    }
+
+    suspend fun saveNote(topicId: String, text: String) = db.withTransaction {
+        writeNote(topicId, text.trim(), starred = notes.get(topicId)?.starred ?: false)
+    }
+
+    /** A row exists only while there is something to keep (a note or a star). */
+    private suspend fun writeNote(topicId: String, note: String, starred: Boolean) {
+        if (note.isEmpty() && !starred) notes.delete(topicId)
+        else notes.upsert(TopicNoteEntity(topicId, note, starred, now()))
+    }
 
     /**
      * Also used for "I revised this again": at the top level the level can't rise, but the timestamp is

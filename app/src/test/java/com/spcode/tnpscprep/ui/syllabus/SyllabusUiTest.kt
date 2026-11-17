@@ -48,4 +48,14 @@ class SyllabusUiTest {
         assertEquals(4, ExamFilter.G4.mask)
         assertEquals(7, ExamFilter.ALL.mask)
     }
+
+    @Test fun star_and_note_flags_reach_the_ui_model() {
+        val ui = buildSyllabusUi(subjects, units, listOf(
+            TopicWithLevel("a", "s1", "u1", "a", "a", 7, 1, starred = true, hasNote = true),
+            TopicWithLevel("b", "s1", "u1", "b", "b", 7, 0),
+        ))
+        val topics = ui.single().units.single().topics
+        assertEquals(listOf(true, false), topics.map { it.starred })
+        assertEquals(listOf(true, false), topics.map { it.hasNote })
+    }
 }

@@ -10,7 +10,10 @@ enum class ExamFilter(val mask: Int) {
     ALL(Exam.ALL_MASK), G1(Exam.G1.bit), G2(Exam.G2.bit), G4(Exam.G4.bit)
 }
 
-data class TopicUi(val id: String, val nameEn: String, val nameTa: String, val exams: Int, val level: Int)
+data class TopicUi(
+    val id: String, val nameEn: String, val nameTa: String, val exams: Int, val level: Int,
+    val starred: Boolean = false, val hasNote: Boolean = false,
+)
 data class UnitUi(val id: String, val nameEn: String, val nameTa: String, val topics: List<TopicUi>)
 data class SubjectUi(
     val id: String, val nameEn: String, val nameTa: String,
@@ -33,7 +36,7 @@ fun buildSyllabusUi(
         val unitUis = unitsBySubject[s.id].orEmpty().mapNotNull { u ->
             val ts = topicsByUnit[u.id].orEmpty()
             if (ts.isEmpty()) null
-            else UnitUi(u.id, u.nameEn, u.nameTa, ts.map { TopicUi(it.id, it.nameEn, it.nameTa, it.exams, it.level) })
+            else UnitUi(u.id, u.nameEn, u.nameTa, ts.map { TopicUi(it.id, it.nameEn, it.nameTa, it.exams, it.level, it.starred, it.hasNote) })
         }
         if (unitUis.isEmpty()) null
         else {

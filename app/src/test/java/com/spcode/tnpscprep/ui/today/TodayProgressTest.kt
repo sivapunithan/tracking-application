@@ -59,4 +59,25 @@ class TodayProgressTest {
         assertEquals(0, p.readinessPercent)
         assertTrue(p.due.isEmpty())
     }
+
+    @Test fun progress_by_subject_uses_only_that_subjects_topics_in_syllabus_order() {
+        val two = listOf(SubjectEntity("s1", "Polity", "ஆ", 0), SubjectEntity("s2", "Economy", "பொ", 1), SubjectEntity("s3", "Empty", "x", 2))
+        val all = listOf(
+            TopicWithLevel("a", "s1", "u", "a", "a", 7, 4), TopicWithLevel("b", "s1", "u", "b", "b", 7, 0),
+            TopicWithLevel("c", "s2", "u", "c", "c", 7, 2),
+        )
+        val p = buildTodayProgress(emptyList(), all, two, today, zone)
+        assertEquals(listOf("s1", "s2"), p.subjects.map { it.subjectId }) // s3 has no topics: hidden
+        assertEquals(listOf(50, 50), p.subjects.map { it.percent })
+        assertEquals(listOf(2, 1), p.subjects.map { it.topicCount })
+    }
+
+    @Test fun starred_topics_carry_subject_names_level_and_note() {
+        val st = listOf(com.spcode.tnpscprep.data.db.StarredTopic("a", "s1", "A", "அ", 2, "remember articles 12-35"))
+        val p = buildTodayProgress(emptyList(), emptyList(), subjects, today, zone, st)
+        val item = p.starred.single()
+        assertEquals("Polity", item.subjectEn)
+        assertEquals(2, item.level)
+        assertEquals("remember articles 12-35", item.note)
+    }
 }

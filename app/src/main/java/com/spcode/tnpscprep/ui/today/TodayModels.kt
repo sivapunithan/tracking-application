@@ -1,5 +1,6 @@
 package com.spcode.tnpscprep.ui.today
 
+import com.spcode.tnpscprep.data.db.StarredTopic
 import com.spcode.tnpscprep.data.db.StudiedTopic
 import com.spcode.tnpscprep.data.db.SubjectEntity
 import com.spcode.tnpscprep.data.db.TopicWithLevel
@@ -17,11 +18,26 @@ data class DueItem(
     val daysOverdue: Int,
 )
 
+data class SubjectProgress(
+    val subjectId: String, val nameEn: String, val nameTa: String,
+    val percent: Int, val topicCount: Int,
+)
+
+data class StarredItem(
+    val topicId: String,
+    val nameEn: String, val nameTa: String,
+    val subjectEn: String, val subjectTa: String,
+    val level: Int,
+    val note: String,
+)
+
 data class TodayProgress(
     val readinessPercent: Int,
     val totalTopics: Int,
     val notStarted: Int,
     val due: List<DueItem>,
+    val subjects: List<SubjectProgress> = emptyList(),
+    val starred: List<StarredItem> = emptyList(),
 )
 
 /**
@@ -34,6 +50,7 @@ fun buildTodayProgress(
     subjects: List<SubjectEntity>,
     today: LocalDate,
     zone: ZoneId,
+    starred: List<StarredTopic> = emptyList(),
 ): TodayProgress {
     val subjectById = subjects.associateBy { it.id }
     val due = studied.mapNotNull { s ->
@@ -49,5 +66,13 @@ fun buildTodayProgress(
         totalTopics = allTopics.size,
         notStarted = allTopics.count { it.level == RevisionLevel.NOT_STARTED },
         due = due,
+        subjects = subjects.mapNotNull { s ->
+            val ts = allTopics.filter { it.subjectId == s.id }
+            if (ts.isEmpty()) null else SubjectProgress(s.id, s.nameEn, s.nameTa, RevisionLevel.percent(ts.map { it.level }), ts.size)
+        },
+        starred = starred.map {
+            val subj = subjectById[it.subjectId]
+            StarredItem(it.topicId, it.nameEn, it.nameTa, subj?.nameEn.orEmpty(), subj?.nameTa.orEmpty(), it.level, it.note)
+        },
     )
 }

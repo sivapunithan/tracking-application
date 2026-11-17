@@ -8,13 +8,14 @@ import androidx.room.RoomDatabase
 @Database(
     entities = [
         SubjectEntity::class, SyllabusUnitEntity::class, TopicEntity::class,
-        TopicProgressEntity::class, StudySessionEntity::class, AppMetaEntity::class,
+        TopicProgressEntity::class, StudySessionEntity::class, AppMetaEntity::class, TopicNoteEntity::class,
     ],
-    version = 1,
+    version = 2,
     exportSchema = true,
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun syllabusDao(): SyllabusDao
     abstract fun progressDao(): ProgressDao
     abstract fun sessionDao(): SessionDao
+    abstract fun noteDao(): NoteDao
 }
