@@ -119,16 +119,24 @@ class SyllabusSeederTest {
         assertEquals(0, store.replaceCalls)
     }
 
-    /** Guards the real asset (and later, the file converted from the official PDFs). */
-    @Test fun bundled_syllabus_json_is_valid_and_labelled_sample() = runBlocking {
+    /** Guards the real asset: any future edit (e.g. a new official syllabus) must still be valid. */
+    @Test fun bundled_syllabus_json_is_valid_and_complete() = runBlocking {
         val text = File("src/main/assets/syllabus.json").readText() // tests run with cwd = app/
         val store = FakeStore()
-        assertEquals(SeedResult.SEEDED, SyllabusSeeder(store).seedIfNeeded(text))
+        assertEquals(SeedResult.SEEDED, SyllabusSeeder(store).seedIfNeeded(text)) // validates ids, exam codes, uniqueness
         val d = store.data!!
-        assertEquals(3, d.subjects.size)
-        assertTrue(d.topics.size in 10..15)
-        assertTrue(d.topics.any { it.exams == 7 })      // shared by all three
-        assertTrue(d.topics.any { it.exams == 1 })      // G1 only
-        assertTrue(text.contains("SAMPLE DATA ONLY"))
+        assertTrue("version must be >= 2 (v1 was the sample)", store.version >= 2)
+        assertTrue(d.subjects.size >= 10)
+        assertTrue(d.topics.size >= 150)
+        // every exam has real content, and shared topics are stored once with several tags
+        assertTrue(d.topics.count { it.exams and 1 != 0 } > 50)  // G1
+        assertTrue(d.topics.count { it.exams and 2 != 0 } > 50)  // G2
+        assertTrue(d.topics.count { it.exams and 4 != 0 } > 50)  // G4
+        assertTrue(d.topics.any { it.exams == 7 })
+        assertTrue(d.topics.any { it.exams == 1 })
+        // names: English always; Tamil everywhere except the English-language paper
+        assertTrue(d.topics.all { it.nameEn.isNotBlank() })
+        assertTrue(d.topics.filter { it.subjectId != "eng" }.all { it.nameTa.isNotBlank() })
+        assertTrue("sample data must be gone", d.subjects.none { it.nameEn.startsWith("[SAMPLE]") })
     }
 }

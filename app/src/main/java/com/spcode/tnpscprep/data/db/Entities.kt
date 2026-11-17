@@ -88,3 +88,13 @@ data class TopicWithLevel(
 )
 
 data class DayTotal(val date: String, val minutes: Int)
+
+/** A topic that has been started (level > 0) with when it was last touched: input for the revision schedule. */
+data class StudiedTopic(
+    val topicId: String,
+    val subjectId: String,
+    val nameEn: String,
+    val nameTa: String,
+    val level: Int,
+    val lastUpdated: Long,
+)

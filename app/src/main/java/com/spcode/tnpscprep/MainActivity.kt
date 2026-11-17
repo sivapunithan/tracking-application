@@ -16,6 +16,7 @@ import com.spcode.tnpscprep.ui.AppRoot
 import com.spcode.tnpscprep.ui.syllabus.SyllabusViewModel
 import com.spcode.tnpscprep.ui.theme.TnpscTheme
 import com.spcode.tnpscprep.ui.timer.TimerViewModel
+import com.spcode.tnpscprep.ui.today.TodayViewModel
 
 // AppCompatActivity (not ComponentActivity) so AppCompatDelegate.setApplicationLocales works on API 26+.
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
@@ -37,7 +38,12 @@ class MainActivity : AppCompatActivity() {
                             initializer { TimerViewModel(c.sessionRepository, c.settingsStore, c.syllabusRepository) }
                         },
                     )
-                    AppRoot(syllabusVm, timerVm, twoPane = widthClass != WindowWidthSizeClass.Compact)
+                    val todayVm = viewModel<TodayViewModel>(
+                        factory = viewModelFactory {
+                            initializer { TodayViewModel(c.syllabusRepository, c.sessionRepository, c.settingsStore) }
+                        },
+                    )
+                    AppRoot(todayVm, syllabusVm, timerVm, twoPane = widthClass != WindowWidthSizeClass.Compact)
                 }
             }
         }

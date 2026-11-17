@@ -1,5 +1,21 @@
 # TnpscPrep
 
+## PURPOSE (clarified by the owner, overrides earlier guesses)
+The app is for **REVISION + a progress TRACKER + real CURRENT AFFAIRS**. It is NOT primarily a question bank / mock-test app
+(quizzes are optional, last). Offline is fine: no INTERNET permission.
+**Handover constraint: the owner will NOT maintain the app after development.** Therefore:
+- Ship it self-contained and clearly documented (signed release APK, README with install steps in English + Tamil, this file).
+- Anything time-sensitive (current affairs) must carry a visible "data up to <date>" label so it can never mislead silently.
+- Let the user maintain her own content inside the app (own notes, own current-affairs entries) so it stays useful with no developer.
+- Prefer evergreen features (syllabus, revision schedule, notes, tracker) over data that goes stale.
+
+## Roadmap (current)
+6. [DONE, 64 unit tests; Today screen + date picker seen on phone; due list verified by unit tests only] Revision engine: due-for-revision queue (3/7/21/60-day intervals by level), Today screen, exam date countdown, readiness %.
+7. Tracker views: readiness per exam/subject, stale topics, starred (weak) topics, per-topic own notes.
+8. Current affairs: real dated items from official/open sources (own words + source + verified flag), monthly browse,
+   bookmarks/revised flag on the same revision queue, user-added entries.
+9. Release: signed APK, README (EN+TA), handover notes, keystore backup instructions.
+
 Lightweight, fully offline Android app for a friend preparing for TNPSC Group 1, 2 and 4 PRELIMS.
 Package: `com.spcode.tnpscprep`. minSdk 26, targetSdk 36, compileSdk 37 (Compose 1.12 libs require compileSdk 37; targetSdk stays 36 to avoid new-runtime-behaviour changes).
 
@@ -92,3 +108,19 @@ Deploy: `adb install -r app/build/outputs/apk/debug/app-debug.apk`.
 - Tamil: no bundled font (system Noto Sans Tamil fallback renders fine on the Oppo). `tnpscTypography(tamil=true)` enforces
   line height >= 1.6x font size with `LineHeightStyle(Center, Trim.None)` so glyphs aren't clipped. If a device shows tofu boxes, bundle Noto Sans Tamil.
 - Settings tab holds only language for now; daily goal / durations live on the Timer tab.
+
+## Content roadmap (agreed): syllabus -> question bank -> practice/mock -> review -> content pipeline -> pack import
+Step 1 DONE: real syllabus (`syllabus.json` version 2, 12 subjects, 266 topics: G1 142 / G2 260 / G4 174; G2 counts both
+the General Tamil and General English papers because a candidate chooses one). Sources (official, tnpsc.gov.in/static_pdf/syllabus/):
+G1 prelims code 497 dated 16.12.2024; G2/2A and G4/VAO scheme+syllabus revised 27.01.2022 (check for newer revisions).
+Prelims patterns seen in those documents: G1 = 175 GS (degree) + 25 aptitude (SSLC) = 200 Qs; G2 = General Tamil OR English 100
++ GS 75 + aptitude 25 = 200 Qs / 300 marks / 3h; G4 = General Tamil 100 + GS 75 + aptitude 25 = 200 Qs. G1 unit question counts:
+Sci 10, Geo 10, Hist+NM 25, Polity 40, Economy+TN dev admin 50, TN history 40 (those are G1 only). Verify against the live notification.
+Content notes: the Tamil half of these PDFs extracts as garbled text (legacy font); Tamil names were read from page images.
+Tamil names marked as DRAFT (own wording, no readable official text): "Modes of agitation of Tamil Nadu and movements" (nm.u1.t06),
+"Social reformers, social reform movements and social transformation of Tamil Nadu" (tn-hist.u3.t07). Native-speaker review still needed.
+Topic IDs are stable: never renumber, only append. Bump `version` on every change. Re-seed removed the old [SAMPLE] rows
+(their progress rows are harmless orphans).
+Copyright stance: syllabus = official public document; do NOT copy coaching-site content; previous papers only from tnpsc.gov.in with
+source/year labels (reuse terms unconfirmed); TN State Board textbooks are free to download but redistribution terms unconfirmed -> use as
+reference, write own notes with page refs.

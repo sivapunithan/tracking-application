@@ -1,78 +1,2721 @@
 {
-  "version": 1,
-  "_notice": "SAMPLE DATA ONLY - NOT the official TNPSC syllabus. Replace with content converted from the official TNPSC PDFs and bump 'version'. Tamil text is a draft: have a native speaker check it.",
+  "version": 2,
+  "_notice": "Built from the official TNPSC syllabus documents: Group I prelims (code 497, dated 16.12.2024), Group II/IIA scheme and syllabus (revised 27.01.2022) and Group IV/VAO scheme and syllabus (revised 27.01.2022). Topics are split from the official bullet points and the exam tags come from comparing the three documents; this is a study aid, so always check the current official notification. Tamil names follow the official Tamil text where it was readable; a few (marked in the project notes) are drafts that need a native speaker's review. IDs are stable: never renumber, only add.",
   "subjects": [
     {
-      "id": "sample-history",
-      "nameEn": "[SAMPLE] History",
-      "nameTa": "[மாதிரி] வரலாறு",
+      "id": "sci",
+      "nameEn": "General Science",
+      "nameTa": "பொது அறிவியல்",
       "units": [
         {
-          "id": "sample-history.u1",
-          "nameEn": "[SAMPLE] Ancient period",
-          "nameTa": "[மாதிரி] பண்டைய காலம்",
+          "id": "sci.u1",
+          "nameEn": "Physics",
+          "nameTa": "இயற்பியல்",
           "topics": [
-            { "id": "sample-history.u1.t1", "nameEn": "[SAMPLE] Indus Valley civilisation", "nameTa": "[மாதிரி] சிந்துவெளி நாகரிகம்", "exams": ["G1", "G2", "G4"] },
-            { "id": "sample-history.u1.t2", "nameEn": "[SAMPLE] Sangam age", "nameTa": "[மாதிரி] சங்க காலம்", "exams": ["G1", "G2", "G4"] }
+            {
+              "id": "sci.u1.t01",
+              "nameEn": "Scientific knowledge and scientific temper; power of reasoning",
+              "nameTa": "அறிவியல் அறிவு மற்றும் அறிவியல் உணர்வு; பகுத்தறிதல்",
+              "exams": [
+                "G1",
+                "G2"
+              ]
+            },
+            {
+              "id": "sci.u1.t02",
+              "nameEn": "Rote learning vs conceptual learning; science as a tool to understand past, present and future",
+              "nameTa": "பொருள் உணராமல் கற்றலும் கருத்துணர்ந்து கற்றலும்; கடந்தகாலம், நிகழ்காலம், எதிர்காலம் பற்றி புரிந்து கொள்வதற்கான ஒரு கருவி அறிவியல்",
+              "exams": [
+                "G1",
+                "G2"
+              ]
+            },
+            {
+              "id": "sci.u1.t03",
+              "nameEn": "Nature of the universe",
+              "nameTa": "பேரண்டத்தின் இயல்பு",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "sci.u1.t04",
+              "nameEn": "Measurement of physical quantities",
+              "nameTa": "இயற்பியல் அளவுகளின் அளவீடுகள்",
+              "exams": [
+                "G4"
+              ]
+            },
+            {
+              "id": "sci.u1.t05",
+              "nameEn": "General scientific laws: mechanics, properties of matter, force, motion and energy",
+              "nameTa": "பொது அறிவியல் விதிகள் - இயக்கவியல் - பருப்பொருளின் பண்புகள், விசை, இயக்கம் மற்றும் ஆற்றல்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "sci.u1.t06",
+              "nameEn": "Everyday applications of mechanics, electricity, magnetism, light, sound, heat and nuclear physics",
+              "nameTa": "அன்றாட வாழ்வில் இயக்கவியல், மின்னியல், காந்தவியல், ஒளி, ஒலி, வெப்பம், அணுக்கரு இயற்பியல் ஆகியவற்றின் அடிப்படை கோட்பாடுகளின் பயன்பாடுகள்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "sci.u1.t07",
+              "nameEn": "Laser, electronics and communications",
+              "nameTa": "லேசர் (LASER), மின்னணுவியல் மற்றும் தகவல் தொடர்பியல்",
+              "exams": [
+                "G1",
+                "G2"
+              ]
+            }
           ]
         },
         {
-          "id": "sample-history.u2",
-          "nameEn": "[SAMPLE] Modern period",
-          "nameTa": "[மாதிரி] நவீன காலம்",
+          "id": "sci.u2",
+          "nameEn": "Chemistry",
+          "nameTa": "வேதியியல்",
           "topics": [
-            { "id": "sample-history.u2.t1", "nameEn": "[SAMPLE] Freedom struggle", "nameTa": "[மாதிரி] விடுதலைப் போராட்டம்", "exams": ["G1", "G2", "G4"] },
-            { "id": "sample-history.u2.t2", "nameEn": "[SAMPLE] Revolt of 1857", "nameTa": "[மாதிரி] 1857 கிளர்ச்சி", "exams": ["G1", "G2"] }
+            {
+              "id": "sci.u2.t01",
+              "nameEn": "Elements and compounds",
+              "nameTa": "தனிமங்களும் சேர்மங்களும்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "sci.u2.t02",
+              "nameEn": "Acids, bases and salts",
+              "nameTa": "அமிலங்கள், காரங்கள், உப்புகள்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "sci.u2.t03",
+              "nameEn": "Petroleum products",
+              "nameTa": "பெட்ரோலியப் பொருட்கள்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "sci.u2.t04",
+              "nameEn": "Fertilizers and pesticides",
+              "nameTa": "உரங்கள், பூச்சிகொல்லிகள்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "sci.u2.t05",
+              "nameEn": "Metallurgy and food adulterants",
+              "nameTa": "உலோகவியல் மற்றும் உணவில் கலப்படம்",
+              "exams": [
+                "G4"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "sci.u3",
+          "nameEn": "Life science",
+          "nameTa": "உயிரியல்",
+          "topics": [
+            {
+              "id": "sci.u3.t01",
+              "nameEn": "Main concepts of life science",
+              "nameTa": "உயிரியலின் முக்கிய கோட்பாடுகள்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "sci.u3.t02",
+              "nameEn": "Classification of living organisms",
+              "nameTa": "உயிர் உலகின் வகைப்பாடு",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "sci.u3.t03",
+              "nameEn": "Evolution and genetics",
+              "nameTa": "பரிணாமம், மரபியல்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "sci.u3.t04",
+              "nameEn": "Physiology",
+              "nameTa": "உடலியங்கியல்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "sci.u3.t05",
+              "nameEn": "Nutrition, health and hygiene",
+              "nameTa": "உணவியல், உடல்நலம் மற்றும் சுகாதாரம்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "sci.u3.t06",
+              "nameEn": "Human diseases",
+              "nameTa": "மனிதநோய்கள்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "sci.u4",
+          "nameEn": "Environment",
+          "nameTa": "சுற்றுச்சூழல்",
+          "topics": [
+            {
+              "id": "sci.u4.t01",
+              "nameEn": "Environment and ecology",
+              "nameTa": "சுற்றுப்புறச்சூழல் மற்றும் சூழலியல்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            }
           ]
         }
       ]
     },
     {
-      "id": "sample-polity",
-      "nameEn": "[SAMPLE] Polity",
-      "nameTa": "[மாதிரி] அரசியல் அமைப்பு",
+      "id": "geo",
+      "nameEn": "Geography of India",
+      "nameTa": "இந்தியாவின் புவியியல்",
       "units": [
         {
-          "id": "sample-polity.u1",
-          "nameEn": "[SAMPLE] Constitution basics",
-          "nameTa": "[மாதிரி] அரசமைப்பு அடிப்படைகள்",
+          "id": "geo.u1",
+          "nameEn": "Physical geography",
+          "nameTa": "இயற்கைப் புவியியல்",
           "topics": [
-            { "id": "sample-polity.u1.t1", "nameEn": "[SAMPLE] Preamble", "nameTa": "[மாதிரி] முகவுரை", "exams": ["G1", "G2", "G4"] },
-            { "id": "sample-polity.u1.t2", "nameEn": "[SAMPLE] Fundamental rights", "nameTa": "[மாதிரி] அடிப்படை உரிமைகள்", "exams": ["G1", "G2", "G4"] }
+            {
+              "id": "geo.u1.t01",
+              "nameEn": "Location",
+              "nameTa": "அமைவிடம்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "geo.u1.t02",
+              "nameEn": "Physical features",
+              "nameTa": "இயற்கை அமைவுகள்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "geo.u1.t03",
+              "nameEn": "Monsoon, rainfall, weather and climate",
+              "nameTa": "பருவமழை, மழைப்பொழிவு, வானிலை மற்றும் காலநிலை",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "geo.u1.t04",
+              "nameEn": "Water resources",
+              "nameTa": "நீர் வளங்கள்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "geo.u1.t05",
+              "nameEn": "Rivers in India",
+              "nameTa": "இந்திய ஆறுகள்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "geo.u1.t06",
+              "nameEn": "Soil, minerals and natural resources",
+              "nameTa": "மண், கனிம வளங்கள் மற்றும் இயற்கை வளங்கள்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "geo.u1.t07",
+              "nameEn": "Forest and wildlife",
+              "nameTa": "காடு மற்றும் வன உயிரினங்கள்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "geo.u1.t08",
+              "nameEn": "Agricultural pattern",
+              "nameTa": "வேளாண் முறைகள்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            }
           ]
         },
         {
-          "id": "sample-polity.u2",
-          "nameEn": "[SAMPLE] Governance",
-          "nameTa": "[மாதிரி] ஆட்சிமுறை",
+          "id": "geo.u2",
+          "nameEn": "Transport, communication and social geography",
+          "nameTa": "போக்குவரத்து, தகவல் தொடர்பு மற்றும் சமூகப் புவியியல்",
           "topics": [
-            { "id": "sample-polity.u2.t1", "nameEn": "[SAMPLE] Parliamentary committees", "nameTa": "[மாதிரி] நாடாளுமன்றக் குழுக்கள்", "exams": ["G1"] },
-            { "id": "sample-polity.u2.t2", "nameEn": "[SAMPLE] Local administration", "nameTa": "[மாதிரி] உள்ளாட்சி அமைப்பு", "exams": ["G2", "G4"] }
+            {
+              "id": "geo.u2.t01",
+              "nameEn": "Transport",
+              "nameTa": "போக்குவரத்து",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "geo.u2.t02",
+              "nameEn": "Communication",
+              "nameTa": "தகவல் தொடர்பு",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "geo.u2.t03",
+              "nameEn": "Population density and distribution",
+              "nameTa": "மக்கள்தொகை அடர்த்தி மற்றும் பரவல்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "geo.u2.t04",
+              "nameEn": "Racial and linguistic groups; major tribes",
+              "nameTa": "இனம், மொழிக் குழுக்கள் மற்றும் முக்கியப் பழங்குடிகள்",
+              "exams": [
+                "G1",
+                "G2"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "geo.u3",
+          "nameEn": "Disasters and environment",
+          "nameTa": "பேரிடர் மற்றும் சுற்றுச்சூழல்",
+          "topics": [
+            {
+              "id": "geo.u3.t01",
+              "nameEn": "Natural calamities and disaster management",
+              "nameTa": "இயற்கைப் பேரிடர் - பேரிடர் மேலாண்மை",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "geo.u3.t02",
+              "nameEn": "Environmental pollution: causes and preventive measures",
+              "nameTa": "சுற்றுச்சூழல் மாசுபடுதல் - காரணங்களும் தடுப்பு முறைகளும்",
+              "exams": [
+                "G1",
+                "G2"
+              ]
+            },
+            {
+              "id": "geo.u3.t03",
+              "nameEn": "Climate change",
+              "nameTa": "பருவநிலை மாற்றம்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "geo.u3.t04",
+              "nameEn": "Green energy",
+              "nameTa": "பசுமை ஆற்றல்",
+              "exams": [
+                "G1",
+                "G2"
+              ]
+            }
           ]
         }
       ]
     },
     {
-      "id": "sample-aptitude",
-      "nameEn": "[SAMPLE] Aptitude",
-      "nameTa": "[மாதிரி] திறனறிவு",
+      "id": "hist",
+      "nameEn": "History and Culture of India",
+      "nameTa": "இந்தியாவின் வரலாறு மற்றும் பண்பாடு",
       "units": [
         {
-          "id": "sample-aptitude.u1",
-          "nameEn": "[SAMPLE] Numerical ability",
-          "nameTa": "[மாதிரி] எண் திறன்",
+          "id": "hist.u1",
+          "nameEn": "Ancient and medieval India",
+          "nameTa": "பண்டைய மற்றும் இடைக்கால இந்தியா",
           "topics": [
-            { "id": "sample-aptitude.u1.t1", "nameEn": "[SAMPLE] Percentage", "nameTa": "[மாதிரி] சதவீதம்", "exams": ["G1", "G2", "G4"] },
-            { "id": "sample-aptitude.u1.t2", "nameEn": "[SAMPLE] Simple interest", "nameTa": "[மாதிரி] தனி வட்டி", "exams": ["G2", "G4"] },
-            { "id": "sample-aptitude.u1.t3", "nameEn": "[SAMPLE] Simplification", "nameTa": "[மாதிரி] சுருக்குதல்", "exams": ["G4"] }
+            {
+              "id": "hist.u1.t01",
+              "nameEn": "Indus Valley civilization",
+              "nameTa": "சிந்து சமவெளி நாகரிகம்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "hist.u1.t02",
+              "nameEn": "Guptas",
+              "nameTa": "குப்தர்கள்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "hist.u1.t03",
+              "nameEn": "Delhi Sultans",
+              "nameTa": "தில்லி சுல்தான்கள்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "hist.u1.t04",
+              "nameEn": "Mughals",
+              "nameTa": "முகலாயர்கள்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "hist.u1.t05",
+              "nameEn": "Marathas",
+              "nameTa": "மராத்தியர்கள்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "hist.u1.t06",
+              "nameEn": "Age of Vijayanagara and Bahmani kingdoms",
+              "nameTa": "விஜயநகர மற்றும் பாமினி அரசுகளின் காலம்",
+              "exams": [
+                "G1",
+                "G2"
+              ]
+            },
+            {
+              "id": "hist.u1.t07",
+              "nameEn": "South Indian history",
+              "nameTa": "தென் இந்திய வரலாறு",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            }
           ]
         },
         {
-          "id": "sample-aptitude.u2",
-          "nameEn": "[SAMPLE] Reasoning",
-          "nameTa": "[மாதிரி] அறிவுக்கூர்மை",
+          "id": "hist.u2",
+          "nameEn": "Indian culture",
+          "nameTa": "இந்தியப் பண்பாடு",
           "topics": [
-            { "id": "sample-aptitude.u2.t1", "nameEn": "[SAMPLE] Logical reasoning", "nameTa": "[மாதிரி] தர்க்க அறிவு", "exams": ["G1", "G2"] }
+            {
+              "id": "hist.u2.t01",
+              "nameEn": "Change and continuity in the socio-cultural history of India",
+              "nameTa": "இந்திய சமூகப் பண்பாட்டு வரலாற்றில் மாற்றங்களும் தொடர்ச்சியும்",
+              "exams": [
+                "G1",
+                "G2"
+              ]
+            },
+            {
+              "id": "hist.u2.t02",
+              "nameEn": "Characteristics of Indian culture; unity in diversity (race, language, custom)",
+              "nameTa": "இந்தியப் பண்பாட்டின் இயல்புகள், வேற்றுமையில் ஒற்றுமை - இனம், மொழி, வழக்காறு",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "hist.u2.t03",
+              "nameEn": "India as a secular state",
+              "nameTa": "இந்தியா ஒரு மதச்சார்பற்ற நாடு",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "hist.u2.t04",
+              "nameEn": "Social harmony",
+              "nameTa": "சமூக நல்லிணக்கம்",
+              "exams": [
+                "G1",
+                "G2"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "nm",
+      "nameEn": "Indian National Movement",
+      "nameTa": "இந்திய தேசிய இயக்கம்",
+      "units": [
+        {
+          "id": "nm.u1",
+          "nameEn": "Freedom struggle",
+          "nameTa": "விடுதலைப் போராட்டம்",
+          "topics": [
+            {
+              "id": "nm.u1.t01",
+              "nameEn": "National renaissance",
+              "nameTa": "தேசிய மறுமலர்ச்சி",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "nm.u1.t02",
+              "nameEn": "Early uprisings against British rule",
+              "nameTa": "ஆங்கிலேயர் ஆட்சிக்கு எதிரான தொடக்க கால எழுச்சிகள்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "nm.u1.t03",
+              "nameEn": "Indian National Congress",
+              "nameTa": "இந்திய தேசிய காங்கிரஸ்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "nm.u1.t04",
+              "nameEn": "Emergence of leaders (Ambedkar, Bhagat Singh, Bharathiar, V.O.Chidambaranar, Nehru, Kamarajar, Gandhi, Azad, Periyar, Rajaji, Bose, Tagore and others)",
+              "nameTa": "தலைவர்கள் உருவாதல் (அம்பேத்கர், பகத்சிங், பாரதியார், வ.உ.சிதம்பரனார், ஜவகர்லால் நேரு, காமராசர், மகாத்மா காந்தி, மௌலானா அபுல் கலாம் ஆசாத், தந்தை பெரியார், இராஜாஜி, சுபாஷ் சந்திர போஸ், ரவீந்திரநாத் தாகூர் மற்றும் பலர்)",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "nm.u1.t05",
+              "nameEn": "Different modes of agitation: growth of Satyagraha and militant movements",
+              "nameTa": "விடுதலைப் போராட்டத்தின் பல்வேறு நிலைகள்: அகிம்சை முறையின் வளர்ச்சி மற்றும் புரட்சிகர இயக்கங்கள்",
+              "exams": [
+                "G1",
+                "G2"
+              ]
+            },
+            {
+              "id": "nm.u1.t06",
+              "nameEn": "Modes of agitation of Tamil Nadu and movements",
+              "nameTa": "தமிழ்நாட்டின் போராட்ட வடிவங்களும் இயக்கங்களும்",
+              "exams": [
+                "G4"
+              ]
+            },
+            {
+              "id": "nm.u1.t07",
+              "nameEn": "Communalism and Partition",
+              "nameTa": "வகுப்புவாதம் மற்றும் தேசப் பிரிவினை",
+              "exams": [
+                "G1",
+                "G2"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "pol",
+      "nameEn": "Indian Polity",
+      "nameTa": "இந்திய ஆட்சியியல்",
+      "units": [
+        {
+          "id": "pol.u1",
+          "nameEn": "The Constitution",
+          "nameTa": "அரசியலமைப்பு",
+          "topics": [
+            {
+              "id": "pol.u1.t01",
+              "nameEn": "Constitution of India",
+              "nameTa": "இந்திய அரசியலமைப்பு",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "pol.u1.t02",
+              "nameEn": "Preamble to the Constitution",
+              "nameTa": "அரசியலமைப்பின் முகவுரை",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "pol.u1.t03",
+              "nameEn": "Salient features of the Constitution",
+              "nameTa": "அரசியலமைப்பின் முக்கிய கூறுகள்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "pol.u1.t04",
+              "nameEn": "Union, State and Union Territory",
+              "nameTa": "ஒன்றியம், மாநிலம் மற்றும் யூனியன் பிரதேசங்கள்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "pol.u1.t05",
+              "nameEn": "Citizenship",
+              "nameTa": "குடியுரிமை",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "pol.u1.t06",
+              "nameEn": "Fundamental Rights",
+              "nameTa": "அடிப்படை உரிமைகள்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "pol.u1.t07",
+              "nameEn": "Fundamental Duties",
+              "nameTa": "அடிப்படைக் கடமைகள்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "pol.u1.t08",
+              "nameEn": "Directive Principles of State Policy",
+              "nameTa": "அரசின் நெறிமுறைக் கோட்பாடுகள்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "pol.u2",
+          "nameEn": "Government and federalism",
+          "nameTa": "அரசாங்கம் மற்றும் கூட்டாட்சி",
+          "topics": [
+            {
+              "id": "pol.u2.t01",
+              "nameEn": "Union Executive",
+              "nameTa": "ஒன்றிய நிர்வாகம்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "pol.u2.t02",
+              "nameEn": "Union Legislature",
+              "nameTa": "ஒன்றிய நாடாளுமன்றம்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "pol.u2.t03",
+              "nameEn": "State Executive",
+              "nameTa": "மாநில நிர்வாகம்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "pol.u2.t04",
+              "nameEn": "State Legislature",
+              "nameTa": "மாநில சட்டமன்றம்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "pol.u2.t05",
+              "nameEn": "Local governments; Panchayat Raj",
+              "nameTa": "உள்ளாட்சி அமைப்புகள், பஞ்சாயத்து ராஜ்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "pol.u2.t06",
+              "nameEn": "Spirit of federalism; Centre-State relationships",
+              "nameTa": "கூட்டாட்சியின் அடிப்படைத் தன்மைகள்; மத்திய - மாநில உறவுகள்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "pol.u2.t07",
+              "nameEn": "Election",
+              "nameTa": "தேர்தல்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "pol.u2.t08",
+              "nameEn": "Judiciary in India",
+              "nameTa": "இந்திய நீதி அமைப்புகள்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "pol.u2.t09",
+              "nameEn": "Rule of law",
+              "nameTa": "சட்டத்தின் ஆட்சி",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "pol.u3",
+          "nameEn": "Accountability and rights",
+          "nameTa": "பொறுப்புடைமை மற்றும் உரிமைகள்",
+          "topics": [
+            {
+              "id": "pol.u3.t01",
+              "nameEn": "Corruption in public life; anti-corruption measures",
+              "nameTa": "பொதுவாழ்வில் ஊழல் - ஊழல் தடுப்பு நடவடிக்கைகள்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "pol.u3.t02",
+              "nameEn": "Lokpal and Lokayukta",
+              "nameTa": "லோக்பால் மற்றும் லோக் ஆயுக்தா",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "pol.u3.t03",
+              "nameEn": "Right to Information",
+              "nameTa": "தகவல் உரிமை",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "pol.u3.t04",
+              "nameEn": "Empowerment of women",
+              "nameTa": "பெண்களுக்கு அதிகாரமளித்தல்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "pol.u3.t05",
+              "nameEn": "Consumer protection forums",
+              "nameTa": "நுகர்வோர் பாதுகாப்பு அமைப்புகள்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "pol.u3.t06",
+              "nameEn": "Human rights charter",
+              "nameTa": "மனித உரிமைகள் சாசனம்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "eco",
+      "nameEn": "Indian Economy",
+      "nameTa": "இந்தியப் பொருளாதாரம்",
+      "units": [
+        {
+          "id": "eco.u1",
+          "nameEn": "Planning and public finance",
+          "nameTa": "திட்டமிடலும் பொது நிதியும்",
+          "topics": [
+            {
+              "id": "eco.u1.t01",
+              "nameEn": "Nature of the Indian economy",
+              "nameTa": "இந்தியப் பொருளாதாரத்தின் இயல்புகள்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "eco.u1.t02",
+              "nameEn": "Five-year plan models: an assessment",
+              "nameTa": "ஐந்தாண்டு திட்ட மாதிரிகள் - ஒரு மதிப்பீடு",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "eco.u1.t03",
+              "nameEn": "Planning Commission and NITI Aayog",
+              "nameTa": "திட்டக்குழு மற்றும் நிதி ஆயோக்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "eco.u1.t04",
+              "nameEn": "Sources of revenue",
+              "nameTa": "வருவாய் ஆதாரங்கள்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "eco.u1.t05",
+              "nameEn": "Reserve Bank of India",
+              "nameTa": "இந்திய ரிசர்வ் வங்கி",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "eco.u1.t06",
+              "nameEn": "Fiscal policy and monetary policy",
+              "nameTa": "நிதி கொள்கை மற்றும் பணவியல் கொள்கை",
+              "exams": [
+                "G1",
+                "G2"
+              ]
+            },
+            {
+              "id": "eco.u1.t07",
+              "nameEn": "Finance Commission",
+              "nameTa": "நிதி ஆணையம்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "eco.u1.t08",
+              "nameEn": "Resource sharing between Union and State governments",
+              "nameTa": "மத்திய மாநில அரசுகளுக்கிடையேயான நிதிப் பகிர்வு",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "eco.u1.t09",
+              "nameEn": "Goods and Services Tax",
+              "nameTa": "சரக்கு மற்றும் சேவை வரி",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "eco.u2",
+          "nameEn": "Economy, agriculture and society",
+          "nameTa": "பொருளாதாரம், வேளாண்மை மற்றும் சமூகம்",
+          "topics": [
+            {
+              "id": "eco.u2.t01",
+              "nameEn": "Structure of the Indian economy",
+              "nameTa": "இந்தியப் பொருளாதார அமைப்பு",
+              "exams": [
+                "G1",
+                "G2"
+              ]
+            },
+            {
+              "id": "eco.u2.t02",
+              "nameEn": "Economic trends",
+              "nameTa": "பொருளாதாரப் போக்குகள்",
+              "exams": [
+                "G4"
+              ]
+            },
+            {
+              "id": "eco.u2.t03",
+              "nameEn": "Employment generation",
+              "nameTa": "வேலைவாய்ப்பு உருவாக்கம்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "eco.u2.t04",
+              "nameEn": "Land reforms and agriculture",
+              "nameTa": "நிலச் சீர்திருத்தங்கள் மற்றும் வேளாண்மை",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "eco.u2.t05",
+              "nameEn": "Application of science and technology in agriculture",
+              "nameTa": "வேளாண்மையில் அறிவியல் தொழில்நுட்பத்தின் பயன்பாடு",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "eco.u2.t06",
+              "nameEn": "Industrial growth",
+              "nameTa": "தொழில் வளர்ச்சி",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "eco.u2.t07",
+              "nameEn": "Rural welfare oriented programmes",
+              "nameTa": "ஊரக நலன்சார் திட்டங்கள்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "eco.u2.t08",
+              "nameEn": "Social problems: population, education, health, employment, poverty",
+              "nameTa": "சமூகப் பிரச்சனைகள் - மக்கள்தொகை, கல்வி, நலவாழ்வு, வேலைவாய்ப்பு, வறுமை",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tn-hist",
+      "nameEn": "History, Culture, Heritage and Socio-Political Movements of Tamil Nadu",
+      "nameTa": "தமிழ்நாட்டின் வரலாறு, பண்பாடு, மரபு மற்றும் சமூக - அரசியல் இயக்கங்கள்",
+      "units": [
+        {
+          "id": "tn-hist.u1",
+          "nameEn": "Tamil society and literature",
+          "nameTa": "தமிழ்ச் சமுதாயமும் இலக்கியமும்",
+          "topics": [
+            {
+              "id": "tn-hist.u1.t01",
+              "nameEn": "History of Tamil society and related archaeological discoveries",
+              "nameTa": "தமிழ் சமுதாய வரலாறு, அது தொடர்பான தொல்லியல் கண்டுபிடிப்புகள்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tn-hist.u1.t02",
+              "nameEn": "Tamil literature from the Sangam age till contemporary times",
+              "nameTa": "சங்க காலம் முதல் இக்காலம் வரையிலான தமிழ் இலக்கிய வரலாறு",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "tn-hist.u2",
+          "nameEn": "Thirukkural",
+          "nameTa": "திருக்குறள்",
+          "topics": [
+            {
+              "id": "tn-hist.u2.t01",
+              "nameEn": "Significance as a secular literature",
+              "nameTa": "மதச் சார்பற்ற தனித்தன்மையுள்ள இலக்கியம்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tn-hist.u2.t02",
+              "nameEn": "Relevance to everyday life",
+              "nameTa": "அன்றாட வாழ்வியலோடு தொடர்புத் தன்மை",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tn-hist.u2.t03",
+              "nameEn": "Impact of Thirukkural on humanity",
+              "nameTa": "மானுடத்தின் மீதான திருக்குறளின் தாக்கம்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tn-hist.u2.t04",
+              "nameEn": "Thirukkural and universal values (equality, humanism, etc.)",
+              "nameTa": "திருக்குறளும் மாறாத விழுமியங்களும்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tn-hist.u2.t05",
+              "nameEn": "Relevance to socio-politico-economic affairs",
+              "nameTa": "சமூக அரசியல் பொருளாதார நிகழ்வுகளில் திருக்குறளின் பொருத்தப்பாடு",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tn-hist.u2.t06",
+              "nameEn": "Philosophical content in Thirukkural",
+              "nameTa": "திருக்குறளில் தத்துவக் கோட்பாடுகள்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "tn-hist.u3",
+          "nameEn": "Freedom struggle and social movements in Tamil Nadu",
+          "nameTa": "தமிழ்நாட்டில் விடுதலைப் போராட்டமும் சமூக இயக்கங்களும்",
+          "topics": [
+            {
+              "id": "tn-hist.u3.t01",
+              "nameEn": "Role of Tamil Nadu in the freedom struggle",
+              "nameTa": "விடுதலைப் போராட்டத்தில் தமிழ்நாட்டின் பங்கு",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tn-hist.u3.t02",
+              "nameEn": "Early agitations against British rule",
+              "nameTa": "ஆங்கிலேயருக்கு எதிரான தொடக்க கால கிளர்ச்சிகள்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tn-hist.u3.t03",
+              "nameEn": "Role of women in the freedom struggle",
+              "nameTa": "விடுதலைப் போராட்டத்தில் பெண்களின் பங்கு",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tn-hist.u3.t04",
+              "nameEn": "19th and 20th century socio-political movements in Tamil Nadu: Justice Party, growth of rationalism",
+              "nameTa": "பத்தொன்பதாம் மற்றும் இருபதாம் நூற்றாண்டுகளில் தமிழ்நாட்டின் சமூக - அரசியல் இயக்கங்களின் பரிணாம வளர்ச்சி - நீதிக்கட்சி, பகுத்தறிவு வாதத்தின் வளர்ச்சி",
+              "exams": [
+                "G1",
+                "G2"
+              ]
+            },
+            {
+              "id": "tn-hist.u3.t05",
+              "nameEn": "Self-Respect Movement and Dravidian Movement; their underlying principles",
+              "nameTa": "சுயமரியாதை இயக்கம், திராவிட இயக்கம் மற்றும் இவ்வியக்கங்களுக்கான அடிப்படைக் கொள்கைகள்",
+              "exams": [
+                "G1",
+                "G2"
+              ]
+            },
+            {
+              "id": "tn-hist.u3.t06",
+              "nameEn": "Contributions of Thanthai Periyar and Perarignar Anna",
+              "nameTa": "தந்தை பெரியார் மற்றும் பேரறிஞர் அண்ணாவின் பங்களிப்புகள்",
+              "exams": [
+                "G1",
+                "G2"
+              ]
+            },
+            {
+              "id": "tn-hist.u3.t07",
+              "nameEn": "Social reformers, social reform movements and social transformation of Tamil Nadu",
+              "nameTa": "சமூக சீர்திருத்தவாதிகள், சமூக சீர்திருத்த இயக்கங்கள் மற்றும் தமிழ்நாட்டின் சமூக மாற்றம்",
+              "exams": [
+                "G4"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tn-dev",
+      "nameEn": "Development Administration in Tamil Nadu",
+      "nameTa": "தமிழ்நாட்டில் வளர்ச்சி நிர்வாகம்",
+      "units": [
+        {
+          "id": "tn-dev.u1",
+          "nameEn": "Development administration",
+          "nameTa": "வளர்ச்சி நிர்வாகம்",
+          "topics": [
+            {
+              "id": "tn-dev.u1.t01",
+              "nameEn": "Human Development Indicators in Tamil Nadu and a comparison across the country",
+              "nameTa": "தமிழ்நாட்டின் மனிதவள மேம்பாட்டுக் குறியீடுகளும் அவற்றை தேசிய மற்றும் பிற மாநிலங்களுக்கான குறியீடுகளுடன் ஒப்பாய்வும்",
+              "exams": [
+                "G1",
+                "G2"
+              ]
+            },
+            {
+              "id": "tn-dev.u1.t02",
+              "nameEn": "Impact of social reform movements on the socio-economic development of Tamil Nadu",
+              "nameTa": "தமிழ்நாட்டின் சமூக பொருளாதார வளர்ச்சிக்கு சமூக மறுமலர்ச்சி இயக்கங்களின் பங்களிப்பு",
+              "exams": [
+                "G1",
+                "G2"
+              ]
+            },
+            {
+              "id": "tn-dev.u1.t03",
+              "nameEn": "Political parties and welfare schemes for various sections of people",
+              "nameTa": "அரசியல் கட்சிகளும் பலதரப்பு மக்களுக்கான நலத்திட்டங்களும்",
+              "exams": [
+                "G1",
+                "G2"
+              ]
+            },
+            {
+              "id": "tn-dev.u1.t04",
+              "nameEn": "Rationale behind the reservation policy; access to social resources",
+              "nameTa": "இடஒதுக்கீட்டுக் கொள்கைக்கான நியாயங்களும் சமூக வளங்களைப் பெறும் வாய்ப்புகளும்",
+              "exams": [
+                "G1",
+                "G2"
+              ]
+            },
+            {
+              "id": "tn-dev.u1.t05",
+              "nameEn": "Economic trends in Tamil Nadu",
+              "nameTa": "தமிழ்நாட்டின் பொருளாதார போக்குகள்",
+              "exams": [
+                "G1",
+                "G2"
+              ]
+            },
+            {
+              "id": "tn-dev.u1.t06",
+              "nameEn": "Role and impact of social welfare schemes in the socio-economic development of Tamil Nadu",
+              "nameTa": "தமிழ்நாட்டின் சமூக பொருளாதார வளர்ச்சியில் சமூகநலத் திட்டங்களின் தாக்கமும் பங்களிப்பும்",
+              "exams": [
+                "G1",
+                "G2"
+              ]
+            },
+            {
+              "id": "tn-dev.u1.t07",
+              "nameEn": "Social justice and social harmony as cornerstones of socio-economic development",
+              "nameTa": "சமூக நீதியும் சமூக நல்லிணக்கமும் சமூகப் பொருளாதார மேம்பாட்டின் மூலாதாரங்கள்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tn-dev.u1.t08",
+              "nameEn": "Education and health systems in Tamil Nadu",
+              "nameTa": "தமிழ்நாட்டின் கல்வி மற்றும் நலவாழ்வு (Health) முறைமைகள்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tn-dev.u1.t09",
+              "nameEn": "Geography of Tamil Nadu and its impact on economic growth",
+              "nameTa": "தமிழ்நாட்டின் புவியியல் கூறுகளும் பொருளாதார வளர்ச்சியில் அவற்றின் தாக்கமும்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tn-dev.u1.t10",
+              "nameEn": "Achievements of Tamil Nadu in various fields",
+              "nameTa": "பல்வேறு துறைகளில் தமிழ்நாடு நிகழ்த்தியுள்ள சாதனைகள்",
+              "exams": [
+                "G1",
+                "G2"
+              ]
+            },
+            {
+              "id": "tn-dev.u1.t11",
+              "nameEn": "e-Governance in Tamil Nadu",
+              "nameTa": "தமிழ்நாட்டில் மின்னாளுகை",
+              "exams": [
+                "G1",
+                "G2"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cur",
+      "nameEn": "Current Events",
+      "nameTa": "நடப்பு நிகழ்வுகள்",
+      "units": [
+        {
+          "id": "cur.u1",
+          "nameEn": "Current events",
+          "nameTa": "நடப்பு நிகழ்வுகள்",
+          "topics": [
+            {
+              "id": "cur.u1.t01",
+              "nameEn": "Current affairs (Group I lists this under every unit)",
+              "nameTa": "நடப்பு நிகழ்வுகள் (தொகுதி I-இல் ஒவ்வொரு அலகிலும் இடம்பெறுகிறது)",
+              "exams": [
+                "G1"
+              ]
+            },
+            {
+              "id": "cur.u1.t02",
+              "nameEn": "Latest diary of events",
+              "nameTa": "அண்மை நிகழ்வுகளின் தொகுப்பு",
+              "exams": [
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "cur.u1.t03",
+              "nameEn": "National symbols",
+              "nameTa": "தேசிய சின்னங்கள்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "cur.u1.t04",
+              "nameEn": "Profile of states",
+              "nameTa": "மாநிலங்கள் குறித்த விவரங்கள்",
+              "exams": [
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "cur.u1.t05",
+              "nameEn": "Eminent personalities and places in news",
+              "nameTa": "செய்திகளில் இடம்பெற்ற சிறந்த ஆளுமைகளும் இடங்களும்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "cur.u1.t06",
+              "nameEn": "Sports",
+              "nameTa": "விளையாட்டு",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "cur.u1.t07",
+              "nameEn": "Books and authors",
+              "nameTa": "நூல்களும் ஆசிரியர்களும்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "cur.u1.t08",
+              "nameEn": "Prominent personalities in arts, science, literature and philosophy",
+              "nameTa": "கலை, அறிவியல், இலக்கியம் மற்றும் தத்துவம் ஆகிய வெவ்வேறு துறைகளில் தனித்துவம் கொண்ட ஆளுமைகள்",
+              "exams": [
+                "G1",
+                "G2"
+              ]
+            },
+            {
+              "id": "cur.u1.t09",
+              "nameEn": "Latest inventions in science and technology",
+              "nameTa": "அறிவியல் மற்றும் தொழில்நுட்பத்தில் அண்மைக்கால கண்டுபிடிப்புகள்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "cur.u1.t10",
+              "nameEn": "Geographical landmarks",
+              "nameTa": "புவியியல் அடையாளங்கள்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "cur.u1.t11",
+              "nameEn": "Current socio-economic issues",
+              "nameTa": "தற்போதைய சமூகப் பொருளாதார பிரச்சனைகள்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "cur.u1.t12",
+              "nameEn": "Political parties and political system",
+              "nameTa": "அரசியல் கட்சிகளும் ஆட்சியியல் முறைகளும்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "cur.u1.t13",
+              "nameEn": "Welfare-oriented government schemes and their utility",
+              "nameTa": "நலன்சார் அரசுத் திட்டங்களும் அவற்றின் பயன்பாடும்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "cur.u1.t14",
+              "nameEn": "Public awareness, general administration and problems in public delivery systems",
+              "nameTa": "பொது விழிப்புணர்வும் பொது நிர்வாகமும்; பொது விநியோக அமைப்புகளில் நிலவும் சிக்கல்கள்",
+              "exams": [
+                "G1",
+                "G2"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "apt",
+      "nameEn": "Aptitude and Mental Ability",
+      "nameTa": "திறனறிவும் மனக்கணக்கு நுண்ணறிவும்",
+      "units": [
+        {
+          "id": "apt.u1",
+          "nameEn": "Aptitude",
+          "nameTa": "திறனறிவு",
+          "topics": [
+            {
+              "id": "apt.u1.t01",
+              "nameEn": "Simplification",
+              "nameTa": "சுருக்குதல்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "apt.u1.t02",
+              "nameEn": "Percentage",
+              "nameTa": "விழுக்காடு",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "apt.u1.t03",
+              "nameEn": "Highest Common Factor (HCF)",
+              "nameTa": "மீப்பெரு பொதுக் காரணி (HCF)",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "apt.u1.t04",
+              "nameEn": "Lowest Common Multiple (LCM)",
+              "nameTa": "மீச்சிறு பொது மடங்கு (LCM)",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "apt.u1.t05",
+              "nameEn": "Ratio and proportion",
+              "nameTa": "விகிதம் மற்றும் விகிதாச்சாரம்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "apt.u1.t06",
+              "nameEn": "Simple interest",
+              "nameTa": "தனிவட்டி",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "apt.u1.t07",
+              "nameEn": "Compound interest",
+              "nameTa": "கூட்டு வட்டி",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "apt.u1.t08",
+              "nameEn": "Area",
+              "nameTa": "பரப்பு",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "apt.u1.t09",
+              "nameEn": "Volume",
+              "nameTa": "கொள்ளளவு",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "apt.u1.t10",
+              "nameEn": "Time and work",
+              "nameTa": "காலம் மற்றும் வேலை",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "apt.u2",
+          "nameEn": "Reasoning",
+          "nameTa": "காரணவியல்",
+          "topics": [
+            {
+              "id": "apt.u2.t01",
+              "nameEn": "Logical reasoning",
+              "nameTa": "தருக்கக் காரணவியல்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "apt.u2.t02",
+              "nameEn": "Puzzles",
+              "nameTa": "புதிர்கள்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "apt.u2.t03",
+              "nameEn": "Dice",
+              "nameTa": "பகடை",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "apt.u2.t04",
+              "nameEn": "Visual reasoning",
+              "nameTa": "காட்சிக் காரணவியல்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "apt.u2.t05",
+              "nameEn": "Alpha-numeric reasoning",
+              "nameTa": "எண் எழுத்துக் காரணவியல்",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "apt.u2.t06",
+              "nameEn": "Number series",
+              "nameTa": "எண் வரிசை",
+              "exams": [
+                "G1",
+                "G2",
+                "G4"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tamil",
+      "nameEn": "General Tamil (SSLC standard)",
+      "nameTa": "பொதுத்தமிழ் (பத்தாம் வகுப்புத் தரம்)",
+      "units": [
+        {
+          "id": "tamil.u1",
+          "nameEn": "Part A: Grammar",
+          "nameTa": "பகுதி அ: இலக்கணம்",
+          "topics": [
+            {
+              "id": "tamil.u1.t01",
+              "nameEn": "Matching: meanings, famous works and authors",
+              "nameTa": "பொருத்துதல் – பொருத்தமான பொருளைத் தேர்வு செய்தல், புகழ் பெற்ற நூல், நூலாசிரியர்",
+              "exams": [
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tamil.u1.t02",
+              "nameEn": "Identify the person or work referred to by a phrase or epithet",
+              "nameTa": "தொடரும் தொடர்பும் அறிதல் (இத்தொடரால் குறிக்கப்படும் சான்றோர்; அடைமொழியால் குறிக்கப்படும் நூல்)",
+              "exams": [
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tamil.u1.t03",
+              "nameEn": "Split the word (separation)",
+              "nameTa": "பிரித்தெழுதுக",
+              "exams": [
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tamil.u1.t04",
+              "nameEn": "Antonyms",
+              "nameTa": "எதிர்ச்சொல்லை எடுத்தெழுதுதல்",
+              "exams": [
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tamil.u1.t05",
+              "nameEn": "Odd word out",
+              "nameTa": "பொருந்தாச் சொல்லைக் கண்டறிதல்",
+              "exams": [
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tamil.u1.t06",
+              "nameEn": "Error correction: sandhi, number, idiom, vazhu, foreign words",
+              "nameTa": "பிழைதிருத்தம் - சந்திப்பிழையை நீக்குதல், ஒருமை பன்மை பிழைகளை நீக்குதல், மரபுப் பிழைகள், வழுஉச் சொற்களை நீக்குதல், பிறமொழிச் சொற்களை நீக்குதல்",
+              "exams": [
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tamil.u1.t07",
+              "nameEn": "Tamil equivalent of an English word",
+              "nameTa": "ஆங்கிலச் சொல்லுக்கு நேரான தமிழ்ச் சொல்லை அறிதல்",
+              "exams": [
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tamil.u1.t08",
+              "nameEn": "Sound differences and the correct meaning",
+              "nameTa": "ஒலி வேறுபாடறிந்து சரியான பொருளை அறிதல்",
+              "exams": [
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tamil.u1.t09",
+              "nameEn": "One-letter words and their meanings",
+              "nameTa": "ஓரெழுத்து ஒரு மொழி உரிய பொருளைக் கண்டறிதல்",
+              "exams": [
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tamil.u1.t10",
+              "nameEn": "Choose the root word",
+              "nameTa": "வேர்ச்சொல்லைத் தேர்வு செய்தல்",
+              "exams": [
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tamil.u1.t11",
+              "nameEn": "Form verb and noun forms from a root word",
+              "nameTa": "வேர்ச்சொல்லைக் கொடுத்து, வினைமுற்று, வினையெச்சம், வினையாலணையும் பெயர், தொழிற்பெயரை உருவாக்கல்",
+              "exams": [
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tamil.u1.t12",
+              "nameEn": "Arrange words in alphabetical order",
+              "nameTa": "அகர வரிசைப்படி சொற்களைச் சீர்செய்தல்",
+              "exams": [
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tamil.u1.t13",
+              "nameEn": "Arrange words into a sentence",
+              "nameTa": "சொற்களை ஒழுங்குபடுத்தி சொற்றொடர் ஆக்குதல்",
+              "exams": [
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tamil.u1.t14",
+              "nameEn": "Identify the type of noun",
+              "nameTa": "பெயர்ச் சொல்லின் வகை அறிதல்",
+              "exams": [
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tamil.u1.t15",
+              "nameEn": "Grammatical notes",
+              "nameTa": "இலக்கணக் குறிப்பறிதல்",
+              "exams": [
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tamil.u1.t16",
+              "nameEn": "Choose the question that fits the answer",
+              "nameTa": "விடைக்கேற்ற வினாவைத் தேர்ந்தெடுத்தல்",
+              "exams": [
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tamil.u1.t17",
+              "nameEn": "Identify the type of sentence",
+              "nameTa": "எவ்வகை வாக்கியம் எனக் கண்டெழுதுதல்",
+              "exams": [
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tamil.u1.t18",
+              "nameEn": "Active, passive, transitive and causative sentences",
+              "nameTa": "தன்வினை, பிறவினை, செய்வினை, செயப்பாட்டுவினை வாக்கியங்களைக் கண்டெழுதுதல்",
+              "exams": [
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tamil.u1.t19",
+              "nameEn": "Meaning explained by a simile",
+              "nameTa": "உவமையால் விளக்கப்பெறும் பொருத்தமான பொருளைத் தேர்ந்தெழுதுதல்",
+              "exams": [
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tamil.u1.t20",
+              "nameEn": "Prosody: ethugai, monai, iyaipu",
+              "nameTa": "எதுகை, மோனை, இயைபு இவற்றுள் ஏதேனும் ஒன்றை தேர்ந்தெழுதுதல்",
+              "exams": [
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tamil.u1.t21",
+              "nameEn": "Proverbs",
+              "nameTa": "பழமொழிகள்",
+              "exams": [
+                "G2",
+                "G4"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "tamil.u2",
+          "nameEn": "Part B: Literature",
+          "nameTa": "பகுதி ஆ: இலக்கியம்",
+          "topics": [
+            {
+              "id": "tamil.u2.t01",
+              "nameEn": "Thirukkural: news, quotations, completing the line (25 chapters only)",
+              "nameTa": "திருக்குறள் தொடர்பான செய்திகள், மேற்கோள்கள், தொடரை நிரப்புதல் (இருபத்தைந்து அதிகாரம் மட்டும்)",
+              "exams": [
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tamil.u2.t02",
+              "nameEn": "Didactic works: Naaladiyar, Naanmanikkadigai, Pazhamozhi Naanooru, Mudhumozhikkanji, Thirikadugam, Innaa Naarpadhu, Iniyavai Naarpadhu, Sirupanchamoolam, Elaadhi, Avvaiyar's verses, Pathinenkeezhkanakku",
+              "nameTa": "அறநூல்கள் – நாலடியார், நான்மணிக்கடிகை, பழமொழி நானூறு, முதுமொழிக் காஞ்சி, திரிகடுகம், இன்னா நாற்பது, இனியவை நாற்பது, சிறுபஞ்சமூலம், ஏலாதி, ஔவையார் பாடல்கள் தொடர்பான செய்திகள், பதினெண்கீழ்க்கணக்கு நூல்களில் பிற செய்திகள்",
+              "exams": [
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tamil.u2.t03",
+              "nameEn": "Kambaramayanam and Ravana Kaviyam; verse forms; notable lines",
+              "nameTa": "கம்பராமாயணம், இராவண காவியம் தொடர்பான செய்திகள், பாவகை, சிறந்த தொடர்கள்",
+              "exams": [
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tamil.u2.t04",
+              "nameEn": "Sangam literature: Purananooru, Aganaanooru, Natrinai, Kurunthogai, Ainkurunooru, Kalithogai, Eight Anthologies, Ten Idylls",
+              "nameTa": "புறநானூறு, அகநானூறு, நற்றிணை, குறுந்தொகை, ஐங்குறுநூறு, கலித்தொகை தொடர்பான செய்திகள், மேற்கோள்கள், அடியரையறை, எட்டுத்தொகை, பத்துப்பாட்டு நூல்களில் உள்ள பிற செய்திகள்",
+              "exams": [
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tamil.u2.t05",
+              "nameEn": "Silappathikaram, Manimekalai and the five great and five minor epics",
+              "nameTa": "சிலப்பதிகாரம்-மணிமேகலை தொடர்பான செய்திகள், மேற்கோள்கள், சிறந்த தொடர்கள், உட்பிரிவுகள் மற்றும் ஐம்பெரும்-ஐஞ்சிறுங் காப்பியங்கள் தொடர்பான செய்திகள்",
+              "exams": [
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tamil.u2.t06",
+              "nameEn": "Periyapuranam, Nalayira Divya Prabandham, Thiruvilaiyadal Puranam, Thembavani, Seerapuranam",
+              "nameTa": "பெரியபுராணம் – நாலாயிர திவ்வியப்பிரபந்தம் – திருவிளையாடற் புராணம் – தேம்பாவணி – சீறாப்புராணம் தொடர்பான செய்திகள்",
+              "exams": [
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tamil.u2.t07",
+              "nameEn": "Minor literature (Sitrilakkiyangal): Thirukkutralakuravanji, Kalingathuparani, Muthollayiram, Tamil Vidu Thoothu, Nandikkalambagam, Mukkoodarpallu, Kaavadichindhu, Muthukumaraswamy Pillaitamil, Rajarajan Ula",
+              "nameTa": "சிற்றிலக்கியங்கள்: திருக்குற்றாலக்குறவஞ்சி – கலிங்கத்துப்பரணி – முத்தொள்ளாயிரம், தமிழ்விடு தூது – நந்திக்கலம்பகம் – முக்கூடற்பள்ளு – காவடிச்சிந்து - முத்துக்குமாரசாமி பிள்ளைத் தமிழ் - இராஜராஜ சோழன் உலா",
+              "exams": [
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tamil.u2.t08",
+              "nameEn": "Manonmaniyam, Panchali Sabadham, Kuyil Paattu, Irattura Mozhithal, Azhagiya Sokkanathar",
+              "nameTa": "மனோன்மணியம் - பாஞ்சாலி சபதம் - குயில் பாட்டு - இரட்டுற மொழிதல் (காளமேகப் புலவர்) - அழகிய சொக்கநாதர் தொடர்பான செய்திகள்",
+              "exams": [
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tamil.u2.t09",
+              "nameEn": "Folk songs and Siddhar songs",
+              "nameTa": "நாட்டுப்புறப் பாட்டு - சித்தர் பாடல்கள் தொடர்பான செய்திகள்",
+              "exams": [
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tamil.u2.t10",
+              "nameEn": "Religious pioneers: Appar, Sambandar, Sundarar, Manikkavasagar, Thirumoolar, Kulasekara Alvar, Andal, Seethalai Saathanar, H.A. Krishnapillai, Umaruppulavar",
+              "nameTa": "சமய முன்னோடிகள் – அப்பர், சம்பந்தர், சுந்தரர், மாணிக்கவாசகர், திருமூலர், குலசேகர ஆழ்வார், ஆண்டாள், சீத்தலைச் சாத்தனார், எச்.ஏ.கிருட்டிணனார், உமறுப்புலவர் தொடர்பான செய்திகள், மேற்கோள்கள், சிறப்புப் பெயர்கள்",
+              "exams": [
+                "G2",
+                "G4"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "tamil.u3",
+          "nameEn": "Part C: Tamil scholars and service to Tamil",
+          "nameTa": "பகுதி இ: தமிழ் அறிஞர்களும், தமிழ்த் தொண்டும்",
+          "topics": [
+            {
+              "id": "tamil.u3.t01",
+              "nameEn": "Bharathiyar, Bharathidasan, Namakkal Kavignar, Kavimani Desigavinayagam",
+              "nameTa": "பாரதியார், பாரதிதாசன், நாமக்கல் கவிஞர், கவிமணி தேசிக விநாயகனார் தொடர்பான செய்திகள், சிறந்த தொடர்கள், சிறப்புப் பெயர்கள்",
+              "exams": [
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tamil.u3.t02",
+              "nameEn": "Traditional poetry: Mudiyarasan, Vanidasan, Surada, Kannadasan, Udumalai Narayana Kavi, Pattukkottai Kalyanasundaram, Marudhakasi",
+              "nameTa": "மரபுக் கவிதை - முடியரசன், வாணிதாசன், சுரதா, கண்ணதாசன், உடுமலை நாராயண கவி, பட்டுக்கோட்டை கல்யாணசுந்தரம், மருதகாசி தொடர்பான செய்திகள், அடைமொழிப் பெயர்கள்",
+              "exams": [
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tamil.u3.t03",
+              "nameEn": "Modern (free-verse) poetry: Pichamoorthy, C.Su. Chellappa, Tharumu Sivaramu, Pasuvaiya, Ra. Meenakshi, Mu. Metha, Erodu Thamizhanban, Abdul Rahman, Kalapriya, Kalyanji, Gnanakoothan",
+              "nameTa": "புதுக்கவிதை – ந.பிச்சமூர்த்தி, சி.சு.செல்லப்பா, தருமு சிவராமு, பசுவய்யா, இரா.மீனாட்சி, சி.மணி, சிற்பி, மு.மேத்தா, ஈரோடு தமிழன்பன், அப்துல்ரகுமான், கலாப்ரியா, கல்யாண்ஜி, ஞானக்கூத்தன் – தொடர்பான செய்திகள், மேற்கோள்கள், சிறப்புத் தொடர்கள் மற்றும் எழுதிய நூல்கள்",
+              "exams": [
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tamil.u3.t04",
+              "nameEn": "Letter literature in Tamil: Natkurippu, Nehru, Gandhi, Mu. Varadarasanar, Perarignar Anna",
+              "nameTa": "தமிழில் கடித இலக்கியம் – நாட்குறிப்பு, ஜவகர்லால் நேரு, மகாத்மா காந்தி, மு.வரதராசனார், பேரறிஞர் அண்ணா தொடர்பான செய்திகள்",
+              "exams": [
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tamil.u3.t05",
+              "nameEn": "Performing (folk) arts",
+              "nameTa": "நிகழ்கலை (நாட்டுப்புறக் கலைகள்) தொடர்பான செய்திகள்",
+              "exams": [
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tamil.u3.t06",
+              "nameEn": "Short stories in Tamil: titles, authors, matching",
+              "nameTa": "தமிழில் சிறுகதைகள் தலைப்பு - ஆசிரியர் - பொருத்துதல்",
+              "exams": [
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tamil.u3.t07",
+              "nameEn": "Arts: sculpture, painting, oratory, cinema",
+              "nameTa": "கலைகள் – சிற்பம் – ஓவியம் – பேச்சு - திரைப்படக்கலை தொடர்பான செய்திகள்",
+              "exams": [
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tamil.u3.t08",
+              "nameEn": "Antiquity of Tamil, greatness of the Tamil language, Dravidian languages",
+              "nameTa": "தமிழின் தொன்மை - தமிழ்மொழியின் சிறப்பு, திராவிட மொழிகள் தொடர்பான செய்திகள்",
+              "exams": [
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tamil.u3.t09",
+              "nameEn": "Prose writers: Maraimalai Adigal, Parithimar Kalaignar, N.M. Venkatasami Nattar, Ra.Pi. Sethu, Thiru.Vi.Ka., Vaiyapuri, Devaneyap Pavanar, Seikkuthambi Pavalar",
+              "nameTa": "உரைநடை - மறைமலை அடிகள், பரிதிமாற்கலைஞர், ந.மு.வேங்கடசாமி நாட்டார், ரா.பி.சேது, திரு.வி.கல்யாண சுந்தரனார், வையாபுரி, பேரா.தனிநாயகம் அடிகள், செய்குதம்பி பாவலர் – மொழி நடை தொடர்பான செய்திகள்",
+              "exams": [
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tamil.u3.t10",
+              "nameEn": "Tamil service of U.Ve. Swaminatha Iyer, Tha.Po. Meenakshisundaranar, C. Ilakkuvanar",
+              "nameTa": "உ.வே.சாமிநாதர், தெ.பொ.மீனாட்சி சுந்தரனார், சி.இலக்குவனார் – தமிழ்ப்பணி தொடர்பான செய்திகள்",
+              "exams": [
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tamil.u3.t11",
+              "nameEn": "Devaneyap Pavanar (lexicon), Paavalareru Perunchithiranar; Tamil service",
+              "nameTa": "தேவநேயப்பாவாணர்-அகரமுதலி, பாவலரேறு பெருஞ்சித்திரனார், தமிழ்த்தொண்டு தொடர்பான செய்திகள்",
+              "exams": [
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tamil.u3.t12",
+              "nameEn": "G.U. Pope and Veeramamunivar: Tamil service",
+              "nameTa": "ஜி.யு.போப் - வீரமாமுனிவர் தமிழ்த்தொண்டு சிறப்புத் தொடர்கள்",
+              "exams": [
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tamil.u3.t13",
+              "nameEn": "Thanthai Periyar, Perarignar Anna, Muthuramalingar, Ambedkar, Kamarajar, Ma.Po.Sivagnanam, Kayidhe Millath: social service",
+              "nameTa": "தந்தை பெரியார் – பேரறிஞர் அண்ணா – முத்துராமலிங்கர் – அம்பேத்கர் – காமராசர் – ம.பொ.சிவஞானம் - காயிதேமில்லத் - சமுதாயத் தொண்டு",
+              "exams": [
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tamil.u3.t14",
+              "nameEn": "Tamilagam: origins and changes of place names",
+              "nameTa": "தமிழகம் – ஊரும் பேரும், தோற்றம் மாற்றம் பற்றிய செய்திகள்",
+              "exams": [
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tamil.u3.t15",
+              "nameEn": "Tamils across the world: their greatness and service to Tamil",
+              "nameTa": "உலகளாவிய தமிழர்கள் சிறப்பும் – பெருமையும் – தமிழ்ப் பணியும்",
+              "exams": [
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tamil.u3.t16",
+              "nameEn": "Scientific thought in the Tamil language",
+              "nameTa": "தமிழ்மொழியின் அறிவியல் சிந்தனைகள் தொடர்பான செய்திகள்",
+              "exams": [
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tamil.u3.t17",
+              "nameEn": "Women in Tamil: Moovalur Ramamirtham, Dr. Muthulakshmi, Velu Nachiyar, women achievers, women in the freedom struggle, Thillaiyadi Valliammai, Rani Mangammal, Annie Besant",
+              "nameTa": "தமிழ் மகளிரின் சிறப்பு – மூவலூர் ராமாமிர்தம்மாள், டாக்டர் முத்துலட்சுமி அம்மையார், வேலு நாச்சியார் மற்றும் சாதனை மகளிர் - விடுதலைப் போராட்டத்தில் மகளிர் பங்கு - தில்லையாடி வள்ளியம்மை, ராணி மங்கம்மாள், அன்னி பெசன்ட் அம்மையார்",
+              "exams": [
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tamil.u3.t18",
+              "nameEn": "Tamil trade, archaeological studies and sea voyages",
+              "nameTa": "தமிழர் வணிகம் – தொல்லியல் ஆய்வுகள் – கடற் பயணங்கள் – தொடர்பான செய்திகள்",
+              "exams": [
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tamil.u3.t19",
+              "nameEn": "Food as medicine; medicinal herbs",
+              "nameTa": "உணவே மருந்து – நோய் தீர்க்கும் மூலிகைகள் தொடர்பான செய்திகள்",
+              "exams": [
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tamil.u3.t20",
+              "nameEn": "Religious harmony: Thayumanavar, Ramalinga Adigalar, Thiru.Vi.Ka.",
+              "nameTa": "சமயப் பொதுமை உணர்த்திய தாயுமானவர், இராமலிங்க அடிகளார், திரு.வி.கல்யாண சுந்தரனார் தொடர்பான செய்திகள் – மேற்கோள்கள்",
+              "exams": [
+                "G2",
+                "G4"
+              ]
+            },
+            {
+              "id": "tamil.u3.t21",
+              "nameEn": "News about libraries",
+              "nameTa": "நூலகம் பற்றிய செய்திகள்",
+              "exams": [
+                "G2",
+                "G4"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "eng",
+      "nameEn": "General English (SSLC standard)",
+      "nameTa": "பொது ஆங்கிலம் (பத்தாம் வகுப்புத் தரம்)",
+      "units": [
+        {
+          "id": "eng.u1",
+          "nameEn": "Part A: Grammar",
+          "nameTa": "பகுதி அ: இலக்கணம்",
+          "topics": [
+            {
+              "id": "eng.u1.t01",
+              "nameEn": "Match words and phrases with their meanings",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u1.t02",
+              "nameEn": "Synonyms",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u1.t03",
+              "nameEn": "Antonyms",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u1.t04",
+              "nameEn": "Prefixes and suffixes",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u1.t05",
+              "nameEn": "Articles",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u1.t06",
+              "nameEn": "Prepositions",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u1.t07",
+              "nameEn": "Question tags",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u1.t08",
+              "nameEn": "Tenses",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u1.t09",
+              "nameEn": "Voice",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u1.t10",
+              "nameEn": "Infinitives, gerunds and participles",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u1.t11",
+              "nameEn": "Sentence patterns (subject, verb, object...)",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u1.t12",
+              "nameEn": "Homophones",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u1.t13",
+              "nameEn": "Find the error",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u1.t14",
+              "nameEn": "Select the correct sentence",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u1.t15",
+              "nameEn": "Odd word out (verb, noun, adjective, adverb)",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u1.t16",
+              "nameEn": "Plural forms",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u1.t17",
+              "nameEn": "Simple, compound and complex sentences",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u1.t18",
+              "nameEn": "Degrees of comparison",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u1.t19",
+              "nameEn": "Blending words",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u1.t20",
+              "nameEn": "Compound words",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u1.t21",
+              "nameEn": "British English and American English",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "eng.u2",
+          "nameEn": "Part B: Poetry",
+          "nameTa": "பகுதி ஆ: கவிதை",
+          "topics": [
+            {
+              "id": "eng.u2.t01",
+              "nameEn": "Figures of speech (alliteration, simile, metaphor, personification, onomatopoeia, anaphora, rhyme scheme, rhyming words, repetition)",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u2.t02",
+              "nameEn": "Poetry appreciation",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u2.t03",
+              "nameEn": "Important lines",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u2.t04",
+              "nameEn": "Life - Henry Van Dyke",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u2.t05",
+              "nameEn": "I am Every Woman - Rakhi Nariani Shirke",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u2.t06",
+              "nameEn": "The Secret of the Machines - Rudyard Kipling",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u2.t07",
+              "nameEn": "The Ant and The Cricket - adapted from Aesop's fables",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u2.t08",
+              "nameEn": "No Men are Foreign - James Falconer Kirkup",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u2.t09",
+              "nameEn": "The House on Elm Street - Nadia Bush",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u2.t10",
+              "nameEn": "Stopping by Woods on a Snowy Evening - Robert Frost",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u2.t11",
+              "nameEn": "A Poison Tree - William Blake",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u2.t12",
+              "nameEn": "On Killing a Tree - Gieve Patel",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u2.t13",
+              "nameEn": "The Spider and the Fly - Mary Botham Howitt",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u2.t14",
+              "nameEn": "The River - Caroline Ann Bowles",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u2.t15",
+              "nameEn": "The Comet - Norman Littleford",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u2.t16",
+              "nameEn": "The Stick-together Families - Edgar Albert Guest",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u2.t17",
+              "nameEn": "Special Hero - Christina M. Kerschen",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u2.t18",
+              "nameEn": "Making Life Worth While - George Eliot",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u2.t19",
+              "nameEn": "A Thing of Beauty - John Keats",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u2.t20",
+              "nameEn": "Lessons in Life - Brigette Bryant and Daniel Ho",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u2.t21",
+              "nameEn": "My Computer Needs a Break - Shanthini Govindan",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u2.t22",
+              "nameEn": "Your Space - David Bates",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u2.t23",
+              "nameEn": "Sea Fever - John Masefield",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u2.t24",
+              "nameEn": "Courage - Edgar Albert Guest",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u2.t25",
+              "nameEn": "Team Work - Edgar Albert Guest",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u2.t26",
+              "nameEn": "From a Railway Carriage - Robert Louis Stevenson",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u2.t27",
+              "nameEn": "Indian Seasons - Nisha Dyrene",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u2.t28",
+              "nameEn": "A Tragic Story - William Makepeace Thackeray",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "eng.u3",
+          "nameEn": "Part C: Literary works",
+          "nameTa": "பகுதி இ: இலக்கியப் படைப்புகள்",
+          "topics": [
+            {
+              "id": "eng.u3.t01",
+              "nameEn": "His First Flight - Liam O'Flaherty",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u3.t02",
+              "nameEn": "The Tempest - Tales from Shakespeare",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u3.t03",
+              "nameEn": "The Last Lesson - Alphonse Daudet",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u3.t04",
+              "nameEn": "The Little Hero of Holland - Mary Mapes Dodge",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u3.t05",
+              "nameEn": "The Dying Detective - Arthur Conan Doyle",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u3.t06",
+              "nameEn": "Learning the Game - Sachin Tendulkar",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u3.t07",
+              "nameEn": "The Cat and the Painkiller - Mark Twain",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u3.t08",
+              "nameEn": "Water, the Elixir of Life - Sir C.V. Raman",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u3.t09",
+              "nameEn": "The Story of a Grizzly Cub - William Temple Hornaday",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u3.t10",
+              "nameEn": "Sir Isaac Newton - Nathaniel Hawthorne",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u3.t11",
+              "nameEn": "My Reminiscence - Rabindranath Tagore",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u3.t12",
+              "nameEn": "The Woman on Platform 8 - Ruskin Bond",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u3.t13",
+              "nameEn": "The Nose Jewel - C. Rajagopalachari",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u3.t14",
+              "nameEn": "A Birthday Letter - Jawaharlal Nehru",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u3.t15",
+              "nameEn": "Biographies: Mahatma Gandhi, Jawaharlal Nehru, Subash Chandra Bose, Helen Keller, Kalpana Chawla, Dr. Salim Ali, Rani of Jhansi, Nelson Mandela, Abraham Lincoln",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            },
+            {
+              "id": "eng.u3.t16",
+              "nameEn": "General comprehension",
+              "nameTa": "",
+              "exams": [
+                "G2"
+              ]
+            }
           ]
         }
       ]

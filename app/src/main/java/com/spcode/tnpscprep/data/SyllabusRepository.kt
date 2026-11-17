@@ -17,15 +17,17 @@ class SyllabusRepository(
     fun observeSubjects() = syllabus.observeSubjects()
     fun observeUnits() = syllabus.observeUnits()
     fun observeTopics(mask: Int) = syllabus.observeTopics(mask)
+    fun observeStudied(mask: Int) = progress.observeStudied(mask)
 
     /**
-     * Reads the CURRENT level from the DB inside a transaction instead of trusting the level the
+     * Also used for "I revised this again": at the top level the level can't rise, but the timestamp is
+     * refreshed so the 60-day review restarts. Reading the CURRENT level from the DB inside a transaction instead of trusting the level the
      * UI showed: two fast taps then advance twice, never "twice from the same stale value".
      */
     suspend fun advance(topicId: String) = db.withTransaction {
         val current = progress.getLevel(topicId) ?: RevisionLevel.NOT_STARTED
         val next = RevisionLevel.advance(current)
-        if (next != current) progress.upsert(TopicProgressEntity(topicId, next, now()))
+        progress.upsert(TopicProgressEntity(topicId, next, now()))
     }
 
     /** Long-press: delete the row (no row == Not started). */

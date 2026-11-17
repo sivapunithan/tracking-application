@@ -43,4 +43,28 @@
     <string name="language_label">மொழி</string>
     <string name="language_system">சாதன இயல்புநிலை</string>
     <string name="language_note">மொழியை மாற்றும்போது திரை மீண்டும் ஏற்றப்படும். இயங்கும் டைமர் தொடர்ந்து இயங்கும்.</string>
+    <string name="syllabus_source_title">பாடத்திட்டம் பற்றி</string>
+    <string name="syllabus_source_note">TNPSC-யின் அதிகாரப்பூர்வ ஆவணங்களிலிருந்து உருவாக்கப்பட்டது: தொகுதி I முதல்நிலை (16 டிச 2024), தொகுதி II/IIA மற்றும் தொகுதி IV/VAO (திருத்தம் 27 ஜன 2022). தலைப்புகள் அதிகாரப்பூர்வப் பட்டியலிலிருந்து பிரிக்கப்பட்டவை. இது படிப்பதற்கான உதவி மட்டுமே: tnpsc.gov.in-இல் தற்போதைய அறிவிப்பைச் சரிபார்க்கவும்.</string>
+    <string name="tab_today">இன்று</string>
+    <string name="target_exam_label">தயாராகும் தேர்வு</string>
+    <string name="exam_date_not_set">தேர்வு தேதி அமைக்கப்படவில்லை</string>
+    <string name="exam_date_passed">தேர்வு தேதி கடந்துவிட்டது</string>
+    <string name="set_exam_date">தேர்வு தேதியை அமை</string>
+    <string name="clear">அழி</string>
+    <string name="ok">சரி</string>
+    <string name="cancel">ரத்து</string>
+    <string name="readiness_label">பாடத்திட்டத் தயார்நிலை: %1$d%%</string>
+    <string name="not_started_count">தொடங்காத தலைப்புகள்: %1$d / %2$d</string>
+    <string name="due_title">திருப்புதல் செய்ய வேண்டியவை (%1$d)</string>
+    <string name="due_empty">எதுவும் நிலுவையில் இல்லை. பாடத்திட்டப் பகுதியில் புதிய தலைப்பைப் படியுங்கள், அல்லது நாளை வாருங்கள்.</string>
+    <string name="due_today">இன்றே செய்ய வேண்டும்</string>
+    <string name="revised">திருப்பினேன்</string>
+    <plurals name="exam_in_days">
+        <item quantity="one">தேர்வுக்கு %d நாள்</item>
+        <item quantity="other">தேர்வுக்கு %d நாள்கள்</item>
+    </plurals>
+    <plurals name="overdue_days">
+        <item quantity="one">%d நாள் தாமதம்</item>
+        <item quantity="other">%d நாள்கள் தாமதம்</item>
+    </plurals>
 </resources>

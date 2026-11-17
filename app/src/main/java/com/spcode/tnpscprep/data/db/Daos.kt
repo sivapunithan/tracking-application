@@ -44,6 +44,14 @@ interface ProgressDao {
     @Upsert suspend fun upsert(progress: TopicProgressEntity)
     @Query("SELECT level FROM topic_progress WHERE topicId = :topicId") suspend fun getLevel(topicId: String): Int?
     @Query("DELETE FROM topic_progress WHERE topicId = :topicId") suspend fun reset(topicId: String)
+
+    @Query(
+        """SELECT p.topicId AS topicId, t.subjectId AS subjectId, t.nameEn AS nameEn, t.nameTa AS nameTa,
+                  p.level AS level, p.lastUpdated AS lastUpdated
+           FROM topic_progress p JOIN topic t ON t.id = p.topicId
+           WHERE p.level > 0 AND (t.exams & :mask) != 0"""
+    )
+    fun observeStudied(mask: Int): Flow<List<StudiedTopic>>
 }
 
 @Dao

@@ -43,4 +43,28 @@
     <string name="language_label">Language</string>
     <string name="language_system">System default</string>
     <string name="language_note">The screen reloads when you change language. A running timer keeps running.</string>
+    <string name="syllabus_source_title">About the syllabus</string>
+    <string name="syllabus_source_note">Built from the official TNPSC documents: Group I prelims (16 Dec 2024) and Group II/IIA and Group IV/VAO (revised 27 Jan 2022). Topics are split from the official bullet points. This is a study aid: always check the current official notification at tnpsc.gov.in.</string>
+    <string name="tab_today">Today</string>
+    <string name="target_exam_label">Preparing for</string>
+    <string name="exam_date_not_set">Exam date not set</string>
+    <string name="exam_date_passed">The exam date has passed</string>
+    <string name="set_exam_date">Set exam date</string>
+    <string name="clear">Clear</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="readiness_label">Syllabus readiness: %1$d%%</string>
+    <string name="not_started_count">Not started: %1$d of %2$d topics</string>
+    <string name="due_title">Due for revision (%1$d)</string>
+    <string name="due_empty">Nothing is due. Read a new topic from the Syllabus tab, or come back tomorrow.</string>
+    <string name="due_today">due today</string>
+    <string name="revised">Revised</string>
+    <plurals name="exam_in_days">
+        <item quantity="one">Exam in %d day</item>
+        <item quantity="other">Exam in %d days</item>
+    </plurals>
+    <plurals name="overdue_days">
+        <item quantity="one">%d day overdue</item>
+        <item quantity="other">%d days overdue</item>
+    </plurals>
 </resources>

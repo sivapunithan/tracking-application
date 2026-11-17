@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.material3.PrimaryTabRow
+import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,6 +22,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -35,15 +36,19 @@ import com.spcode.tnpscprep.ui.settings.SettingsScreen
 import com.spcode.tnpscprep.ui.syllabus.SyllabusScreen
 import com.spcode.tnpscprep.ui.syllabus.SyllabusViewModel
 import com.spcode.tnpscprep.ui.timer.TimerScreen
+import com.spcode.tnpscprep.ui.today.TodayScreen
+import com.spcode.tnpscprep.ui.today.TodayViewModel
 import com.spcode.tnpscprep.ui.timer.TimerViewModel
 
 private object Routes {
+    const val TODAY = "today"
     const val SYLLABUS = "syllabus"
     const val TIMER = "timer"
     const val SETTINGS = "settings"
 }
 
 private val TABS = listOf(
+    Routes.TODAY to R.string.tab_today,
     Routes.SYLLABUS to R.string.syllabus_title,
     Routes.TIMER to R.string.timer_title,
     Routes.SETTINGS to R.string.settings_title,
@@ -54,9 +59,9 @@ private val TABS = listOf(
  * Activity scope (not inside the NavHost), so the timer isn't torn down when she switches tabs.
  */
 @Composable
-fun AppRoot(syllabusVm: SyllabusViewModel, timerVm: TimerViewModel, twoPane: Boolean) {
+fun AppRoot(todayVm: TodayViewModel, syllabusVm: SyllabusViewModel, timerVm: TimerViewModel, twoPane: Boolean) {
     val nav = rememberNavController()
-    val route = nav.currentBackStackEntryAsState().value?.destination?.route ?: Routes.SYLLABUS
+    val route = nav.currentBackStackEntryAsState().value?.destination?.route ?: Routes.TODAY
 
     // --- timer concerns that must hold on EVERY tab ---
     val view = LocalView.current
@@ -84,12 +89,13 @@ fun AppRoot(syllabusVm: SyllabusViewModel, timerVm: TimerViewModel, twoPane: Boo
     }
 
     Column(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)) {
-        PrimaryTabRow(selectedTabIndex = TABS.indexOfFirst { it.first == route }.coerceAtLeast(0)) {
+        PrimaryScrollableTabRow(selectedTabIndex = TABS.indexOfFirst { it.first == route }.coerceAtLeast(0), edgePadding = 8.dp) {
             TABS.forEach { (r, label) ->
                 Tab(selected = route == r, onClick = { go(r) }, text = { Text(stringResource(label)) })
             }
         }
-        NavHost(nav, startDestination = Routes.SYLLABUS, modifier = Modifier.weight(1f)) {
+        NavHost(nav, startDestination = Routes.TODAY, modifier = Modifier.weight(1f)) {
+            composable(Routes.TODAY) { TodayScreen(todayVm) }
             composable(Routes.SYLLABUS) { SyllabusScreen(syllabusVm, twoPane) }
             composable(Routes.TIMER) { TimerScreen(timerVm) }
             composable(Routes.SETTINGS) { SettingsScreen() }
