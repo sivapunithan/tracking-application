@@ -358,13 +358,9 @@ private fun Header(name: String, ui: TodayUiState, onProfile: () -> Unit, onExam
                 .clickable(role = androidx.compose.ui.semantics.Role.Button, onClick = onProfile),
         ) {
             val ctx = androidx.compose.ui.platform.LocalContext.current
-            val mood = remember(ui.streak, ui.todayMinutes, ui.goalMinutes, ui.daysSinceStudy, ui.progress.due.size, hour) {
-                MoodEngine.pick(MoodInput(ui.streak, ui.todayMinutes >= ui.goalMinutes, ui.daysSinceStudy, ui.progress.due.size, hour))
-            }
-            // The avatar follows her streak and revision, but only once she has studied something and only when THAT mood's own
-            // picture exists; otherwise (new user, or picture not made yet) a plain initial badge.
-            if (ui.daysSinceStudy != null && hasMoodImage(ctx, mood)) {
-                MoodAvatar(mood, size = 68.dp)
+            // Always the thumbs-up picture (the same one as on Profile) when it is on this phone; otherwise the initial badge.
+            if (hasMoodImage(ctx, com.spcode.tnpscprep.domain.Mood.PROUD)) {
+                com.spcode.tnpscprep.ui.diary.DiaryMood("PROUD", 68.dp)
             } else Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 if (name.isBlank()) {
                     Icon(Icons.Rounded.School, null, tint = MaterialTheme.colorScheme.onPrimaryContainer, modifier = Modifier.size(34.dp))

@@ -415,3 +415,5 @@ reference, write own notes with page refs.
 
 ## Floating bar hides on scroll
 - `AppRoot`: a NestedScrollConnection on the root Box. Scrolling down (child consumed y < -6) hides the bar + its fade; any scroll up, reaching the end of a list, a tap on a 28dp strip at the bottom edge, or a route/tab change shows it. List padding (`LocalBottomBarInset`) is unchanged while hidden so nothing jumps. Still always hidden on Focus, Profile, Wrap-up and the diary editor. Seen on the phone on Today (hide, show on scroll up, fast flick); Study/Care/Journal not checked. One earlier capture right after launch still showed the bar after a fast swipe and I did not find why.
+
+- Today's header avatar (top right, opens Profile) is now always the thumbs-up (PROUD) picture, like the Profile header; the initial/graduation-cap badge only shows if the picture is missing. Seen on the phone.
