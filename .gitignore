@@ -4,3 +4,9 @@ local.properties
 *.iml
 .idea/
 .kotlin/
+
+# Release signing: NEVER commit these
+keystore.properties
+*.jks
+*.keystore
+release/

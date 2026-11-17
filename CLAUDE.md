@@ -14,7 +14,7 @@ The app is for **REVISION + a progress TRACKER + real CURRENT AFFAIRS**. It is N
 7. [DONE: notes+star (schema v2, MIGRATION_1_2 verified on phone over a v1 DB), progress by subject, starred list; 67 unit tests] Tracker views: readiness per exam/subject, stale topics, starred (weak) topics, per-topic own notes.
 8. [DONE v1: 65 items, schema v3 + MIGRATION_2_3, browse/filter/bookmark/revise/own entries; 85 unit tests; NOT yet seen on screen (phone was locked)] Current affairs: real dated items from official/open sources (own words + source + verified flag), monthly browse,
    bookmarks/revised flag on the same revision queue, user-added entries.
-9. Release: signed APK, README (EN+TA), handover notes, keystore backup instructions.
+9. [DONE: v1.0.0 signed APK, README EN+TA; on-phone test of the release build PENDING (needs uninstalling the debug build = data loss on the test phone)] Release: signed APK, README (EN+TA), handover notes, keystore backup instructions.
 
 Lightweight, fully offline Android app for a friend preparing for TNPSC Group 1, 2 and 4 PRELIMS.
 Package: `com.spcode.tnpscprep`. minSdk 26, targetSdk 36, compileSdk 37 (Compose 1.12 libs require compileSdk 37; targetSdk stays 36 to avoid new-runtime-behaviour changes).
@@ -147,3 +147,12 @@ reference, write own notes with page refs.
 - UI shows "Compiled up to <dataUpTo>" and a disclaimer so stale/unverified data can never mislead silently. Source links open the browser
   (no INTERNET permission needed). Own entries can be added/deleted in the app: this keeps the section alive with no developer.
 - CA items you have revised (level >= 1) now appear in the Today due list on the same 3/7/21/60-day schedule (a bookmark alone is never due). `tools/` holds provenance scripts.
+
+## Release v1.0.0 (handover)
+- Signed with `~/.android-keys/tnpscprep-release.jks` (alias tnpscprep, PKCS12, valid ~30 years); passwords in git-ignored `keystore.properties`.
+  Both MUST be backed up by the owner: losing them means no future update can install over existing copies. Debug builds work without them.
+- `./gradlew assembleRelease` -> R8 minify + resource shrink; APK ~1.9 MB (debug ~13 MB), apksigner-verified (v2), no INTERNET permission,
+  versionName 1.0.0 / versionCode 1. Deliverable copy: `release/TnpscPrep-1.0.0.apk` (+ .sha256), git-ignored.
+- NOT yet verified: that the R8-shrunk release build runs correctly on a device (kotlinx.serialization / Room under R8). The debug build is what
+  was tested. Debug and release have different signatures, so installing release over debug requires uninstalling debug (wipes its data).
+- Known gaps for a next maintainer: no backup/export of progress (allowBackup=false), real tablet untested, Tamil strings + CA data need human review.
