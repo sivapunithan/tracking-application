@@ -667,4 +667,11 @@
     <string name="link_save">Save</string>
     <string name="link_open">Open</string>
     <string name="link_unlink">Remove link</string>
+    <string name="bk_restored_photos">Restored. Added %1$d, updated %2$d. Photos brought back: %3$d.</string>
+    <string name="photos_title">Diary photos</string>
+    <string name="photos_none">No photos yet.</string>
+    <string name="photos_used">Photos: %1$d, using %2$s on this phone.</string>
+    <string name="photos_note">Photos live only on this phone. A backup with photos is one .mathi file.</string>
+    <string name="photos_clean">Clean up unused photo files</string>
+    <string name="photos_cleaned">Done. Unused photo files removed: %1$d.</string>
 </resources>

@@ -80,6 +80,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
@@ -339,6 +340,7 @@ private fun EntryCard(e: DiaryItem, onClick: () -> Unit, onPin: () -> Unit) {
                 }
                 Text(e.preview.trim(), style = MaterialTheme.typography.bodyMedium, maxLines = 3, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 4.dp))
             }
+            if (e.firstPhoto != null) EntryThumb(e.firstPhoto, e.photoCount)
             val label = stringResource(if (e.pinned) R.string.diary_unpin else R.string.diary_pin)
             IconButton(onClick = onPin, modifier = Modifier.semantics { contentDescription = label }) {
                 Icon(
@@ -346,6 +348,21 @@ private fun EntryCard(e: DiaryItem, onClick: () -> Unit, onPin: () -> Unit) {
                     tint = if (e.pinned) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
                 )
             }
+        }
+    }
+}
+
+/** The entry's first photo as a small thumbnail (the 320 px copy, decoded off the main thread and cached), with "+n" when there are more. */
+@Composable
+fun EntryThumb(name: String, count: Int, size: androidx.compose.ui.unit.Dp = 64.dp) {
+    val store = (LocalContext.current.applicationContext as com.spcode.tnpscprep.TnpscApp).container.photoStore
+    val bmp by androidx.compose.runtime.produceState<androidx.compose.ui.graphics.ImageBitmap?>(null, name) {
+        value = PhotoBitmaps.get(store, name, thumb = true)?.asImageBitmap()
+    }
+    Box(Modifier.padding(start = 6.dp).size(size).clip(RoundedCornerShape(14.dp)).background(MaterialTheme.colorScheme.surfaceVariant)) {
+        bmp?.let { androidx.compose.foundation.Image(it, null, Modifier.fillMaxSize(), contentScale = androidx.compose.ui.layout.ContentScale.Crop) }
+        if (count > 1) Surface(Modifier.align(Alignment.BottomEnd).padding(3.dp), shape = RoundedCornerShape(50), color = Color.Black.copy(alpha = 0.6f)) {
+            Text("+${count - 1}", Modifier.padding(horizontal = 6.dp, vertical = 1.dp), style = MaterialTheme.typography.labelSmall, color = Color.White)
         }
     }
 }
@@ -420,6 +437,7 @@ private fun DayStory(date: LocalDate, today: LocalDate, entries: List<DiaryItem>
                     DiaryMood(e.mood, 36.dp)
                     Text(e.preview.trim(), style = MaterialTheme.typography.bodyMedium, maxLines = 2, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f).padding(start = 12.dp, top = 2.dp))
                     if (e.wrapup) Text(stringResource(R.string.diary_wrapup_tag), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(start = 8.dp, top = 4.dp))
+                    if (e.firstPhoto != null) EntryThumb(e.firstPhoto, e.photoCount, 44.dp)
                 }
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

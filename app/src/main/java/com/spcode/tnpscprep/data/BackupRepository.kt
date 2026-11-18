@@ -13,11 +13,11 @@ import com.spcode.tnpscprep.data.db.TopicNoteEntity
 import com.spcode.tnpscprep.data.db.TopicProgressEntity
 import com.spcode.tnpscprep.data.db.UserAffairEntity
 
-data class RestoreOutcome(val added: Int, val updated: Int)
+data class RestoreOutcome(val added: Int, val updated: Int, val photos: Int = 0)
 
 /** Builds the full backup file (read-only) and restores one (merge-only, one transaction). */
 class BackupRepository(
-    private val db: AppDatabase, private val settings: SettingsStore, private val diary: DiaryRepository,
+    private val db: AppDatabase, private val settings: SettingsStore, private val diary: DiaryRepository, private val photoStore: PhotoStore? = null,
     private val now: () -> Long = System::currentTimeMillis,
 ) {
 
@@ -42,6 +42,7 @@ class BackupRepository(
             health = db.healthDao().all().map { HealthDto(it.date, it.kind, it.value, it.createdAt) },
             steps = db.stepDao().all().map { StepDto(it.date, it.baseline, it.lastReading, it.steps, it.bootMs, it.updatedAt) },
             settings = settingsSnapshot(),
+            photos = db.diaryPhotoDao().all().map { PhotoDto(it.name, it.frame, it.cornerDp, it.width, it.height, it.createdAt) },
         )
     }
 
@@ -59,6 +60,41 @@ class BackupRepository(
     }
 
     suspend fun exportJson(): String = AppBackup.encode(buildFile())
+
+    suspend fun photoCount(): Int = db.diaryPhotoDao().count()
+
+    /** The one-file ".mathi" backup: the text backup + every photo, as a zip. Returns how many photos went in. */
+    suspend fun exportBundle(out: java.io.OutputStream): Int = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+        val file = buildFile()
+        val store = photoStore
+        MathiBundle.write(out, AppBackup.encode(file), file.photos.map { it.name }) { n -> store?.file(n)?.takeIf { it.exists() }?.inputStream() }
+    }
+
+    /**
+     * Restores a .mathi: the text part first (merge-only, one transaction, exactly like a plain backup), then each photo whose entry now
+     * exists here and that this phone does not have yet. A photo that fails is skipped; it never undoes the text restore.
+     */
+    suspend fun restoreBundle(input: java.io.InputStream): Result<RestoreOutcome> = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+        val reader = MathiBundle.Reader(input)
+        val json = reader.json() ?: return@withContext Result.failure(IllegalArgumentException("not_a_backup"))
+        val text = restore(json).getOrElse { return@withContext Result.failure(it) }
+        val file = (AppBackup.parse(json) as? AppBackup.Parsed.Ok)?.file ?: return@withContext Result.success(text)
+        val store = photoStore ?: return@withContext Result.success(text)
+        val dao = db.diaryPhotoDao()
+        val local = dao.all().map { it.name }.toSet()
+        val byName = file.photos.associateBy { it.name }
+        var restored = 0
+        while (true) {
+            val (name, bytes) = reader.nextPhoto() ?: break
+            val dto = byName[name] ?: continue
+            val eid = db.diaryDao().entryIdWithPhoto(name)
+            val todo = AppBackup.photosToRestore(local, setOf(name), listOf(dto)) { eid }.firstOrNull() ?: continue
+            val saved = store.importBytes(name, bytes) ?: continue
+            dao.put(com.spcode.tnpscprep.data.db.DiaryPhotoEntity(name, todo.second, dto.frame, dto.cornerDp, saved.width, saved.height, saved.bytes, dto.createdAt))
+            restored++
+        }
+        Result.success(text.copy(photos = restored))
+    }
 
     /** Exports, and remembers the time only after the caller has really written the file. */
     fun markBackedUp() = settings.setLastBackupMs(now())

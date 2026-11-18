@@ -46,6 +46,18 @@ class PhotoStore(context: Context) {
         Saved(full.width, full.height, file(name).length() + file(name, true).length())
     }.getOrNull()
 
+    /** Brings a photo back from a backup: [bytes] must decode as a picture (long edge <= 8000); the file is kept as it is and a thumbnail is rebuilt. */
+    fun importBytes(name: String, bytes: ByteArray): Saved? = runCatching {
+        if (!com.spcode.tnpscprep.domain.DiaryPhotos.isName(name)) return null
+        val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        BitmapFactory.decodeByteArray(bytes, 0, bytes.size, bounds)
+        if (bounds.outWidth <= 0 || bounds.outHeight <= 0 || maxOf(bounds.outWidth, bounds.outHeight) > 8000) return null
+        val small = BitmapFactory.decodeByteArray(bytes, 0, bytes.size, BitmapFactory.Options().apply { inSampleSize = PhotoSizing.sampleSize(bounds.outWidth, bounds.outHeight, PhotoSizing.MAX_THUMB) }) ?: return null
+        file(name).writeBytes(bytes)
+        compress(scaleTo(small, PhotoSizing.MAX_THUMB), file(name, true), 75)
+        Saved(bounds.outWidth, bounds.outHeight, file(name).length() + file(name, true).length())
+    }.getOrNull()
+
     fun delete(name: String) { file(name).delete(); file(name, true).delete() }
 
     /** Removes every file that no entry refers to any more (called after deletes / restores). Returns how many photos were removed. */

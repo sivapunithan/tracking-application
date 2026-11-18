@@ -27,7 +27,7 @@ data class DiaryEntryEntity(
 )
 
 /** Light projection for the timeline: only the first 200 characters of each text are read. */
-data class DiaryPreviewRow(val id: Long, val localDate: String, val moodEmojiId: String?, val preview: String, val pinned: Boolean = false, val isWrapup: Boolean = false)
+data class DiaryPreviewRow(val id: Long, val localDate: String, val moodEmojiId: String?, val preview: String, val pinned: Boolean = false, val isWrapup: Boolean = false, val firstPhoto: String? = null, val photoCount: Int = 0)
 
 @Dao
 interface DiaryDao {
@@ -38,17 +38,19 @@ interface DiaryDao {
     @Query("DELETE FROM diary_entry WHERE id = :id") suspend fun delete(id: Long)
     @Query("SELECT * FROM diary_entry ORDER BY localDate, createdAt") suspend fun all(): List<DiaryEntryEntity>
 
-    @Query("SELECT id, localDate, moodEmojiId, substr(text, 1, 200) AS preview, pinned, (wrapup IS NOT NULL) AS isWrapup FROM diary_entry ORDER BY localDate DESC, createdAt DESC")
+    @Query("SELECT id, localDate, moodEmojiId, substr(text, 1, 200) AS preview, pinned, (wrapup IS NOT NULL) AS isWrapup, (SELECT name FROM diary_photo p WHERE p.entryId = diary_entry.id ORDER BY p.createdAt LIMIT 1) AS firstPhoto, (SELECT COUNT(*) FROM diary_photo p WHERE p.entryId = diary_entry.id) AS photoCount FROM diary_entry ORDER BY localDate DESC, createdAt DESC")
     fun observePreviews(): Flow<List<DiaryPreviewRow>>
 
     // Plain substring match. ESCAPE '\' so a typed % or _ is literal. See domain/DiarySearch.
-    @Query("SELECT id, localDate, moodEmojiId, substr(text, 1, 200) AS preview, pinned, (wrapup IS NOT NULL) AS isWrapup FROM diary_entry WHERE text LIKE :pattern ESCAPE '\\' ORDER BY localDate DESC, createdAt DESC LIMIT :limit")
+    @Query("SELECT id, localDate, moodEmojiId, substr(text, 1, 200) AS preview, pinned, (wrapup IS NOT NULL) AS isWrapup, (SELECT name FROM diary_photo p WHERE p.entryId = diary_entry.id ORDER BY p.createdAt LIMIT 1) AS firstPhoto, (SELECT COUNT(*) FROM diary_photo p WHERE p.entryId = diary_entry.id) AS photoCount FROM diary_entry WHERE text LIKE :pattern ESCAPE '\\' ORDER BY localDate DESC, createdAt DESC LIMIT :limit")
     fun observeSearch(pattern: String, limit: Int): Flow<List<DiaryPreviewRow>>
 
     @Query("UPDATE diary_entry SET pinned = :pinned WHERE id = :id") suspend fun setPinned(id: Long, pinned: Boolean)
 
     @Query("SELECT * FROM diary_entry WHERE localDate = :date AND wrapup IS NOT NULL ORDER BY id LIMIT 1") suspend fun wrapupFor(date: String): DiaryEntryEntity?
     @Query("SELECT localDate FROM diary_entry WHERE wrapup IS NOT NULL AND localDate >= :from") fun observeWrapupDates(from: String): Flow<List<String>>
+
+    @Query("SELECT id FROM diary_entry WHERE text LIKE '%[[photo:' || :name || ']]%' LIMIT 1") suspend fun entryIdWithPhoto(name: String): Long?
 
     @Query("SELECT * FROM diary_entry WHERE localDate = :date ORDER BY createdAt")
     fun observeForDate(date: String): Flow<List<DiaryEntryEntity>>
@@ -78,6 +80,8 @@ interface DiaryPhotoDao {
     @Query("SELECT * FROM diary_photo WHERE entryId = :entryId ORDER BY createdAt") suspend fun forEntry(entryId: Long): List<DiaryPhotoEntity>
     @Query("SELECT * FROM diary_photo WHERE entryId = :entryId ORDER BY createdAt") fun observeForEntry(entryId: Long): Flow<List<DiaryPhotoEntity>>
     @Query("SELECT * FROM diary_photo ORDER BY createdAt") suspend fun all(): List<DiaryPhotoEntity>
+    @Query("SELECT name FROM diary_photo WHERE name = :name") suspend fun existing(name: String): String?
+    @Query("SELECT COUNT(*) FROM diary_photo") suspend fun count(): Int
     @Query("DELETE FROM diary_photo WHERE name = :name") suspend fun delete(name: String)
     @Query("DELETE FROM diary_photo WHERE entryId = :entryId") suspend fun deleteForEntry(entryId: Long)
     @Query("DELETE FROM diary_photo WHERE entryId NOT IN (SELECT id FROM diary_entry)") suspend fun deleteOrphans()

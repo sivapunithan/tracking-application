@@ -30,6 +30,8 @@ data class FullBackupFile(
     val health: List<HealthDto> = emptyList(),
     val steps: List<StepDto> = emptyList(),
     val settings: SettingsDto? = null,
+    /** Photo FRAMES only (the pictures themselves travel inside a .mathi zip). Optional: a plain file has none. */
+    val photos: List<PhotoDto> = emptyList(),
 )
 
 @Serializable data class ProgressDto(val topicId: String, val level: Int, val lastUpdated: Long)
@@ -43,6 +45,7 @@ data class FullBackupFile(
 @Serializable data class DayNoteDto(val date: String, val note: String, val updatedAt: Long)
 @Serializable data class PlanDto(val localDate: String, val title: String, val refType: String, val refId: String? = null, val done: Boolean, val createdAt: Long, val sortOrder: Int)
 @Serializable data class HealthDto(val date: String, val kind: String, val value: Double, val createdAt: Long)
+@Serializable data class PhotoDto(val name: String, val frame: String, val cornerDp: Int, val width: Int, val height: Int, val createdAt: Long)
 @Serializable data class StepDto(val date: String, val baseline: Long, val lastReading: Long, val steps: Int, val bootMs: Long, val updatedAt: Long)
 
 /** Only preferences she chose. Every field is optional so a file from an older/newer app version still reads. */
@@ -74,7 +77,7 @@ object AppBackup {
         if (f.app != DiaryBackupFile.APP) return Parsed.Bad("not_a_backup")
         if (f.version !in 1..DiaryBackupFile.VERSION) return Parsed.Bad("version")
         val total = f.diary.size + f.progress.size + f.notes.size + f.sessions.size + f.affairState.size + f.userAffairs.size +
-            f.events.size + f.dayNotes.size + f.plans.size + f.health.size + f.steps.size
+            f.events.size + f.dayNotes.size + f.plans.size + f.health.size + f.steps.size + f.photos.size
         if (total > MAX_ROWS) return Parsed.Bad("too_big")
         return if (valid(f)) Parsed.Ok(f) else Parsed.Bad("bad_entry")
     }
@@ -95,6 +98,7 @@ object AppBackup {
         if (!f.plans.all { date(it.localDate) && it.title.length <= 500 && short(it.refType, 32) && short(it.refId, 80) && it.createdAt > 0 }) return false
         if (!f.health.all { date(it.date) && it.kind.isNotBlank() && short(it.kind, 32) && it.value.isFinite() && it.createdAt > 0 }) return false
         if (!f.steps.all { date(it.date) && it.steps in 0..1_000_000 }) return false
+        if (!f.photos.all { com.spcode.tnpscprep.domain.DiaryPhotos.isName(it.name) && short(it.frame, 16) && it.cornerDp in 0..96 && it.width in 1..20_000 && it.height in 1..20_000 && it.createdAt > 0 }) return false
         f.settings?.let { s ->
             if (!short(s.userName, 60) || !short(s.targetExam, 20) || !short(s.themeMode, 12) || !short(s.sex, 12) || !short(s.activity, 12)) return false
         }
@@ -152,4 +156,11 @@ object AppBackup {
 
     fun stepsToWrite(local: Map<String, Long>, incoming: List<StepDto>): List<StepDto> =
         newest(incoming, { it.date }, { it.updatedAt }).filter { s -> local[s.date]?.let { s.updatedAt > it } ?: true }
+
+    /**
+     * Photos to bring back from a .mathi: only those whose picture is in the zip ([zipNames]), that this phone does not have yet,
+     * and whose token is in an entry that exists here ([entryIdOf] = the local diary row holding "[[photo:name]]").
+     */
+    fun photosToRestore(localNames: Set<String>, zipNames: Set<String>, incoming: List<PhotoDto>, entryIdOf: (String) -> Long?): List<Pair<PhotoDto, Long>> =
+        incoming.distinctBy { it.name }.filter { it.name in zipNames && it.name !in localNames }.mapNotNull { p -> entryIdOf(p.name)?.let { p to it } }
 }

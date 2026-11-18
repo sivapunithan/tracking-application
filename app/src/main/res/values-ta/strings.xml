@@ -667,4 +667,11 @@
     <string name="link_save">சேமி</string>
     <string name="link_open">திற</string>
     <string name="link_unlink">இணைப்பை நீக்கு</string>
+    <string name="bk_restored_photos">மீட்கப்பட்டது. சேர்க்கப்பட்டவை %1$d, புதுப்பிக்கப்பட்டவை %2$d. மீட்ட படங்கள்: %3$d.</string>
+    <string name="photos_title">நாட்குறிப்பு படங்கள்</string>
+    <string name="photos_none">இன்னும் படங்கள் இல்லை.</string>
+    <string name="photos_used">படங்கள்: %1$d, இந்த போனில் %2$s.</string>
+    <string name="photos_note">படங்கள் இந்த போனில் மட்டுமே இருக்கும். படங்களுடன் காப்புப்பிரதி ஒரே .mathi கோப்பு.</string>
+    <string name="photos_clean">பயன்படாத பட கோப்புகளை சுத்தம் செய்</string>
+    <string name="photos_cleaned">முடிந்தது. நீக்கப்பட்ட பயன்படாத கோப்புகள்: %1$d.</string>
 </resources>

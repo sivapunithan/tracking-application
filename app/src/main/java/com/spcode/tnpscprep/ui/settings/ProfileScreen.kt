@@ -268,6 +268,8 @@ private fun DataPage(auth: AuthViewModel) {
     Text(stringResource(R.string.syllabus_source_title), style = MaterialTheme.typography.titleMedium)
     Text(stringResource(R.string.syllabus_source_note), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
     Spacer(Modifier.height(8.dp))
+    PhotoStorageSection()
+    Spacer(Modifier.height(8.dp))
     BackupSection()
     Spacer(Modifier.height(8.dp))
     AccountSection(auth, showSecurity = false)
@@ -285,11 +287,16 @@ private fun BackupSection() {
     var busy by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf(false) }
     val saved = stringResource(R.string.bk_saved); val saveFail = stringResource(R.string.bk_save_failed)
     val bad = stringResource(R.string.bk_bad); val restoredFmt = stringResource(R.string.bk_restored)
-    val save = androidx.activity.compose.rememberLauncherForActivityResult(androidx.activity.result.contract.ActivityResultContracts.CreateDocument("application/json")) { uri ->
+    var bundle by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf(false) }
+    val restoredPhotosFmt = stringResource(R.string.bk_restored_photos)
+    val save = androidx.activity.compose.rememberLauncherForActivityResult(androidx.activity.result.contract.ActivityResultContracts.CreateDocument("application/octet-stream")) { uri ->
         if (uri != null) { busy = true; scope.launch {
             val ok = runCatching {
-                val text = repo.exportJson()
-                withContext(Dispatchers.IO) { ctx.contentResolver.openOutputStream(uri, "wt")!!.use { it.write(text.toByteArray(Charsets.UTF_8)) } }
+                if (bundle) withContext(Dispatchers.IO) { ctx.contentResolver.openOutputStream(uri, "wt")!!.use { repo.exportBundle(it) } }
+                else {
+                    val text = repo.exportJson()
+                    withContext(Dispatchers.IO) { ctx.contentResolver.openOutputStream(uri, "wt")!!.use { it.write(text.toByteArray(Charsets.UTF_8)) } }
+                }
             }.isSuccess
             if (ok) repo.markBackedUp()
             notice = if (ok) saved else saveFail; busy = false
@@ -297,9 +304,19 @@ private fun BackupSection() {
     }
     val restore = androidx.activity.compose.rememberLauncherForActivityResult(androidx.activity.result.contract.ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null) { busy = true; scope.launch {
-            val text = runCatching { withContext(Dispatchers.IO) { ctx.contentResolver.openInputStream(uri)!!.use { it.readBytes() }.toString(Charsets.UTF_8) } }.getOrNull()
-            val r = if (text == null || text.length > com.spcode.tnpscprep.data.AppBackup.MAX_FILE_CHARS) null else repo.restore(text).getOrNull()
-            notice = if (r == null) bad else String.format(restoredFmt, r.added, r.updated); busy = false
+            // a .mathi is a zip ("PK"); anything else is the plain text backup
+            val r = withContext(Dispatchers.IO) {
+                runCatching {
+                    val head = ctx.contentResolver.openInputStream(uri)!!.use { it.readNBytes(2) }
+                    if (com.spcode.tnpscprep.data.MathiBundle.looksLikeZip(head)) ctx.contentResolver.openInputStream(uri)!!.use { repo.restoreBundle(it) }.getOrNull()
+                    else {
+                        val text = ctx.contentResolver.openInputStream(uri)!!.use { it.readBytes() }.toString(Charsets.UTF_8)
+                        if (text.length > com.spcode.tnpscprep.data.AppBackup.MAX_FILE_CHARS) null else repo.restore(text).getOrNull()
+                    }
+                }.getOrNull()
+            }
+            notice = if (r == null) bad else if (r.photos > 0) String.format(restoredPhotosFmt, r.added, r.updated, r.photos) else String.format(restoredFmt, r.added, r.updated)
+            busy = false
         } }
     }
     val lastText = if (last <= 0L) stringResource(R.string.bk_never)
@@ -313,8 +330,14 @@ private fun BackupSection() {
         Switch(checked = remind, onCheckedChange = { container.settingsStore.setBackupReminder(it) })
     }
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        androidx.compose.material3.Button(enabled = !busy, onClick = { save.launch("mathi-backup-" + java.time.LocalDate.now() + ".json") }) { Text(stringResource(R.string.bk_save)) }
-        androidx.compose.material3.OutlinedButton(enabled = !busy, onClick = { restore.launch(arrayOf("application/json", "text/plain", "application/octet-stream")) }) { Text(stringResource(R.string.bk_restore)) }
+        androidx.compose.material3.Button(enabled = !busy, onClick = {
+            scope.launch {
+                // with photos it is ONE .mathi file (text + pictures); without, the plain text file as before
+                bundle = repo.photoCount() > 0
+                save.launch("mathi-backup-" + java.time.LocalDate.now() + if (bundle) ".mathi" else ".json")
+            }
+        }) { Text(stringResource(R.string.bk_save)) }
+        androidx.compose.material3.OutlinedButton(enabled = !busy, onClick = { restore.launch(arrayOf("*/*")) }) { Text(stringResource(R.string.bk_restore)) }
     }
     if (busy) Text(stringResource(R.string.bk_busy), style = MaterialTheme.typography.bodySmall)
     notice?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary) }
@@ -424,4 +447,31 @@ private fun SoundsAndPraise() {
         if (android.os.Build.VERSION.SDK_INT >= 33) ask.launch(android.Manifest.permission.POST_NOTIFICATIONS)
         else ctx.startActivity(android.content.Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(android.provider.Settings.EXTRA_APP_PACKAGE, ctx.packageName).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK))
     }) { Text(stringResource(R.string.profile_praise_allow)) }
+}
+
+
+/** How much space diary photos use, and a button that removes files nothing refers to any more. */
+@Composable
+private fun PhotoStorageSection() {
+    val ctx = androidx.compose.ui.platform.LocalContext.current
+    val container = (ctx.applicationContext as com.spcode.tnpscprep.TnpscApp).container
+    val dao = container.database.diaryPhotoDao()
+    val count by dao.observeCount().collectAsStateWithLifecycle(0)
+    val bytes by dao.observeTotalBytes().collectAsStateWithLifecycle(0L)
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
+    var msg by remember { mutableStateOf<String?>(null) }
+    val cleaned = stringResource(R.string.photos_cleaned)
+    Text(stringResource(R.string.photos_title), style = MaterialTheme.typography.titleMedium)
+    Text(
+        if (count == 0) stringResource(R.string.photos_none) else stringResource(R.string.photos_used, count, if (bytes < 1_048_576L) "${maxOf(1L, bytes / 1024)} KB" else String.format("%.1f MB", bytes / 1_048_576.0)),
+        style = MaterialTheme.typography.bodyMedium,
+    )
+    Text(stringResource(R.string.photos_note), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    OutlinedButton(onClick = {
+        scope.launch {
+            val removed = withContext(Dispatchers.IO) { container.photoStore.deleteExcept(container.diaryRepository.sweepPhotoRows()) }
+            msg = String.format(cleaned, removed)
+        }
+    }) { Text(stringResource(R.string.photos_clean)) }
+    msg?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary) }
 }

@@ -20,7 +20,7 @@ class DiaryRepository(private val db: AppDatabase, private val now: () -> Long =
     private val dao = db.diaryDao()
 
     private fun rows(f: Flow<List<com.spcode.tnpscprep.data.db.DiaryPreviewRow>>): Flow<List<DiaryItem>> =
-        f.map { l -> l.mapNotNull { r -> runCatching { LocalDate.parse(r.localDate) }.getOrNull()?.let { DiaryItem(r.id, it, r.moodEmojiId, com.spcode.tnpscprep.domain.DiaryLinks.preview(com.spcode.tnpscprep.domain.DiaryPhotos.preview(r.preview, "📷")), r.pinned, r.isWrapup) } } }
+        f.map { l -> l.mapNotNull { r -> runCatching { LocalDate.parse(r.localDate) }.getOrNull()?.let { DiaryItem(r.id, it, r.moodEmojiId, com.spcode.tnpscprep.domain.DiaryLinks.preview(com.spcode.tnpscprep.domain.DiaryPhotos.preview(r.preview, "📷")), r.pinned, r.isWrapup, r.firstPhoto, r.photoCount) } } }
 
     /** Timeline, or search results when [query] is not blank. */
     fun observe(query: String): Flow<List<DiaryItem>> {
