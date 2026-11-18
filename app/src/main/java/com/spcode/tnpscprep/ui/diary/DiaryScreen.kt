@@ -41,6 +41,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.rounded.AddPhotoAlternate
+import androidx.compose.material.icons.rounded.Link
 import com.spcode.tnpscprep.data.db.DiaryPhotoEntity
 import kotlinx.coroutines.withContext
 import androidx.compose.foundation.shape.CircleShape
@@ -460,6 +461,9 @@ private fun ReviewCard(w: com.spcode.tnpscprep.domain.DiaryWeek, streak: Int) {
 
 // ---------------------------------------------------------------- editor
 
+/** [block] = display index of the text run; [link] null = a new link. */
+private data class LinkEdit(val block: Int, val link: com.spcode.tnpscprep.domain.DiaryLinks.Link?)
+
 @Composable
 private fun EditorPane(vm: DiaryViewModel, entryId: Long?, startDate: LocalDate, onDone: (removed: DiaryEntryEntity?) -> Unit, onWrapup: () -> Unit) {
     val scope = rememberCoroutineScope()
@@ -477,6 +481,8 @@ private fun EditorPane(vm: DiaryViewModel, entryId: Long?, startDate: LocalDate,
     val photos = remember { androidx.compose.runtime.mutableStateMapOf<String, DiaryPhotoEntity>() }
     var pendingPhoto by remember { mutableStateOf<android.graphics.Bitmap?>(null) }
     var removePhoto by remember { mutableStateOf<String?>(null) }
+    var editPhoto by remember { mutableStateOf<String?>(null) }
+    var linkEdit by remember { mutableStateOf<LinkEdit?>(null) }
     var cursorBlock by remember { mutableStateOf(-1) }   // display index of the text block that has the cursor
     var cursorPos by remember { mutableStateOf(0) }
     val picker = androidx.activity.compose.rememberLauncherForActivityResult(androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia()) { uri ->
@@ -492,12 +498,14 @@ private fun EditorPane(vm: DiaryViewModel, entryId: Long?, startDate: LocalDate,
                 session.id = e.id; session.savedText = e.text; session.savedMood = e.moodEmojiId
                 text = e.text; mood = e.moodEmojiId; date = runCatching { LocalDate.parse(e.localDate) }.getOrDefault(date)
                 vm.photosFor(e.id).forEach { photos[it.name] = it; session.photoFiles += it.name }
+                session.savedSig = photoSig(photos.values)
             }
             loaded = true
         } else focus.requestFocus()
     }
     // Autosave: this effect restarts on every keystroke, so the delay IS the debounce.
-    LaunchedEffect(text, mood, loaded) {
+    val sig = photoSig(photos.values)
+    LaunchedEffect(text, mood, loaded, sig) {
         if (!loaded) return@LaunchedEffect
         lastEdit = System.currentTimeMillis()
         delay(com.spcode.tnpscprep.domain.Autosave.DEBOUNCE_MS)
@@ -583,9 +591,13 @@ private fun EditorPane(vm: DiaryViewModel, entryId: Long?, startDate: LocalDate,
                         b.text, big, if (display.size == 1) stringResource(R.string.diary_write_hint) else null,
                         onText = { n -> commit(display.toMutableList().also { it[i] = Disp(com.spcode.tnpscprep.domain.DiaryBlock.Text(n), false) }) },
                         onCursor = { cursorPos = it }, onFocus = { cursorBlock = i },
+                        onLink = { link, long ->
+                            if (long) linkEdit = LinkEdit(i, link)
+                            else runCatching { ctx.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(link.url)).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)) }
+                        },
                         modifier = (if (i == 0) Modifier.focusRequester(focus) else Modifier).let { m -> if (loaded) m else m },
                     )
-                    is com.spcode.tnpscprep.domain.DiaryBlock.Photo -> PhotoBlockView(b.name, photos[b.name], vm.store) { removePhoto = b.name }
+                    is com.spcode.tnpscprep.domain.DiaryBlock.Photo -> PhotoBlockView(b.name, photos[b.name], vm.store) { editPhoto = b.name }
                 }
             }
         }
@@ -595,6 +607,9 @@ private fun EditorPane(vm: DiaryViewModel, entryId: Long?, startDate: LocalDate,
                 else picker.launch(androidx.activity.result.PickVisualMediaRequest(androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia.ImageOnly))
             }) {
                 Icon(Icons.Rounded.AddPhotoAlternate, null, Modifier.size(20.dp)); Spacer(Modifier.width(6.dp)); Text(stringResource(R.string.editor_add_photo))
+            }
+            TextButton(onClick = { linkEdit = LinkEdit(-1, null) }) {
+                Icon(Icons.Rounded.Link, null, Modifier.size(20.dp)); Spacer(Modifier.width(6.dp)); Text(stringResource(R.string.link_add))
             }
             Spacer(Modifier.weight(1f))
             if (text.isNotBlank()) Text(
@@ -632,6 +647,68 @@ private fun EditorPane(vm: DiaryViewModel, entryId: Long?, startDate: LocalDate,
                 commit(list)
             }
         }
+    }
+    // photo edit sheet: frame, move, remove
+    editPhoto?.let { name ->
+        val meta = photos[name]
+        val idx = real.indexOfFirst { (it as? com.spcode.tnpscprep.domain.DiaryBlock.Photo)?.name == name }
+        if (meta == null || idx < 0) editPhoto = null
+        else PhotoEditSheet(
+            meta, canUp = idx > 0, canDown = idx < real.size - 1,
+            onChange = { f, c -> photos[name] = meta.copy(frame = f.name, cornerDp = c) },
+            onUp = { val l = real.toMutableList(); java.util.Collections.swap(l, idx, idx - 1); text = com.spcode.tnpscprep.domain.DiaryPhotos.join(l) },
+            onDown = { val l = real.toMutableList(); java.util.Collections.swap(l, idx, idx + 1); text = com.spcode.tnpscprep.domain.DiaryPhotos.join(l) },
+            onRemove = { editPhoto = null; removePhoto = name },
+            onDismiss = { editPhoto = null },
+        )
+    }
+    // link dialog: new link at the cursor, or edit/open/remove the long-pressed one
+    linkEdit?.let { le ->
+        var label by remember(le) { mutableStateOf(le.link?.label ?: "") }
+        var url by remember(le) { mutableStateOf(le.link?.url ?: "") }
+        var bad by remember(le) { mutableStateOf(false) }
+        AlertDialog(
+            onDismissRequest = { linkEdit = null },
+            title = { Text(stringResource(if (le.link == null) R.string.link_title else R.string.link_edit_title)) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    androidx.compose.material3.OutlinedTextField(label, { label = it.take(80) }, singleLine = true, label = { Text(stringResource(R.string.link_label)) })
+                    androidx.compose.material3.OutlinedTextField(url, { url = it; bad = false }, singleLine = true, isError = bad, label = { Text(stringResource(R.string.link_url)) },
+                        supportingText = if (bad) ({ Text(stringResource(R.string.link_bad)) }) else null)
+                    if (le.link != null) Row {
+                        TextButton(onClick = { runCatching { ctx.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(le.link.url)).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)) } }) { Text(stringResource(R.string.link_open)) }
+                        TextButton(onClick = {
+                            val l = display.toMutableList(); val d = l.getOrNull(le.block)
+                            val t = (d?.block as? com.spcode.tnpscprep.domain.DiaryBlock.Text)?.text
+                            if (t != null) { l[le.block] = Disp(com.spcode.tnpscprep.domain.DiaryBlock.Text(t.replaceRange(le.link.start, le.link.end, le.link.label)), false); commit(l) }
+                            linkEdit = null
+                        }) { Text(stringResource(R.string.link_unlink), color = MaterialTheme.colorScheme.error) }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    val md = com.spcode.tnpscprep.domain.DiaryLinks.make(label.ifBlank { url }, url)
+                    if (md == null) { bad = true; return@TextButton }
+                    val l = display.toMutableList()
+                    if (le.link != null) {
+                        val t = (l.getOrNull(le.block)?.block as? com.spcode.tnpscprep.domain.DiaryBlock.Text)?.text
+                        if (t != null) l[le.block] = Disp(com.spcode.tnpscprep.domain.DiaryBlock.Text(t.replaceRange(le.link.start, le.link.end, md)), false)
+                    } else {
+                        // new link: at the cursor of the text run she was in, followed by a space so she can keep typing after it
+                        val at = cursorBlock.takeIf { it in l.indices && l[it].block is com.spcode.tnpscprep.domain.DiaryBlock.Text }
+                            ?: l.indexOfLast { it.block is com.spcode.tnpscprep.domain.DiaryBlock.Text }
+                        if (at >= 0) {
+                            val t = (l[at].block as com.spcode.tnpscprep.domain.DiaryBlock.Text).text
+                            val cut = if (at == cursorBlock) cursorPos.coerceIn(0, t.length) else t.length
+                            l[at] = Disp(com.spcode.tnpscprep.domain.DiaryBlock.Text(t.substring(0, cut) + md + " " + t.substring(cut)), false)
+                        } else l += Disp(com.spcode.tnpscprep.domain.DiaryBlock.Text("$md "), false)
+                    }
+                    commit(l); linkEdit = null
+                }) { Text(stringResource(if (le.link == null) R.string.link_insert else R.string.link_save)) }
+            },
+            dismissButton = { TextButton(onClick = { linkEdit = null }) { Text(stringResource(R.string.cancel)) } },
+        )
     }
     removePhoto?.let { name ->
         AlertDialog(

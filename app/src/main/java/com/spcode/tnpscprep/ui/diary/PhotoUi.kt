@@ -6,6 +6,7 @@ import android.util.LruCache
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -52,6 +53,14 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
+import androidx.compose.ui.text.input.OffsetMapping
+import androidx.compose.ui.text.input.TransformedText
+import androidx.compose.ui.text.input.VisualTransformation
+import kotlinx.coroutines.withTimeoutOrNull
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
@@ -67,6 +76,8 @@ import com.spcode.tnpscprep.R
 import com.spcode.tnpscprep.data.PhotoStore
 import com.spcode.tnpscprep.data.db.DiaryPhotoEntity
 import com.spcode.tnpscprep.domain.CropMath
+import com.spcode.tnpscprep.domain.DiaryLinks
+import com.spcode.tnpscprep.domain.PhotoFrame
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -80,32 +91,74 @@ object PhotoBitmaps {
     fun forget(name: String) { cache.remove(name); cache.remove("$name:t") }
 }
 
-/** One photo in an entry. [onRemove] null = read only. */
+/** One photo in an entry, in its frame. [onClick] null = read only. */
 @Composable
-fun PhotoBlockView(name: String, meta: DiaryPhotoEntity?, store: PhotoStore, onRemove: (() -> Unit)?) {
+fun PhotoBlockView(name: String, meta: DiaryPhotoEntity?, store: PhotoStore, onClick: (() -> Unit)? = null) {
     val bmp by produceState<ImageBitmap?>(null, name) { value = PhotoBitmaps.get(store, name)?.asImageBitmap() }
-    val ratio = (meta?.let { it.width.toFloat() / it.height.coerceAtLeast(1) } ?: bmp?.let { it.width.toFloat() / it.height } ?: 1.33f).coerceIn(0.6f, 2.4f)
-    val shape = if (meta?.frame == "ROUNDED") RoundedCornerShape((meta.cornerDp).dp) else RoundedCornerShape(0.dp)
-    Box(Modifier.fillMaxWidth().padding(vertical = 8.dp).aspectRatio(ratio).clip(shape).background(MaterialTheme.colorScheme.surfaceVariant)) {
+    val frame = PhotoFrame.of(meta?.frame)
+    val ratio = if (frame.squareOnly) 1f else (meta?.let { it.width.toFloat() / it.height.coerceAtLeast(1) } ?: bmp?.let { it.width.toFloat() / it.height } ?: 1.33f).coerceIn(0.6f, 2.4f)
+    val shape = frameShape(meta?.frame, meta?.cornerDp ?: 0)
+    // circle / heart / star are always square and centred (a 0.7 width keeps a heart from being huge)
+    val widthFraction = if (frame.squareOnly) 0.78f else 1f
+    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+    Box(Modifier.fillMaxWidth(widthFraction).padding(vertical = 8.dp).aspectRatio(ratio).clip(shape).background(MaterialTheme.colorScheme.surfaceVariant).let { m -> if (onClick != null) m.clickable(onClick = onClick) else m }) {
         val b = bmp
         if (b != null) Image(b, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
         else Text(stringResource(R.string.photo_missing), Modifier.align(Alignment.Center).padding(16.dp), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        if (onRemove != null) IconButton(onClick = onRemove, modifier = Modifier.align(Alignment.TopEnd).padding(6.dp).size(34.dp).clip(RoundedCornerShape(50)).background(Color.Black.copy(alpha = 0.45f))) {
-            Icon(Icons.Rounded.Close, stringResource(R.string.photo_remove), Modifier.size(18.dp), tint = Color.White)
-        }
+    }
     }
 }
 
-/** A run of text between photos. Reports its cursor so a new photo can be placed exactly there. */
+/**
+ * A run of text between photos. Reports its cursor so a new photo/link can be placed exactly there. Links are stored as `[label](url)`
+ * but SHOWN as just the (underlined) label; a tap on one opens it, a long press edits it ([onLink]).
+ */
 @Composable
-fun EditorTextBlock(text: String, style: TextStyle, hint: String?, onText: (String) -> Unit, onCursor: (Int) -> Unit, onFocus: () -> Unit, modifier: Modifier = Modifier) {
+fun EditorTextBlock(
+    text: String, style: TextStyle, hint: String?, onText: (String) -> Unit, onCursor: (Int) -> Unit, onFocus: () -> Unit,
+    onLink: (DiaryLinks.Link, Boolean) -> Unit, modifier: Modifier = Modifier,
+) {
     var tfv by remember { mutableStateOf(TextFieldValue(text, TextRange(text.length))) }
     LaunchedEffect(text) { if (tfv.text != text) tfv = TextFieldValue(text, TextRange(text.length)) }
+    val linkColor = MaterialTheme.colorScheme.primary
+    val vt = remember(linkColor) {
+        VisualTransformation { raw ->
+            val d = DiaryLinks.display(raw.text)
+            TransformedText(
+                androidx.compose.ui.text.buildAnnotatedString {
+                    append(d.text)
+                    d.links.forEach { addStyle(androidx.compose.ui.text.SpanStyle(color = linkColor, textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline), it.tStart, it.tEnd) }
+                },
+                object : OffsetMapping {
+                    override fun originalToTransformed(offset: Int) = d.shownOffset(offset)
+                    override fun transformedToOriginal(offset: Int) = d.storedOffset(offset)
+                },
+            )
+        }
+    }
+    val disp = remember(text) { DiaryLinks.display(text) }
+    var layout by remember { mutableStateOf<androidx.compose.ui.text.TextLayoutResult?>(null) }
     BasicTextField(
         value = tfv,
         onValueChange = { tfv = it; onCursor(it.selection.start); if (it.text != text) onText(it.text) },
-        textStyle = style, cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-        modifier = modifier.fillMaxWidth().onFocusChanged { if (it.isFocused) { onFocus(); onCursor(tfv.selection.start) } },
+        textStyle = style, cursorBrush = SolidColor(MaterialTheme.colorScheme.primary), visualTransformation = vt,
+        onTextLayout = { layout = it },
+        modifier = modifier.fillMaxWidth()
+            .pointerInput(disp) {
+                if (disp.links.isEmpty()) return@pointerInput
+                awaitEachGesture {
+                    val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
+                    val l = layout ?: return@awaitEachGesture
+                    val hit = disp.links.firstOrNull { sl -> (sl.tStart until sl.tEnd).any { i -> runCatching { l.getBoundingBox(i).contains(down.position) }.getOrDefault(false) } } ?: return@awaitEachGesture
+                    val t0 = System.nanoTime()
+                    val longMs = viewConfiguration.longPressTimeoutMillis
+                    val up = withTimeoutOrNull(longMs) { waitForUpOrCancellation(PointerEventPass.Initial) }
+                    val elapsedMs = (System.nanoTime() - t0) / 1_000_000
+                    if (up != null) { up.consume(); down.consume(); onLink(hit.link, false) }
+                    else if (elapsedMs >= longMs - 20) { down.consume(); onLink(hit.link, true); waitForUpOrCancellation(PointerEventPass.Initial)?.consume() }
+                }
+            }
+            .onFocusChanged { if (it.isFocused) { onFocus(); onCursor(tfv.selection.start) } },
         decorationBox = { inner -> Box { if (text.isEmpty() && hint != null) Text(hint, style = style.copy(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f))); inner() } },
     )
 }
@@ -120,6 +173,7 @@ private enum class CropShape(val label: Int, val ratio: Float?) { ORIGINAL(R.str
 fun PhotoCropDialog(bitmap: Bitmap, onCancel: () -> Unit, onDone: (Bitmap, String, Int) -> Unit) {
     var mode by remember { mutableStateOf(CropShape.SQUARE) }
     var corner by remember { mutableFloatStateOf(16f) }
+    var frameName by remember { mutableStateOf(PhotoFrame.ROUNDED) }
     var scale by remember { mutableFloatStateOf(1f) }
     var offX by remember { mutableFloatStateOf(0f) }
     var offY by remember { mutableFloatStateOf(0f) }
@@ -138,7 +192,8 @@ fun PhotoCropDialog(bitmap: Bitmap, onCancel: () -> Unit, onDone: (Bitmap, Strin
                     else {
                         val r = CropMath.sourceRect(bitmap.width, bitmap.height, frame.x, frame.y, scale, offX, offY)
                         val out = Bitmap.createBitmap(bitmap, r.x, r.y, r.w.coerceAtMost(bitmap.width - r.x), r.h.coerceAtMost(bitmap.height - r.y))
-                        onDone(out, if (corner >= 1f) "ROUNDED" else "ORIGINAL", corner.toInt())
+                        val f = if (frameName == PhotoFrame.ROUNDED && corner < 1f) PhotoFrame.ORIGINAL else frameName
+                        onDone(out, f.name, if (f == PhotoFrame.ROUNDED) corner.toInt() else 0)
                     }
                 }) { Text(stringResource(R.string.photo_done)) }
             }
@@ -149,7 +204,7 @@ fun PhotoCropDialog(bitmap: Bitmap, onCancel: () -> Unit, onDone: (Bitmap, Strin
                 val fw: Float; val fh: Float
                 if (availW / ratio <= availH) { fw = availW; fh = availW / ratio } else { fh = availH; fw = availH * ratio }
                 LaunchedEffect(mode, fw, fh) { frame = Offset(fw, fh); reset(frame) }
-                val shape = if (mode == CropShape.ORIGINAL) RoundedCornerShape(0.dp) else RoundedCornerShape(corner.dp)
+                val shape = if (mode == CropShape.ORIGINAL) RoundedCornerShape(0.dp) else frameShape(frameName.name, corner.toInt())
                 Box(
                     Modifier.size(with(d) { fw.toDp() }, with(d) { fh.toDp() }).clip(shape).background(Color.Black)
                         .pointerInput(mode, fw, fh) {
@@ -172,12 +227,54 @@ fun PhotoCropDialog(bitmap: Bitmap, onCancel: () -> Unit, onDone: (Bitmap, Strin
                 }
             }
             Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                CropShape.entries.forEach { m -> FilterChip(selected = mode == m, onClick = { mode = m }, label = { Text(stringResource(m.label)) }) }
+                CropShape.entries.forEach { m -> FilterChip(selected = mode == m, enabled = !(frameName.squareOnly && m != CropShape.SQUARE), onClick = { mode = m }, label = { Text(stringResource(m.label)) }) }
             }
-            if (mode != CropShape.ORIGINAL) Column(Modifier.padding(horizontal = 20.dp)) {
-                Text(stringResource(R.string.photo_round), style = MaterialTheme.typography.labelLarge)
-                Slider(value = corner, onValueChange = { corner = it }, valueRange = 0f..48f)
+            if (mode != CropShape.ORIGINAL) {
+                FrameChips(frameName) { f -> frameName = f; if (f.squareOnly) mode = CropShape.SQUARE }
+                if (frameName == PhotoFrame.ROUNDED) Column(Modifier.padding(horizontal = 20.dp)) {
+                    Text(stringResource(R.string.photo_round), style = MaterialTheme.typography.labelLarge)
+                    Slider(value = corner, onValueChange = { corner = it }, valueRange = 0f..48f)
+                }
             } else Spacer(Modifier.height(8.dp))
+        }
+    }
+}
+
+@Composable
+private fun frameLabel(f: PhotoFrame) = stringResource(when (f) {
+    PhotoFrame.ORIGINAL -> R.string.frame_sharp; PhotoFrame.ROUNDED -> R.string.frame_rounded; PhotoFrame.CIRCLE -> R.string.frame_circle
+    PhotoFrame.HEART -> R.string.frame_heart; PhotoFrame.STAR -> R.string.frame_star
+})
+
+/** The five frames as chips. */
+@Composable
+fun FrameChips(selected: PhotoFrame, onPick: (PhotoFrame) -> Unit) {
+    Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        PhotoFrame.entries.forEach { f -> FilterChip(selected = selected == f, onClick = { onPick(f) }, label = { Text(frameLabel(f)) }) }
+    }
+}
+
+/** Opened by tapping a photo in the editor: change its frame, move it up or down, or remove it. The picture itself is not re-cropped. */
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@Composable
+fun PhotoEditSheet(meta: DiaryPhotoEntity, canUp: Boolean, canDown: Boolean, onChange: (PhotoFrame, Int) -> Unit, onUp: () -> Unit, onDown: () -> Unit, onRemove: () -> Unit, onDismiss: () -> Unit) {
+    androidx.compose.material3.ModalBottomSheet(onDismissRequest = onDismiss) {
+        var corner by remember(meta.name) { mutableFloatStateOf(meta.cornerDp.toFloat().coerceAtLeast(16f)) }
+        val frame = PhotoFrame.of(meta.frame)
+        Column(Modifier.padding(horizontal = 8.dp, vertical = 4.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(stringResource(R.string.photo_frame), Modifier.padding(horizontal = 16.dp), style = MaterialTheme.typography.titleMedium)
+            FrameChips(frame) { f -> onChange(f, if (f == PhotoFrame.ROUNDED) corner.toInt() else 0) }
+            if (frame == PhotoFrame.ROUNDED) Column(Modifier.padding(horizontal = 20.dp)) {
+                Text(stringResource(R.string.photo_round), style = MaterialTheme.typography.labelLarge)
+                Slider(value = corner, onValueChange = { corner = it; onChange(PhotoFrame.ROUNDED, it.toInt()) }, valueRange = 0f..48f)
+            }
+            Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                TextButton(onClick = onUp, enabled = canUp) { Text(stringResource(R.string.photo_move_up)) }
+                TextButton(onClick = onDown, enabled = canDown) { Text(stringResource(R.string.photo_move_down)) }
+                Spacer(Modifier.weight(1f))
+                TextButton(onClick = onRemove) { Text(stringResource(R.string.photo_remove), color = MaterialTheme.colorScheme.error) }
+            }
+            Spacer(Modifier.height(16.dp))
         }
     }
 }

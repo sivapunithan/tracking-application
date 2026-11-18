@@ -67,3 +67,9 @@ object PhotoSizing {
         return s
     }
 }
+
+/** The shapes a photo can be shown in. Stored by name in diary_photo.frame; unknown names fall back to ORIGINAL. */
+enum class PhotoFrame(val squareOnly: Boolean) {
+    ORIGINAL(false), ROUNDED(false), CIRCLE(true), HEART(true), STAR(true);
+    companion object { fun of(name: String?) = entries.firstOrNull { it.name == name } ?: ORIGINAL }
+}

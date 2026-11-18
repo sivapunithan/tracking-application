@@ -84,5 +84,5 @@ object DiaryStats {
     }
 
     /** Words separated by whitespace: works for Tamil too (it is space-separated). */
-    fun words(text: String): Int = DiaryPhotos.preview(text, " ").trim().split(Regex("\\s+")).count { it.isNotEmpty() }
+    fun words(text: String): Int = DiaryLinks.preview(DiaryPhotos.preview(text, " ")).trim().split(Regex("\\s+")).count { it.isNotEmpty() }
 }

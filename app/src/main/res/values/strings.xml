@@ -649,4 +649,22 @@
     <string name="profile_praise">Kind notifications</string>
     <string name="profile_praise_note">A small banner with your mood picture when you finish something: a task, a focus session, the wrap-up.</string>
     <string name="profile_praise_allow">Allow notifications</string>
+    <string name="frame_sharp">Sharp</string>
+    <string name="frame_rounded">Rounded</string>
+    <string name="frame_circle">Circle</string>
+    <string name="frame_heart">Heart</string>
+    <string name="frame_star">Star</string>
+    <string name="photo_frame">Photo frame</string>
+    <string name="photo_move_up">Move up</string>
+    <string name="photo_move_down">Move down</string>
+    <string name="link_add">Link</string>
+    <string name="link_title">Add a link</string>
+    <string name="link_edit_title">Link</string>
+    <string name="link_label">Text to show</string>
+    <string name="link_url">Web address</string>
+    <string name="link_bad">Enter a web address like example.com</string>
+    <string name="link_insert">Add</string>
+    <string name="link_save">Save</string>
+    <string name="link_open">Open</string>
+    <string name="link_unlink">Remove link</string>
 </resources>

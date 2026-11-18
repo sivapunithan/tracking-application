@@ -29,7 +29,12 @@ import kotlinx.coroutines.withContext
 class EditorSession(var id: Long?, var savedText: String?, var savedMood: String?) {
     /** Photo files this editor wrote or loaded: after a save, any of them no longer in the text is deleted from storage. */
     val photoFiles = HashSet<String>()
+    /** What the saved photo rows looked like (frames/corners): a change alone also needs a save. */
+    var savedSig: Int = 0
 }
+
+fun photoSig(photos: Collection<com.spcode.tnpscprep.data.db.DiaryPhotoEntity>): Int =
+    photos.sortedBy { it.name }.joinToString("|") { "${it.name}:${it.frame}:${it.cornerDp}" }.hashCode()
 
 sealed interface Persisted {
     data object Nothing : Persisted
@@ -57,10 +62,13 @@ class DiaryViewModel(private val repo: DiaryRepository, private val photoStore: 
 
     /** Applies the autosave rules (domain/Autosave) and stores the result. A mood change alone also counts as a change. */
     suspend fun persist(s: EditorSession, date: LocalDate, text: String, mood: String?, msSinceEdit: Long, leaving: Boolean, photos: Collection<com.spcode.tnpscprep.data.db.DiaryPhotoEntity>? = null): Persisted = lock.withLock {
+        val sig = photos?.let { photoSig(it) } ?: s.savedSig
         var action = Autosave.decide(text, s.savedText, s.id == null, msSinceEdit, leaving)
         if (action == Autosave.Action.NONE && s.id != null && mood != s.savedMood && text.isNotBlank() && (leaving || msSinceEdit >= Autosave.DEBOUNCE_MS)) {
             action = Autosave.Action.SAVE
         }
+        // only a frame/corner change of a photo (the text is the same)
+        if (action == Autosave.Action.NONE && s.id != null && sig != s.savedSig && text.isNotBlank() && (leaving || msSinceEdit >= Autosave.DEBOUNCE_MS)) action = Autosave.Action.SAVE
         when (action) {
             Autosave.Action.NONE -> Persisted.Nothing
             Autosave.Action.SAVE -> {
@@ -70,6 +78,7 @@ class DiaryViewModel(private val repo: DiaryRepository, private val photoStore: 
                 val used = com.spcode.tnpscprep.domain.DiaryPhotos.names(text).toSet()
                 (s.photoFiles - used).forEach { photoStore.delete(it) }
                 s.photoFiles.retainAll(used)
+                s.savedSig = sig
                 s.savedText = text; s.savedMood = mood
                 Persisted.Saved(first)
             }
