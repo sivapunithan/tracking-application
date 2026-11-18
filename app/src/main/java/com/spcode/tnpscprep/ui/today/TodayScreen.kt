@@ -160,27 +160,7 @@ fun TodayScreen(vm: TodayViewModel, onOpenProfile: () -> Unit, onOpenDiary: (Str
     val showBackup = com.spcode.tnpscprep.domain.BackupNudge.shouldShow(nowMs, lastBackup, bkBase, bkSnooze, bkOn)
     LaunchedEffect(gsComplete) { if (gsComplete && !gsDone) settings.setGettingStartedDone(true) } // once done, never shown again
     val showGs = !gsDone && !gsComplete
-    // ---- today's plan: built ONCE per day from existing data, then stored (so it is finite and a ticked line stays) ----
-    val dueNow = ui.progress.due
-    val nextTopicName = extras.nextTopic?.let { localized(it.nameEn, it.nameTa) }
-    val affairName = extras.affairToReview?.let { localized(it.titleEn, it.titleTa) }
-    val names = HashMap<String, String>().apply {
-        dueNow.forEach { put(it.topicId, localized(it.nameEn, it.nameTa)) }
-        extras.nextTopic?.let { t -> nextTopicName?.let { put(t.id, it) } }
-        extras.affairToReview?.let { a -> affairName?.let { put(a.id, it) } }
-    }
-    val picks = com.spcode.tnpscprep.domain.PlanBuilder.build(dueNow.map { com.spcode.tnpscprep.domain.DuePick(it.topicId, it.affairCategory != null) }, extras.nextTopic?.id, extras.affairToReview?.id)
-    val planDraft = picks.mapNotNull { p ->
-        names[p.refId]?.let { n ->
-            com.spcode.tnpscprep.data.PlanDraftItem(n, when (p.kind) {
-                com.spcode.tnpscprep.domain.PlanKind.REVISION -> com.spcode.tnpscprep.data.PlanRefType.REVISION
-                com.spcode.tnpscprep.domain.PlanKind.READ -> com.spcode.tnpscprep.data.PlanRefType.TOPIC
-                com.spcode.tnpscprep.domain.PlanKind.NEWS -> com.spcode.tnpscprep.data.PlanRefType.CURRENT_AFFAIRS
-            }, p.refId)
-        }
-    }
-    // wait until the data has settled (several flows feed it), then store; a no-op when the day already has a plan
-    LaunchedEffect(foodDay, planDraft.map { it.refId }) { delay(900); if (planDraft.isNotEmpty()) wvm.generate(foodDay, planDraft) }
+    // today's plan = only what she added herself (or picked in last night's wrap-up): nothing is made up for her
     val tickPlan: (com.spcode.tnpscprep.data.db.PlannedTaskEntity) -> Unit = { t ->
         wvm.setDone(t.id, true)
         t.refId?.let { id -> when (t.refType) { "TOPIC", "REVISION" -> vm.readTopic(id); "CURRENT_AFFAIRS" -> vm.reviseAffair(id) } }
@@ -188,7 +168,7 @@ fun TodayScreen(vm: TodayViewModel, onOpenProfile: () -> Unit, onOpenDiary: (Str
     val waterToday = healthEntries.filter { it.kind == com.spcode.tnpscprep.data.HealthKind.WATER && it.date == foodDay.toString() }.sumOf { it.value }.toInt()
     val stepsToday = if (stepSensor && stepsAllowed(appCtx)) stepsWeek.firstOrNull { it.date == today.toString() }?.steps ?: 0 else null
     val wrapState = com.spcode.tnpscprep.domain.WrapupCard.state(hour, wrapHour, wrapped)
-    val checkinsIndex = 2 + (if (showGs) 1 else 0) + (if (wrapState != com.spcode.tnpscprep.domain.WrapupCardState.HIDDEN) 1 else 0) + (if (plannedToday.isNotEmpty()) 1 else 0)
+    val checkinsIndex = 2 + (if (showGs) 1 else 0) + (if (wrapState != com.spcode.tnpscprep.domain.WrapupCardState.HIDDEN) 1 else 0) + 1
     fun toCheckins() { scope.launch { listState.animateScrollToItem(checkinsIndex) } }
 
     LazyColumn(
@@ -228,7 +208,7 @@ fun TodayScreen(vm: TodayViewModel, onOpenProfile: () -> Unit, onOpenDiary: (Str
         }
 
 
-        if (plannedToday.isNotEmpty()) item(key = "plan") { PlanCard(plannedToday, extras.doneRefs, tickPlan) }
+        item(key = "plan") { PlanCard(plannedToday, extras.doneRefs, hour, tickPlan, { wvm.addManual(foodDay, it) }, { wvm.delete(it.id) }) }
 
         if (showBackup) item(key = "backup-nudge") {
             BackupNudgeCard(

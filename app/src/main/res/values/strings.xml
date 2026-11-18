@@ -570,4 +570,11 @@
     <string name="widget_add_plan">Add Plan widget</string>
     <string name="widget_pin_asked">Your phone will ask you to confirm. If nothing appears, add it by long-pressing the home screen › Widgets › Mathi.</string>
     <string name="widget_pin_unsupported">This home screen cannot add widgets from here. Long-press the home screen › Widgets › Mathi.</string>
+    <string name="plan_empty">Nothing planned yet. Add your first task.</string>
+    <string name="plan_add">Add a task</string>
+    <string name="plan_add_hint">What do you want to do today?</string>
+    <string name="plan_add_save">Add</string>
+    <string name="plan_add_cancel">Cancel</string>
+    <string name="plan_remove">Remove task</string>
+    <string name="story_plan">Plan</string>
 </resources>

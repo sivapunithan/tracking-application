@@ -34,6 +34,19 @@ class MainActivity : AppCompatActivity() {
         com.spcode.tnpscprep.widget.WidgetUpdater.refreshAll(applicationContext) // widgets show what she just did
     }
 
+    /** The phone's own navigation buttons (square / circle / triangle) are hidden; a swipe up from the bottom edge shows them for a moment. */
+    private fun hidePhoneNavButtons() {
+        androidx.core.view.WindowCompat.getInsetsController(window, window.decorView).apply {
+            systemBarsBehavior = androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            hide(androidx.core.view.WindowInsetsCompat.Type.navigationBars())
+        }
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus) hidePhoneNavButtons()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen() // must run before super.onCreate: swaps the splash theme for the normal one
         super.onCreate(savedInstanceState)

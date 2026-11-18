@@ -376,6 +376,8 @@ private fun DayStory(date: LocalDate, today: LocalDate, entries: List<DiaryItem>
         )
     }
     val r = recap
+    var plan by remember(date) { mutableStateOf<List<com.spcode.tnpscprep.data.db.PlannedTaskEntity>>(emptyList()) }
+    LaunchedEffect(date) { plan = app.container.plannedTaskRepository.get(date) }
     SoftCard(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp).animateContentSize(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Text(
@@ -390,6 +392,19 @@ private fun DayStory(date: LocalDate, today: LocalDate, entries: List<DiaryItem>
                     if (r.affairsRevised > 0) StoryChip(stringResource(R.string.story_news, r.affairsRevised))
                     r.food?.let { f -> StoryChip(stringResource(R.string.ev_food, stringResource(when (f) { com.spcode.tnpscprep.domain.FoodState.HEALTHY -> R.string.food_healthy; com.spcode.tnpscprep.domain.FoodState.JUNK -> R.string.food_junk; com.spcode.tnpscprep.domain.FoodState.MIXED -> R.string.food_mixed }))) }
                     r.steps?.let { StoryChip(stringResource(R.string.story_steps, it)) }
+                }
+            }
+            if (plan.isNotEmpty()) {
+                val done = plan.count { it.done }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    com.spcode.tnpscprep.domain.PlanMood.of(done, plan.size, if (date == today) java.time.LocalTime.now().hour else 0)  .let { DiaryMood(it, 36.dp); Spacer(Modifier.padding(start = 10.dp)) }
+                    Text(stringResource(R.string.story_plan) + " · $done/${plan.size}", style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold))
+                }
+                plan.forEach { t ->
+                    Text(
+                        (if (t.done) "✓ " else "○ ") + t.title, style = MaterialTheme.typography.bodyMedium, maxLines = 2, overflow = TextOverflow.Ellipsis,
+                        color = if (t.done) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
+                    )
                 }
             }
             if (entries.isEmpty()) {

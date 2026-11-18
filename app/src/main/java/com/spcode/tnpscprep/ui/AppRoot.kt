@@ -15,6 +15,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -33,6 +37,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.foundation.gestures.draggable
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.animation.AnimatedVisibility
@@ -195,10 +200,10 @@ fun AppRoot(
     var barPx by remember { mutableIntStateOf(0) }
     val navBottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     // The inset = the bar's MEASURED height (incl. system-bar padding) + air while the bar shows; on full-screen pages just the system bar.
-    val inset = if (showBar) (if (barPx > 0) with(LocalDensity.current) { barPx.toDp() } + 16.dp else 108.dp) else 16.dp + navBottom
+    var scrolledAway by remember { mutableStateOf(false) }
+    val inset = if (showBar && !scrolledAway) (if (barPx > 0) with(LocalDensity.current) { barPx.toDp() } + 16.dp else 108.dp) else 16.dp + navBottom
 
     // The bar slides away while she scrolls down and returns on a scroll up, at the end of a list, on a tap at the bottom edge, or on a tab change.
-    var scrolledAway by remember { mutableStateOf(false) }
     LaunchedEffect(route) { scrolledAway = false }
     val barScroll = remember {
         object : NestedScrollConnection {
@@ -211,7 +216,23 @@ fun AppRoot(
             }
         }
     }
-    Box(Modifier.fillMaxSize().nestedScroll(barScroll)) {
+    // Swipe left/right anywhere on a tab page moves to the next/previous tab. A standard horizontal drag on the root: a child that scrolls
+    // sideways (the heatmap) gets the gesture first, vertical scrolling and taps are unaffected. A short drag or a quick flick is enough.
+    val swipeThreshold = with(LocalDensity.current) { 56.dp.toPx() }
+    val flickMin = with(LocalDensity.current) { 24.dp.toPx() }
+    val dragged = remember { floatArrayOf(0f) }
+    val swipeState = androidx.compose.foundation.gestures.rememberDraggableState { dragged[0] += it }
+    Box(
+        Modifier.fillMaxSize().nestedScroll(barScroll).draggable(
+            state = swipeState, orientation = androidx.compose.foundation.gestures.Orientation.Horizontal, enabled = selectedTab >= 0,
+            onDragStarted = { dragged[0] = 0f },
+            onDragStopped = { v ->
+                val d = dragged[0]
+                val go = kotlin.math.abs(d) > swipeThreshold || (kotlin.math.abs(d) > flickMin && kotlin.math.abs(v) > 800f)
+                if (go) { val next = selectedTab + if (d < 0) 1 else -1; if (next in TABS.indices) goTab(TABS[next].graph) }
+            },
+        ),
+    ) {
         CompositionLocalProvider(LocalBottomBarInset provides inset) {
             NavHost(
                 nav,

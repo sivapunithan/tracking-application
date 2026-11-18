@@ -162,5 +162,7 @@ class WrapupStatusViewModel(private val diary: DiaryRepository, private val plan
 
     fun setDone(id: Long, done: Boolean) { viewModelScope.launch { planned.setDone(id, done) } }
     /** Stores today's plan once (does nothing if the day already has one, e.g. from last night's wrap-up). */
+    fun addManual(day: LocalDate, title: String) { viewModelScope.launch { planned.addManual(day, title) } }
+    fun delete(id: Long) { viewModelScope.launch { planned.delete(id) } }
     fun generate(day: LocalDate, items: List<PlanDraftItem>) { viewModelScope.launch { planned.generateIfEmpty(day, items) } }
 }

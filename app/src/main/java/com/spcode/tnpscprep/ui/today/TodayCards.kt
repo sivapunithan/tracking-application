@@ -19,6 +19,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CheckCircle
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.DeleteOutline
 import androidx.compose.material.icons.rounded.MenuBook
 import androidx.compose.material.icons.rounded.Newspaper
 import androidx.compose.material.icons.rounded.Replay
@@ -179,7 +181,12 @@ fun GettingStartedCard(items: List<GettingStartedItem>, onStep: (GettingStartedS
  * (revise / read / review) and it stays in the list, ticked. A line also shows as done when she did that work elsewhere (e.g. in the Study tab).
  */
 @Composable
-fun PlanCard(tasks: List<PlannedTaskEntity>, doneRefs: Set<String>, onTick: (PlannedTaskEntity) -> Unit) {
+fun PlanCard(
+    tasks: List<PlannedTaskEntity>, doneRefs: Set<String>, hour: Int, onTick: (PlannedTaskEntity) -> Unit,
+    onAdd: (String) -> Unit, onDelete: (PlannedTaskEntity) -> Unit,
+) {
+    var adding by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf(false) }
+    var text by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf("") }
     fun isDone(t: PlannedTaskEntity) = t.done || (t.refId != null && t.refId in doneRefs)
     val doneNow = tasks.count(::isDone)
     val total = tasks.size
@@ -190,12 +197,14 @@ fun PlanCard(tasks: List<PlannedTaskEntity>, doneRefs: Set<String>, onTick: (Pla
                 Column(Modifier.weight(1f)) {
                     Text(stringResource(R.string.plan_title), style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
                     Text(
-                        stringResource(if (allDone) R.string.plan_complete else R.string.plan_left, total - doneNow),
+                        if (total == 0) stringResource(R.string.plan_empty) else stringResource(if (allDone) R.string.plan_complete else R.string.plan_left, total - doneNow),
                         style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
-                if (allDone) { DiaryMood("CELEBRATE", 52.dp); Spacer(Modifier.width(8.dp)) }
-                ProgressRing(
+                com.spcode.tnpscprep.domain.PlanMood.of(doneNow, total, hour).let { m ->
+                    DiaryMood(m, 52.dp); Spacer(Modifier.width(8.dp))
+                }
+                if (total > 0) ProgressRing(
                     (doneNow.toFloat() / total.coerceAtLeast(1)).coerceIn(0f, 1f), Modifier.size(52.dp), strokeWidth = 6.dp,
                     track = MaterialTheme.colorScheme.outlineVariant, color = MaterialTheme.colorScheme.primary,
                 ) { Text("$doneNow/$total", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), maxLines = 1) }
@@ -227,6 +236,27 @@ fun PlanCard(tasks: List<PlannedTaskEntity>, doneRefs: Set<String>, onTick: (Pla
                             color = if (done) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
                         )
                     }
+                    androidx.compose.material3.IconButton(onClick = { onDelete(t) }) {
+                        Icon(Icons.Rounded.DeleteOutline, stringResource(R.string.plan_remove), Modifier.size(20.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f))
+                    }
+                }
+            }
+            if (adding) {
+                androidx.compose.material3.OutlinedTextField(
+                    value = text, onValueChange = { text = it.take(com.spcode.tnpscprep.domain.PlanMood.MAX_TITLE) },
+                    modifier = Modifier.fillMaxWidth(), singleLine = true, label = { Text(stringResource(R.string.plan_add_hint)) },
+                )
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    androidx.compose.material3.Button(
+                        onClick = { onAdd(text); text = ""; adding = false },
+                        enabled = com.spcode.tnpscprep.domain.PlanMood.cleanTitle(text) != null,
+                    ) { Text(stringResource(R.string.plan_add_save)) }
+                    androidx.compose.material3.TextButton(onClick = { text = ""; adding = false }) { Text(stringResource(R.string.plan_add_cancel)) }
+                }
+            } else if (total < com.spcode.tnpscprep.domain.PlanMood.MAX_LINES) {
+                androidx.compose.material3.TextButton(onClick = { adding = true }) {
+                    Icon(Icons.Rounded.Add, null, Modifier.size(18.dp)); Spacer(Modifier.width(6.dp))
+                    Text(stringResource(R.string.plan_add))
                 }
             }
         }

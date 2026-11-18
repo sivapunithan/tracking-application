@@ -8,7 +8,7 @@ import java.time.LocalDate
 import kotlinx.coroutines.flow.Flow
 
 /** REVISION = revise a topic that is due; TOPIC = read a new topic. (Plain text in the table, so adding a value needs no migration.) */
-enum class PlanRefType { TOPIC, CURRENT_AFFAIRS, CUSTOM, REVISION }
+enum class PlanRefType { TOPIC, CURRENT_AFFAIRS, CUSTOM, REVISION, MANUAL }
 
 data class PlanDraftItem(val title: String, val refType: PlanRefType, val refId: String?)
 
@@ -27,8 +27,10 @@ class PlannedTaskRepository(private val db: AppDatabase, private val now: () -> 
 
     /** Stores [items] as the day's plan ONLY if the day has no plan yet (a wrap-up plan from last night wins). Returns true when it wrote. */
     suspend fun generateIfEmpty(date: LocalDate, items: List<PlanDraftItem>): Boolean = db.withTransaction {
-        if (items.isEmpty() || dao.forDate(date.toString()).isNotEmpty()) return@withTransaction false
-        items.forEachIndexed { i, it -> dao.insert(PlannedTaskEntity(localDate = date.toString(), title = it.title.trim(), refType = it.refType.name, refId = it.refId, done = false, createdAt = now(), sortOrder = i)) }
+        val existing = dao.forDate(date.toString())
+        // lines she typed herself (MANUAL) do not count as "the day already has a plan"
+        if (items.isEmpty() || existing.any { it.refType != PlanRefType.MANUAL.name }) return@withTransaction false
+        items.forEachIndexed { i, it -> dao.insert(PlannedTaskEntity(localDate = date.toString(), title = it.title.trim(), refType = it.refType.name, refId = it.refId, done = false, createdAt = now(), sortOrder = i - items.size)) }
         true
     }
 
@@ -43,4 +45,13 @@ class PlannedTaskRepository(private val db: AppDatabase, private val now: () -> 
     }
 
     suspend fun delete(id: Long) = dao.delete(id)
+
+    /** Adds a line she typed to [date]'s plan (after the others). False when blank or the day already has [PlanMood.MAX_LINES] lines. */
+    suspend fun addManual(date: LocalDate, title: String): Boolean = db.withTransaction {
+        val t = com.spcode.tnpscprep.domain.PlanMood.cleanTitle(title) ?: return@withTransaction false
+        val list = dao.forDate(date.toString())
+        if (list.size >= com.spcode.tnpscprep.domain.PlanMood.MAX_LINES) return@withTransaction false
+        dao.insert(PlannedTaskEntity(localDate = date.toString(), title = t, refType = PlanRefType.MANUAL.name, refId = null, done = false, createdAt = now(), sortOrder = (list.maxOfOrNull { it.sortOrder } ?: -1) + 1))
+        true
+    }
 }
