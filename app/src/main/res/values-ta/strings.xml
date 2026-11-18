@@ -644,7 +644,7 @@
     </string-array>
     <string name="praise_channel">அன்பான வார்த்தைகள்</string>
     <string name="profile_sounds">மனநிலை ஒலிகள்</string>
-    <string name="profile_sounds_note">அழுகை, கோபம், கவலை தேர்ந்தால் ஒரு சிறு ஒலி, மேலும் சில விளையாட்டு ஒலிகள். போனின் அமைதி முறையைப் பின்பற்றும்.</string>
+    <string name="profile_sounds_note">உன் மனநிலை படத்துடன் ஒரு சிறு ஒலி: மனநிலையைத் தேர்ந்தால், ஒவ்வொரு அன்பான அறிவிப்பிலும். போனின் அமைதி முறையைப் பின்பற்றும்.</string>
     <string name="profile_sounds_test">ஒலி சோதனை</string>
     <string name="profile_praise">அன்பான அறிவிப்புகள்</string>
     <string name="profile_praise_note">ஒரு பணி, கவனப் பயிற்சி, மாலை முடிப்பு போன்றவற்றை முடிக்கும்போது உன் மனநிலை படத்துடன் சிறு அறிவிப்பு.</string>
@@ -737,4 +737,5 @@
     <string name="guide_p2_body">படிப்பு, மாலை, உணவு, தோற்றம் மற்றும் மொழி, தனியுரிமை, தரவு. ஒரு வரியைத் தொட்டுத் திற.</string>
     <string name="guide_p3_title">உன் தரவைக் காப்புப் பிரதி எடு</string>
     <string name="guide_p3_body">தரவு மற்றும் பற்றி என்பதில் எல்லாவற்றையும், படங்களுடன், ஒரே கோப்பாகச் சேமித்து புதிய போனில் மீட்கலாம்.</string>
+    <string name="praise_channel_plan">திட்டம் முடிந்தது</string>
 </resources>

@@ -116,6 +116,7 @@ fun CareScreen() {
     val lastGlass = health.filter { it.kind == HealthKind.WATER && it.date == today.toString() }.maxByOrNull { it.createdAt }
     val stepsToday = if (stepSensor) steps.firstOrNull { it.date == today.toString() }?.steps else null
 
+    val cctx = androidx.compose.ui.platform.LocalContext.current
     val cb = com.spcode.tnpscprep.ui.guide.rememberGuideBounds()
     val careScroll = rememberScrollState()
     Box(Modifier.fillMaxSize()) {
@@ -195,8 +196,8 @@ fun CareScreen() {
                             waterWeek.forEach { (d, _) -> Text(d.dayOfWeek.getDisplayName(TextStyle.NARROW, Locale.getDefault()), Modifier.weight(1f), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center) }
                         }
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                            OutlinedButton(onClick = { hvm.add(HealthKind.WATER, 250.0) }) { Text("+250") }
-                            OutlinedButton(onClick = { hvm.add(HealthKind.WATER, 500.0) }) { Text("+500") }
+                            OutlinedButton(onClick = { com.spcode.tnpscprep.ui.mood.MoodSounds.play(cctx, com.spcode.tnpscprep.domain.MoodSoundRules.forWater(waterToday, 250, target)); hvm.add(HealthKind.WATER, 250.0) }) { Text("+250") }
+                            OutlinedButton(onClick = { com.spcode.tnpscprep.ui.mood.MoodSounds.play(cctx, com.spcode.tnpscprep.domain.MoodSoundRules.forWater(waterToday, 500, target)); hvm.add(HealthKind.WATER, 500.0) }) { Text("+500") }
                             Spacer(Modifier.weight(1f))
                             if (lastGlass != null) OutlinedButton(onClick = { hvm.delete(lastGlass.id) }) { Icon(Icons.Rounded.Remove, null, Modifier.size(18.dp)); Spacer(Modifier.width(4.dp)); Text(stringResource(R.string.care_water_undo)) }
                         }

@@ -58,15 +58,15 @@ class ReminderReceiver : BroadcastReceiver() {
         val nm = NotificationManagerCompat.from(ctx)
         if (!nm.areNotificationsEnabled()) return
         if (Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(ctx, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) return
-        val channel = NotificationChannel(CHANNEL, ctx.getString(R.string.reminder_channel), NotificationManager.IMPORTANCE_DEFAULT)
-        (ctx.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).createNotificationChannel(channel)
+        val clip = com.spcode.tnpscprep.domain.MoodSoundRules.forMood(mood.name)
+        val chan = com.spcode.tnpscprep.notify.Praise.channelFor(ctx, "reminder", ctx.getString(R.string.reminder_channel), clip, (ctx.applicationContext as TnpscApp).container.settingsStore.moodSounds.value)
         val open = PendingIntent.getActivity(ctx, 0, Intent(ctx, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP), PendingIntent.FLAG_IMMUTABLE)
-        val n = NotificationCompat.Builder(ctx, CHANNEL)
+        val n = NotificationCompat.Builder(ctx, chan)
             .setSmallIcon(R.drawable.ic_stat_wrapup)
             .setContentTitle(ctx.getString(R.string.wrap_title))
             .setContentText(ctx.getString(R.string.reminder_text)) // generic on purpose: nothing private on the lock screen
             .setContentIntent(open).setAutoCancel(true).setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
-            .setPublicVersion(NotificationCompat.Builder(ctx, CHANNEL).setSmallIcon(R.drawable.ic_stat_wrapup).setContentTitle(ctx.getString(R.string.app_name)).build())
+            .setPublicVersion(NotificationCompat.Builder(ctx, chan).setSmallIcon(R.drawable.ic_stat_wrapup).setContentTitle(ctx.getString(R.string.app_name)).build())
         com.spcode.tnpscprep.notify.Praise.moodBitmap(ctx, mood)?.let { n.setLargeIcon(it) }
         val built = n.build()
         nm.notify(NOTIF_ID, built)

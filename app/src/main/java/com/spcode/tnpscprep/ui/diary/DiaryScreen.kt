@@ -159,6 +159,7 @@ fun JournalScreen(
     LaunchedEffect(undo) { if (undo != null) { delay(5_000); vm.clearUndo() } }
     LaunchedEffect(notice) { if (notice != null) { delay(4_000); vm.clearNotice() } }
     val deletedText = stringResource(R.string.diary_deleted)
+    val undoCtx = LocalContext.current
     Surface(Modifier.fillMaxSize(), color = paper()) {
       Column(Modifier.fillMaxSize()) {
         Box(Modifier.fillMaxSize()) {
@@ -172,7 +173,7 @@ fun JournalScreen(
                     Surface(shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.inverseSurface, tonalElevation = 6.dp) {
                         Row(Modifier.padding(start = 16.dp, end = 4.dp), verticalAlignment = Alignment.CenterVertically) {
                             Text(deletedText, color = MaterialTheme.colorScheme.inverseOnSurface, modifier = Modifier.weight(1f))
-                            TextButton(onClick = { u?.let(vm::restore); vm.clearUndo() }) { Text(stringResource(R.string.diary_undo), color = MaterialTheme.colorScheme.inversePrimary) }
+                            TextButton(onClick = { com.spcode.tnpscprep.ui.mood.MoodSounds.play(undoCtx, com.spcode.tnpscprep.domain.MoodSoundRules.UNDONE); u?.let(vm::restore); vm.clearUndo() }) { Text(stringResource(R.string.diary_undo), color = MaterialTheme.colorScheme.inversePrimary) }
                         }
                     }
                 }
@@ -678,6 +679,7 @@ private fun EditorPane(vm: DiaryViewModel, entryId: Long?, startDate: LocalDate,
                 val name = com.spcode.tnpscprep.domain.DiaryPhotos.newName()
                 val saved = withContext(kotlinx.coroutines.Dispatchers.IO) { vm.store.write(name, out) }
                 if (saved == null) { android.widget.Toast.makeText(ctx, ctx.getString(R.string.photo_read_fail), android.widget.Toast.LENGTH_SHORT).show(); return@launch }
+                com.spcode.tnpscprep.ui.mood.MoodSounds.play(ctx, com.spcode.tnpscprep.domain.MoodSoundRules.PHOTO)
                 photos[name] = DiaryPhotoEntity(name, 0, frame, corner, saved.width, saved.height, saved.bytes, System.currentTimeMillis())
                 session.photoFiles += name
                 // place it at the cursor: split that text run in two (a newline at the cut is not kept), else at the end
@@ -769,7 +771,7 @@ private fun EditorPane(vm: DiaryViewModel, entryId: Long?, startDate: LocalDate,
             confirmButton = { TextButton(onClick = {
                 val n = name; removePhoto = null
                 commit(display.filterNot { (it.block as? com.spcode.tnpscprep.domain.DiaryBlock.Photo)?.name == n })
-                PhotoBitmaps.forget(n)
+                PhotoBitmaps.forget(n); com.spcode.tnpscprep.ui.mood.MoodSounds.play(ctx, com.spcode.tnpscprep.domain.MoodSoundRules.DELETED)
             }) { Text(stringResource(R.string.health_delete), color = MaterialTheme.colorScheme.error) } },
             dismissButton = { TextButton(onClick = { removePhoto = null }) { Text(stringResource(R.string.cancel)) } },
         )
@@ -781,7 +783,7 @@ private fun EditorPane(vm: DiaryViewModel, entryId: Long?, startDate: LocalDate,
             title = { Text(stringResource(R.string.diary_delete_title)) },
             text = { Text(stringResource(R.string.diary_delete_body)) },
             confirmButton = {
-                TextButton(onClick = { confirmDelete = false; scope.launch { val id = session.id; onDone(if (id != null) vm.delete(id) else null) } }) {
+                TextButton(onClick = { confirmDelete = false; com.spcode.tnpscprep.ui.mood.MoodSounds.play(ctx, com.spcode.tnpscprep.domain.MoodSoundRules.DELETED); scope.launch { val id = session.id; onDone(if (id != null) vm.delete(id) else null) } }) {
                     Text(stringResource(R.string.health_delete), color = MaterialTheme.colorScheme.error)
                 }
             },

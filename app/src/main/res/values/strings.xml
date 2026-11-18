@@ -644,7 +644,7 @@
     </string-array>
     <string name="praise_channel">Kind words</string>
     <string name="profile_sounds">Mood sounds</string>
-    <string name="profile_sounds_note">A short sound when you pick Crying, Angry or Worried, and a few playful ones. Follows your phone\'s silent mode.</string>
+    <string name="profile_sounds_note">A short sound with your mood picture: when you pick a mood, and with every kind notification. Follows your phone\'s silent mode.</string>
     <string name="profile_sounds_test">Test sound</string>
     <string name="profile_praise">Kind notifications</string>
     <string name="profile_praise_note">A small banner with your mood picture when you finish something: a task, a focus session, the wrap-up.</string>
@@ -737,4 +737,5 @@
     <string name="guide_p2_body">Study, evening, food, look and language, privacy, and data. Tap a row to open it.</string>
     <string name="guide_p3_title">Back up your data</string>
     <string name="guide_p3_body">Under Data and about you can save everything, photos too, in one file, and restore it on a new phone.</string>
+    <string name="praise_channel_plan">Plan complete</string>
 </resources>

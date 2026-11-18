@@ -254,9 +254,10 @@ private fun SubjectDetail(
                 )
             }
             items(unit.topics, key = { it.id }) { t ->
+                val sctx = androidx.compose.ui.platform.LocalContext.current
                 TopicRow(
                     t,
-                    onTap = { vm.onTopicTap(t.id) },
+                    onTap = { vm.onTopicTap(t.id); if (t.level < 4) com.spcode.tnpscprep.ui.mood.MoodSounds.play(sctx, com.spcode.tnpscprep.domain.MoodSoundRules.forTopicLevelUp(t.level + 1)) },
                     onLongPress = { vm.onTopicLongPress(t.id) },
                     onStar = { vm.onToggleStar(t.id) },
                     onNote = { onOpenNote(t.id) },

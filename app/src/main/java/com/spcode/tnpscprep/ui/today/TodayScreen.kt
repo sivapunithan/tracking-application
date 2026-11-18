@@ -245,7 +245,7 @@ fun TodayScreen(vm: TodayViewModel, onOpenProfile: () -> Unit, onOpenDiary: (Str
             CheckinCard(
                 mood = moods[foodDay], food = food[foodDay], foodPrompt = evening, waterMl = waterToday, waterTarget = waterTarget,
                 onMood = { sheet = "mood" }, onFood = { sheet = "foodpick" },
-                onWaterAdd = { hvm.add(com.spcode.tnpscprep.data.HealthKind.WATER, 250.0) },
+                onWaterAdd = { com.spcode.tnpscprep.ui.mood.MoodSounds.play(appCtx, com.spcode.tnpscprep.domain.MoodSoundRules.forWater(waterToday, 250, waterTarget)); hvm.add(com.spcode.tnpscprep.data.HealthKind.WATER, 250.0) },
                 onWaterUndo = lastGlass?.let { g -> { hvm.delete(g.id) } },
             )
         } }
@@ -297,7 +297,7 @@ fun TodayScreen(vm: TodayViewModel, onOpenProfile: () -> Unit, onOpenDiary: (Str
     if (current != null) {
         PopSheet(onDismiss = { sheet = null }) { dismiss ->
             when {
-                current == "date" -> ExamDateSheet(ui, onSave = { vm.setExamDate(it); dismiss() }, onClear = { vm.clearExamDate(); dismiss() }, onCancel = dismiss)
+                current == "date" -> ExamDateSheet(ui, onSave = { vm.setExamDate(it); com.spcode.tnpscprep.ui.mood.MoodSounds.play(appCtx, com.spcode.tnpscprep.domain.MoodSoundRules.EXAM_DATE_SET); dismiss() }, onClear = { vm.clearExamDate(); dismiss() }, onCancel = dismiss)
                 current == "foodalert" -> FoodAlertSheet(dismiss)
                 current == "mood" -> MoodPickSheet(moods[foodDay]) { mvm.set(foodDay, it); dismiss() }
                 current == "foodpick" -> FoodPickSheet(food[foodDay]) { fvm.set(foodDay, it); dismiss() }

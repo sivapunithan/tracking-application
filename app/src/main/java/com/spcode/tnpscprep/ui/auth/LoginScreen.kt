@@ -49,6 +49,7 @@ fun LoginScreen(
     var busy by rememberSaveable { mutableStateOf(false) }
     var showForgot by rememberSaveable { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
+    val loginCtx = androidx.compose.ui.platform.LocalContext.current
 
     LaunchedEffect(lockedUntil) {
         while (System.currentTimeMillis() < lockedUntil) {
@@ -77,7 +78,7 @@ fun LoginScreen(
                         busy = true
                         when (val r = onSubmit(pin)) {
                             PinResult.Ok -> Unit
-                            is PinResult.Wrong -> { triesLeft = r.triesLeftBeforeWait; err += 1 }
+                            is PinResult.Wrong -> { triesLeft = r.triesLeftBeforeWait; err += 1; com.spcode.tnpscprep.ui.mood.MoodSounds.play(loginCtx, com.spcode.tnpscprep.domain.MoodSoundRules.WRONG_PIN) }
                             is PinResult.Locked -> { lockedUntil = r.untilMs; triesLeft = -1; err += 1 }
                         }
                         busy = false

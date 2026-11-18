@@ -2,6 +2,7 @@ package com.spcode.tnpscprep.domain
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class PraiseTest {
@@ -19,9 +20,20 @@ class PraiseTest {
         assertEquals(Mood.ANGRY, PraiseRules.reminderMood(9, 20))
         assertEquals(Mood.PROUD, PraiseRules.reminderMood(null, 20))
     }
+    @Test fun everyEventHasAClipAndTheGoalChangesFocus() {
+        PraiseEvent.entries.forEach { assertTrue(PraiseRules.soundFor(it).isNotBlank()) }
+        assertEquals("proud", PraiseRules.soundFor(PraiseEvent.FOCUS_DONE)); assertEquals("celebrate", PraiseRules.soundFor(PraiseEvent.FOCUS_DONE, goalMet = true))
+        assertEquals("boom", PraiseRules.soundFor(PraiseEvent.PLAN_COMPLETE))
+        assertEquals("slap", MoodSoundRules.WRONG_PIN)
+    }
+    @Test fun topicAndWaterRules() {
+        assertNull(MoodSoundRules.forTopicLevelUp(0)); assertEquals("cheer", MoodSoundRules.forTopicLevelUp(2)); assertEquals("celebrate", MoodSoundRules.forTopicLevelUp(4))
+        assertEquals("celebrate", MoodSoundRules.forWater(1900, 250, 2000)); assertNull(MoodSoundRules.forWater(500, 250, 2000)); assertNull(MoodSoundRules.forWater(2100, 250, 2000))
+        assertEquals("worried", MoodSoundRules.forFood("MIXED"))
+    }
     @Test fun sounds() {
         assertEquals("cry", MoodSoundRules.forMood("CRY")); assertEquals("angry", MoodSoundRules.forMood("ANGRY")); assertEquals("worried", MoodSoundRules.forMood("WORRIED"))
-        assertNull(MoodSoundRules.forMood("LAUGH")); assertNull(MoodSoundRules.forMood(null))
+        assertEquals("laugh", MoodSoundRules.forMood("LAUGH")); assertEquals("cheer", MoodSoundRules.forMood("CHEER")); assertEquals("proud", MoodSoundRules.forMood("PROUD")); assertEquals("celebrate", MoodSoundRules.forMood("CELEBRATE")); assertNull(MoodSoundRules.forMood(null))
         assertEquals("fail", MoodSoundRules.forFood("JUNK")); assertNull(MoodSoundRules.forFood("HEALTHY"))
     }
 }

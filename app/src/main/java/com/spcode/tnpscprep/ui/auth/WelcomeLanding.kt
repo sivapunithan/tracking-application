@@ -60,13 +60,14 @@ fun WelcomeLanding(onStart: () -> Unit, onRestore: suspend (android.net.Uri) -> 
     val tamil = LocalConfiguration.current.locales[0].language == "ta"
     val screenH = LocalConfiguration.current.screenHeightDp
     val scope = rememberCoroutineScope()
+    val wctx = androidx.compose.ui.platform.LocalContext.current
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     val bad = stringResource(R.string.welcome_restore_bad)
     val noName = stringResource(R.string.welcome_restore_noname)
     val pick = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null) { busy = true; error = null; scope.launch {
-            when (onRestore(uri)) { null -> error = bad; false -> onNeedName(noName); true -> Unit }
+            when (onRestore(uri)) { null -> error = bad; false -> { com.spcode.tnpscprep.ui.mood.MoodSounds.play(wctx, com.spcode.tnpscprep.domain.MoodSoundRules.RESTORED); onNeedName(noName) }; true -> com.spcode.tnpscprep.ui.mood.MoodSounds.play(wctx, com.spcode.tnpscprep.domain.MoodSoundRules.RESTORED) }
             busy = false
         } }
     }

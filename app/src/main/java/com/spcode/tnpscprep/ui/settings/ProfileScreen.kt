@@ -315,13 +315,14 @@ private fun BackupSection() {
                     withContext(Dispatchers.IO) { ctx.contentResolver.openOutputStream(uri, "wt")!!.use { it.write(text.toByteArray(Charsets.UTF_8)) } }
                 }
             }.isSuccess
-            if (ok) repo.markBackedUp()
+            if (ok) { repo.markBackedUp(); com.spcode.tnpscprep.ui.mood.MoodSounds.play(ctx, com.spcode.tnpscprep.domain.MoodSoundRules.BACKUP_SAVED) }
             notice = if (ok) saved else saveFail; busy = false
         } }
     }
     val restore = androidx.activity.compose.rememberLauncherForActivityResult(androidx.activity.result.contract.ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null) { busy = true; scope.launch {
             val r = repo.restoreFromUri(ctx.contentResolver, uri).getOrNull()
+            if (r != null) com.spcode.tnpscprep.ui.mood.MoodSounds.play(ctx, com.spcode.tnpscprep.domain.MoodSoundRules.RESTORED)
             notice = if (r == null) bad else if (r.photos > 0) String.format(restoredPhotosFmt, r.added, r.updated, r.photos) else String.format(restoredFmt, r.added, r.updated)
             busy = false
         } }
