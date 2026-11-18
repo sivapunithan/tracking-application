@@ -305,17 +305,7 @@ private fun BackupSection() {
     }
     val restore = androidx.activity.compose.rememberLauncherForActivityResult(androidx.activity.result.contract.ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null) { busy = true; scope.launch {
-            // a .mathi is a zip ("PK"); anything else is the plain text backup
-            val r = withContext(Dispatchers.IO) {
-                runCatching {
-                    val head = ctx.contentResolver.openInputStream(uri)!!.use { it.readNBytes(2) }
-                    if (com.spcode.tnpscprep.data.MathiBundle.looksLikeZip(head)) ctx.contentResolver.openInputStream(uri)!!.use { repo.restoreBundle(it) }.getOrNull()
-                    else {
-                        val text = ctx.contentResolver.openInputStream(uri)!!.use { it.readBytes() }.toString(Charsets.UTF_8)
-                        if (text.length > com.spcode.tnpscprep.data.AppBackup.MAX_FILE_CHARS) null else repo.restore(text).getOrNull()
-                    }
-                }.getOrNull()
-            }
+            val r = repo.restoreFromUri(ctx.contentResolver, uri).getOrNull()
             notice = if (r == null) bad else if (r.photos > 0) String.format(restoredPhotosFmt, r.added, r.updated, r.photos) else String.format(restoredFmt, r.added, r.updated)
             busy = false
         } }

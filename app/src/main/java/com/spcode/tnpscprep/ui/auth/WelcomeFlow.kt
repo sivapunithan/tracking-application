@@ -67,7 +67,10 @@ import kotlinx.coroutines.launch
 /** First launch: welcome -> about you -> optional PIN. Creates the LOCAL account (nothing leaves the phone). */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun WelcomeFlow(onCreate: suspend (name: String, exam: String, examEpochDay: Long?, goalMinutes: Int, pin: String?) -> Unit) {
+fun WelcomeFlow(
+    onCreate: suspend (name: String, exam: String, examEpochDay: Long?, goalMinutes: Int, pin: String?) -> Unit,
+    onRestore: suspend (android.net.Uri) -> Boolean? = { null },
+) {
     var step by rememberSaveable { mutableIntStateOf(0) }
     var name by rememberSaveable { mutableStateOf("") }
     var examMask by rememberSaveable { mutableIntStateOf(com.spcode.tnpscprep.domain.Exam.ALL_MASK) }
@@ -84,6 +87,11 @@ fun WelcomeFlow(onCreate: suspend (name: String, exam: String, examEpochDay: Lon
         scope.launch { onCreate(name, com.spcode.tnpscprep.domain.ExamSelection.format(examMask), examDay, goal, pin) }
     }
 
+    var restoreNote by rememberSaveable { mutableStateOf<String?>(null) }
+    if (step == 0) {
+        WelcomeLanding(onStart = { step = 1 }, onRestore = onRestore, onNeedName = { restoreNote = it; step = 1 })
+        return
+    }
     Column(
         Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).verticalScroll(rememberScrollState()).navigationBarsPadding(),
     ) {
@@ -111,19 +119,10 @@ fun WelcomeFlow(onCreate: suspend (name: String, exam: String, examEpochDay: Lon
         ) { s ->
             Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 18.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                 when (s) {
-                    0 -> {
-                        Text(stringResource(R.string.welcome_title), style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold), textAlign = TextAlign.Center)
-                        Spacer(Modifier.height(8.dp))
-                        Text(stringResource(R.string.welcome_sub), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
-                        Spacer(Modifier.height(12.dp))
-                        Text(stringResource(R.string.welcome_private), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
-                        Spacer(Modifier.height(24.dp))
-                        Button(onClick = { step = 1 }, modifier = Modifier.fillMaxWidth().height(56.dp)) {
-                            Text(stringResource(R.string.get_started), style = MaterialTheme.typography.titleMedium)
-                        }
-                    }
+                    0 -> Unit
                     1 -> Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(14.dp)) {
                         Text(stringResource(R.string.about_you), style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold))
+                        restoreNote?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary) }
                         OutlinedTextField(
                             value = name, onValueChange = { name = it.take(AccountForm.MAX_NAME) },
                             label = { Text(stringResource(R.string.account_name_label)) }, singleLine = true, modifier = Modifier.fillMaxWidth(),

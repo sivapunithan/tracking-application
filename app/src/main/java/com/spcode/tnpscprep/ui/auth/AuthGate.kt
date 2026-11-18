@@ -33,7 +33,17 @@ fun AuthGate(auth: AuthViewModel, content: @Composable () -> Unit) {
         label = "auth",
     ) { s ->
         when (s) {
-            AuthState.NEEDS_ACCOUNT -> WelcomeFlow(onCreate = { n, exam, day, goal, pin -> auth.createAccount(n, exam, day, goal, pin) })
+            AuthState.NEEDS_ACCOUNT -> {
+                val ctx = androidx.compose.ui.platform.LocalContext.current
+                WelcomeFlow(
+                    onCreate = { n, exam, day, goal, pin -> auth.createAccount(n, exam, day, goal, pin) },
+                    // returns null = not a Mathi backup; true = restored and she is in; false = restored but a name is still needed
+                    onRestore = { uri ->
+                        val repo = (ctx.applicationContext as com.spcode.tnpscprep.TnpscApp).container.backupRepository
+                        repo.restoreFromUri(ctx.contentResolver, uri).getOrNull()?.let { auth.adoptRestoredAccount() }
+                    },
+                )
+            }
             AuthState.LOCKED -> LoginScreen(
                 name = name,
                 lockedUntilMs = auth::lockedUntilMs,

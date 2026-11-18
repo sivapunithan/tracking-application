@@ -691,4 +691,14 @@
     <string name="guide_e2_body">A photo goes where your cursor is. Crop it, round the corners, or use a heart, star or circle. Tap a photo later to change or move it.</string>
     <string name="guide_e3_title">Add a link</string>
     <string name="guide_e3_body">Add a web link. Tap it to open it, long-press it to change it.</string>
+    <string name="welcome_restore">I already have a backup</string>
+    <string name="welcome_restoring">Restoring your backup…</string>
+    <string name="welcome_restore_bad">That file is not a Mathi backup.</string>
+    <string name="welcome_restore_noname">Backup restored. Tell us your name to finish.</string>
+    <string name="welcome_f1_title">Revise on a schedule</string>
+    <string name="welcome_f1_body">Every topic comes back at the right time: after 3, 7, 21 and 60 days.</string>
+    <string name="welcome_f2_title">Real current affairs</string>
+    <string name="welcome_f2_body">Dated items with their sources, plus headlines you can star and revise.</string>
+    <string name="welcome_f3_title">Your own private space</string>
+    <string name="welcome_f3_body">A diary with photos, mood check-ins and a calm evening wrap-up.</string>
 </resources>

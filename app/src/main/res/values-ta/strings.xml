@@ -691,4 +691,14 @@
     <string name="guide_e2_body">கர்சர் இருக்கும் இடத்தில் படம் சேரும். வெட்டலாம், மூலைகளை வளைக்கலாம், இதயம், நட்சத்திரம், வட்டம் என வைக்கலாம். பின்னர் படத்தைத் தொட்டு மாற்றலாம், நகர்த்தலாம்.</string>
     <string name="guide_e3_title">இணைப்பைச் சேர்</string>
     <string name="guide_e3_body">இணைய இணைப்பைச் சேர். தொட்டால் திறக்கும், நீண்ட நேரம் தொட்டால் மாற்றலாம்.</string>
+    <string name="welcome_restore">என்னிடம் காப்புப்பிரதி உள்ளது</string>
+    <string name="welcome_restoring">காப்புப்பிரதி மீட்கப்படுகிறது…</string>
+    <string name="welcome_restore_bad">அது மதி காப்புப்பிரதி கோப்பு அல்ல.</string>
+    <string name="welcome_restore_noname">காப்புப்பிரதி மீட்கப்பட்டது. முடிக்க உன் பெயரைச் சொல்.</string>
+    <string name="welcome_f1_title">அட்டவணைப்படி மீள்பார்வை</string>
+    <string name="welcome_f1_body">ஒவ்வொரு தலைப்பும் 3, 7, 21, 60 நாட்களுக்குப் பிறகு சரியான நேரத்தில் திரும்ப வரும்.</string>
+    <string name="welcome_f2_title">உண்மையான நடப்பு நிகழ்வுகள்</string>
+    <string name="welcome_f2_body">தேதியுடன் மூலங்களுடன் கூடிய செய்திகள், நட்சத்திரமிட்டு மீள்பார்வை செய்யக்கூடிய தலைப்புச் செய்திகள்.</string>
+    <string name="welcome_f3_title">உனக்கான தனிப்பட்ட இடம்</string>
+    <string name="welcome_f3_body">படங்களுடன் நாட்குறிப்பு, மனநிலை பதிவுகள், அமைதியான மாலை முடிப்பு.</string>
 </resources>

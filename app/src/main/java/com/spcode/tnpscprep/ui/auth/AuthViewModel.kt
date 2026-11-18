@@ -53,6 +53,16 @@ class AuthViewModel(
         _state.value = AuthState.UNLOCKED
     }
 
+    /**
+     * After a backup was restored on a fresh install: if the file carried her name the account exists already (no PIN: it is never in a backup),
+     * so go straight in. Returns false when there was no name, and the Welcome flow then asks for it.
+     */
+    fun adoptRestoredAccount(): Boolean {
+        if (!AccountForm.isValidName(settings.userName.value)) return false
+        settings.clearPin(); settings.markAccountCreated(); _state.value = AuthState.UNLOCKED
+        return true
+    }
+
     /** Hashing is deliberately slow, so it never runs on the main thread. Counts wrong tries and enforces the wait. */
     suspend fun checkPin(pin: String): PinResult = withContext(Dispatchers.Default) {
         val t = now()

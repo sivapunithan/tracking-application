@@ -61,6 +61,19 @@ class BackupRepository(
 
     suspend fun exportJson(): String = AppBackup.encode(buildFile())
 
+    /** Restores a chosen file, plain text or .mathi (a zip starts with "PK"). Used by Profile and by the first-launch Welcome page. */
+    suspend fun restoreFromUri(resolver: android.content.ContentResolver, uri: android.net.Uri): Result<RestoreOutcome> = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+        runCatching {
+            val head = resolver.openInputStream(uri)!!.use { it.readNBytes(2) }
+            if (MathiBundle.looksLikeZip(head)) resolver.openInputStream(uri)!!.use { restoreBundle(it) }.getOrThrow()
+            else {
+                val text = resolver.openInputStream(uri)!!.use { it.readBytes() }.toString(Charsets.UTF_8)
+                require(text.length <= AppBackup.MAX_FILE_CHARS) { "too_big" }
+                restore(text).getOrThrow()
+            }
+        }
+    }
+
     suspend fun photoCount(): Int = db.diaryPhotoDao().count()
 
     /** The one-file ".mathi" backup: the text backup + every photo, as a zip. Returns how many photos went in. */
