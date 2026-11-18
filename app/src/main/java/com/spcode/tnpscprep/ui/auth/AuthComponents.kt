@@ -44,7 +44,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -117,7 +116,7 @@ fun PinDots(filled: Int, errorTick: Int, modifier: Modifier = Modifier, count: I
 @Composable
 fun PinInput(prompt: String, message: String?, errorTick: Int, onComplete: (String) -> Unit, modifier: Modifier = Modifier, busy: Boolean = false, enabled: Boolean = true) {
     var digits by remember { mutableStateOf("") }
-    val haptic = LocalHapticFeedback.current
+    val haptic = com.spcode.tnpscprep.ui.feedback.rememberAppHaptics()
     LaunchedEffect(digits) {
         if (digits.length == com.spcode.tnpscprep.domain.PinPolicy.LENGTH) { delay(140); onComplete(digits); digits = "" }
     }

@@ -16,6 +16,8 @@ object MoodSounds {
     fun play(context: Context, name: String?, force: Boolean = false) {
         if (name == null) return
         val ctx = context.applicationContext
+        // the buzz that goes with the clip: its own switch (Vibration), independent of the sound switch
+        com.spcode.tnpscprep.ui.feedback.Haptics.fire(ctx, com.spcode.tnpscprep.domain.HapticRules.forClip(name))
         if (!force && !(ctx as TnpscApp).container.settingsStore.moodSounds.value) return
         val id = ctx.resources.getIdentifier("snd_$name", "raw", ctx.packageName)
         if (id == 0) return

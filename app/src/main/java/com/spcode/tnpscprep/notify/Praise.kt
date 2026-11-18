@@ -88,6 +88,7 @@ object Praise {
             .setPriority(NotificationCompat.PRIORITY_HIGH).setCategory(NotificationCompat.CATEGORY_STATUS)
             .setVisibility(NotificationCompat.VISIBILITY_PRIVATE).setPublicVersion(public)
         moodBitmap(ctx, PraiseRules.moodFor(event, goalMet))?.let { b.setLargeIcon(it) }
+        com.spcode.tnpscprep.ui.feedback.Haptics.fire(app, com.spcode.tnpscprep.domain.HapticRules.forClip(PraiseRules.soundFor(event, goalMet)))
         NotificationManagerCompat.from(ctx).notify(ID, b.build())
     }
 }

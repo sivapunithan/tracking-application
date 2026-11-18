@@ -72,7 +72,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -180,7 +179,7 @@ fun AppRoot(
     }
     val completions by timerVm.completions.collectAsStateWithLifecycle()
     var seen by rememberSaveable { mutableIntStateOf(completions) }
-    val haptic = LocalHapticFeedback.current
+    val haptic = com.spcode.tnpscprep.ui.feedback.rememberAppHaptics()
     LaunchedEffect(completions) {
         if (completions != seen) {
             seen = completions; haptic.performHapticFeedback(HapticFeedbackType.LongPress)

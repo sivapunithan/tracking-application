@@ -36,7 +36,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.selected
@@ -58,7 +57,7 @@ fun FloatingNavBar(
     /** Optional round action button in the MIDDLE of the bar (the Focus button). Not a tab: it never gets selected. */
     center: NavItem? = null, onCenter: () -> Unit = {},
 ) {
-    val haptic = LocalHapticFeedback.current
+    val haptic = com.spcode.tnpscprep.ui.feedback.rememberAppHaptics()
     Box(
         modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = 16.dp, vertical = 12.dp),
         contentAlignment = Alignment.BottomCenter,

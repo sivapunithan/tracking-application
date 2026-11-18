@@ -99,7 +99,14 @@ class SettingsStore(context: Context) {
     val guides: StateFlow<Set<String>> = _guides.asStateFlow()
     fun markGuideDone(key: String) { val n = _guides.value + key; prefs.edit().putStringSet(K_GUIDES, n).apply(); _guides.value = n }
     /** "Show the guides again": every tour, including the Journal ones. */
-    fun resetGuides() { prefs.edit().remove(K_GUIDES).apply(); _guides.value = emptySet(); setJournalGuideDone(false); setEditorGuideDone(false) }
+    fun resetGuides() { prefs.edit().remove(K_GUIDES).apply(); _guides.value = emptySet(); _vib.value = true; _vibStr.value = 1; setJournalGuideDone(false); setEditorGuideDone(false) }
+    private val _vib = MutableStateFlow(prefs.getBoolean(K_VIB, true))
+    val vibration: StateFlow<Boolean> = _vib.asStateFlow()
+    fun setVibration(v: Boolean) { prefs.edit().putBoolean(K_VIB, v).apply(); _vib.value = v }
+    /** 0 = Light, 1 = Normal, 2 = Strong. */
+    private val _vibStr = MutableStateFlow(prefs.getInt(K_VIB_STR, 1))
+    val vibrationStrength: StateFlow<Int> = _vibStr.asStateFlow()
+    fun setVibrationStrength(v: Int) { val c = v.coerceIn(0, 2); prefs.edit().putInt(K_VIB_STR, c).apply(); _vibStr.value = c }
     private var praiseCounter = prefs.getInt(K_PRAISE_N, 0)
     fun nextPraiseCounter(): Int { praiseCounter++; prefs.edit().putInt(K_PRAISE_N, praiseCounter).apply(); return praiseCounter }
     private val _foodAlert = MutableStateFlow(prefs.getString(K_FOOD_ALERT, "") ?: "")
@@ -214,6 +221,8 @@ class SettingsStore(context: Context) {
         private const val K_MOOD_SOUNDS = "mood_sounds"
         private const val K_PRAISE = "praise_notifs"
         private const val K_PRAISE_N = "praise_n"
+        private const val K_VIB = "vibration_on"
+        private const val K_VIB_STR = "vibration_strength"
         private const val K_GUIDES = "guides_done"
         private const val K_J_GUIDE = "journal_guide_done"
         private const val K_E_GUIDE = "editor_guide_done"

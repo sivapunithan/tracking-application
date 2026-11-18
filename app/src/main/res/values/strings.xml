@@ -738,4 +738,11 @@
     <string name="guide_p3_title">Back up your data</string>
     <string name="guide_p3_body">Under Data and about you can save everything, photos too, in one file, and restore it on a new phone.</string>
     <string name="praise_channel_plan">Plan complete</string>
+    <string name="sv_title">Sound and vibration</string>
+    <string name="sv_vibration">Vibration</string>
+    <string name="sv_vibration_note">A short, gentle buzz when you finish something, pick a mood or switch tabs. Off means no buzz at all.</string>
+    <string name="sv_light">Light</string>
+    <string name="sv_normal">Normal</string>
+    <string name="sv_strong">Strong</string>
+    <string name="sv_vibration_test">Test vibration</string>
 </resources>

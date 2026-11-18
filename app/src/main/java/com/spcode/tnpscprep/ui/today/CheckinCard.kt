@@ -39,7 +39,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -83,7 +82,7 @@ fun CheckinCard(
     mood: Mood?, food: FoodState?, foodPrompt: Boolean, waterMl: Int, waterTarget: Int,
     onMood: () -> Unit, onFood: () -> Unit, onWaterAdd: () -> Unit, onWaterUndo: (() -> Unit)?,
 ) {
-    val haptic = LocalHapticFeedback.current
+    val haptic = com.spcode.tnpscprep.ui.feedback.rememberAppHaptics()
     SoftCard(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Column {
@@ -163,7 +162,7 @@ private fun Tile(modifier: Modifier, title: String, sub: String?, onClick: () ->
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun MoodPickSheet(current: Mood?, onPick0: (Mood?) -> Unit) {
-    val haptic = LocalHapticFeedback.current
+    val haptic = com.spcode.tnpscprep.ui.feedback.rememberAppHaptics()
     val ctx = androidx.compose.ui.platform.LocalContext.current
     val onPick: (Mood?) -> Unit = { m -> com.spcode.tnpscprep.ui.mood.MoodSounds.play(ctx, com.spcode.tnpscprep.domain.MoodSoundRules.forMood(m?.name)); onPick0(m) }
     Column(Modifier.padding(horizontal = 24.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
@@ -193,7 +192,7 @@ fun MoodPickSheet(current: Mood?, onPick0: (Mood?) -> Unit) {
 /** The three food states, as their pictures. Not a diet tool: no calories, no scores. */
 @Composable
 fun FoodPickSheet(current: FoodState?, onPick0: (FoodState?) -> Unit) {
-    val haptic = LocalHapticFeedback.current
+    val haptic = com.spcode.tnpscprep.ui.feedback.rememberAppHaptics()
     val ctx = androidx.compose.ui.platform.LocalContext.current
     val onPick: (FoodState?) -> Unit = { f ->
         com.spcode.tnpscprep.ui.mood.MoodSounds.play(ctx, com.spcode.tnpscprep.domain.MoodSoundRules.forFood(f?.name))

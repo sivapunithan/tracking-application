@@ -738,4 +738,11 @@
     <string name="guide_p3_title">உன் தரவைக் காப்புப் பிரதி எடு</string>
     <string name="guide_p3_body">தரவு மற்றும் பற்றி என்பதில் எல்லாவற்றையும், படங்களுடன், ஒரே கோப்பாகச் சேமித்து புதிய போனில் மீட்கலாம்.</string>
     <string name="praise_channel_plan">திட்டம் முடிந்தது</string>
+    <string name="sv_title">ஒலி மற்றும் அதிர்வு</string>
+    <string name="sv_vibration">அதிர்வு</string>
+    <string name="sv_vibration_note">ஏதாவது முடிக்கும்போது, மனநிலையைத் தேர்ந்தால், தாவல் மாற்றும்போது ஒரு சிறு மென்மையான அதிர்வு. அணைத்தால் அதிர்வே இருக்காது.</string>
+    <string name="sv_light">மென்மை</string>
+    <string name="sv_normal">சாதாரணம்</string>
+    <string name="sv_strong">வலிமை</string>
+    <string name="sv_vibration_test">அதிர்வைச் சோதி</string>
 </resources>

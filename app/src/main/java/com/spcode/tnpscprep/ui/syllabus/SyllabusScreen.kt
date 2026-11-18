@@ -46,7 +46,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -270,7 +269,7 @@ private fun SubjectDetail(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun TopicRow(t: TopicUi, onTap: () -> Unit, onLongPress: () -> Unit, onStar: () -> Unit, onNote: () -> Unit) {
-    val haptic = LocalHapticFeedback.current
+    val haptic = com.spcode.tnpscprep.ui.feedback.rememberAppHaptics()
     val levelName = stringArrayResource(R.array.revision_levels)[RevisionLevel.clamp(t.level)]
     val exams = Exam.entries.filter { t.exams and it.bit != 0 }.joinToString(" · ") { it.code }
     Row(

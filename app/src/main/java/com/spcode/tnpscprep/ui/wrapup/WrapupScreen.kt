@@ -65,7 +65,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -128,7 +127,7 @@ fun WrapupScreen(todayVm: TodayViewModel, onClose: () -> Unit) {
     val s by vm.state.collectAsStateWithLifecycle()
     val ui by todayVm.ui.collectAsStateWithLifecycle()
     val extras by todayVm.extras.collectAsStateWithLifecycle()
-    val haptic = LocalHapticFeedback.current
+    val haptic = com.spcode.tnpscprep.ui.feedback.rememberAppHaptics()
     val reduce = rememberReduceMotion()
     val day = remember { LogicalDay.of(System.currentTimeMillis(), ZoneId.systemDefault()) }
     val wctx = androidx.compose.ui.platform.LocalContext.current

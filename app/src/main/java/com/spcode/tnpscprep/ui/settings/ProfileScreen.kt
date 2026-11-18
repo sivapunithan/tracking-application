@@ -439,12 +439,29 @@ private fun SoundsAndPraise() {
     var allowed by remember { mutableStateOf(com.spcode.tnpscprep.notify.Praise.canPost(ctx)) }
     val ask = androidx.activity.compose.rememberLauncherForActivityResult(androidx.activity.result.contract.ActivityResultContracts.RequestPermission()) { allowed = com.spcode.tnpscprep.notify.Praise.canPost(ctx) }
     Spacer(Modifier.height(12.dp))
+    SectionLabel(stringResource(R.string.sv_title))
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text(stringResource(R.string.profile_sounds), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
         Switch(checked = sounds, onCheckedChange = settings::setMoodSounds)
     }
     Text(stringResource(R.string.profile_sounds_note), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-    if (sounds) OutlinedButton(onClick = { com.spcode.tnpscprep.ui.mood.MoodSounds.play(ctx, "fail", force = true) }) { Text(stringResource(R.string.profile_sounds_test)) }
+    if (sounds) OutlinedButton(onClick = { com.spcode.tnpscprep.ui.mood.MoodSounds.play(ctx, "cheer", force = true) }) { Text(stringResource(R.string.profile_sounds_test)) }
+    Spacer(Modifier.height(10.dp))
+    val vib by settings.vibration.collectAsStateWithLifecycle()
+    val vibStr by settings.vibrationStrength.collectAsStateWithLifecycle()
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(stringResource(R.string.sv_vibration), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+        Switch(checked = vib, onCheckedChange = settings::setVibration)
+    }
+    Text(stringResource(R.string.sv_vibration_note), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    if (vib) {
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            listOf(R.string.sv_light, R.string.sv_normal, R.string.sv_strong).forEachIndexed { i, label ->
+                FilterChip(selected = vibStr == i, onClick = { settings.setVibrationStrength(i); com.spcode.tnpscprep.ui.feedback.Haptics.fire(ctx, com.spcode.tnpscprep.domain.HapticKind.SUCCESS) }, label = { Text(stringResource(label)) })
+            }
+        }
+        OutlinedButton(onClick = { com.spcode.tnpscprep.ui.feedback.Haptics.fire(ctx, com.spcode.tnpscprep.domain.HapticKind.SUCCESS) }) { Text(stringResource(R.string.sv_vibration_test)) }
+    }
     Spacer(Modifier.height(12.dp))
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text(stringResource(R.string.profile_praise), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))

@@ -69,6 +69,7 @@ class ReminderReceiver : BroadcastReceiver() {
             .setPublicVersion(NotificationCompat.Builder(ctx, chan).setSmallIcon(R.drawable.ic_stat_wrapup).setContentTitle(ctx.getString(R.string.app_name)).build())
         com.spcode.tnpscprep.notify.Praise.moodBitmap(ctx, mood)?.let { n.setLargeIcon(it) }
         val built = n.build()
+        com.spcode.tnpscprep.ui.feedback.Haptics.fire(ctx, com.spcode.tnpscprep.domain.HapticRules.forClip(clip))
         nm.notify(NOTIF_ID, built)
     }
 

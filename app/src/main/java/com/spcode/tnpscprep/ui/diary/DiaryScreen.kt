@@ -85,7 +85,6 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
@@ -505,7 +504,7 @@ private data class LinkEdit(val block: Int, val link: com.spcode.tnpscprep.domai
 @Composable
 private fun EditorPane(vm: DiaryViewModel, entryId: Long?, startDate: LocalDate, onDone: (removed: DiaryEntryEntity?) -> Unit, onWrapup: () -> Unit) {
     val scope = rememberCoroutineScope()
-    val haptic = LocalHapticFeedback.current
+    val haptic = com.spcode.tnpscprep.ui.feedback.rememberAppHaptics()
     val session = remember { EditorSession(null, null, null) }
     var loaded by remember { mutableStateOf(entryId == null) }
     var date by remember { mutableStateOf(startDate) }
