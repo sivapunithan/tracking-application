@@ -15,6 +15,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -197,6 +198,13 @@ fun AppRoot(
     val items = TABS.map { NavItem(stringResource(it.labelRes), it.icon) }
     val focusItem = NavItem(stringResource(R.string.nav_focus), Icons.Rounded.Timer)
 
+    // The status-bar height, remembered at its largest: on some phones the reported inset briefly drops to 0 while the keyboard opens or the
+    // navigation buttons hide, which pushed the editor's top row under the clock. The bar itself never shrinks, so the padding must not either.
+    val density = LocalDensity.current
+    val statusNow = WindowInsets.statusBars.getTop(density)
+    var statusMax by remember { mutableIntStateOf(0) }
+    if (statusNow > statusMax) statusMax = statusNow
+    val stableStatusTop = with(density) { statusMax.toDp() }
     var barPx by remember { mutableIntStateOf(0) }
     val navBottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     // The inset = the bar's MEASURED height (incl. system-bar padding) + air while the bar shows; on full-screen pages just the system bar.
@@ -237,7 +245,7 @@ fun AppRoot(
             NavHost(
                 nav,
                 startDestination = Graph.TODAY,
-                modifier = Modifier.fillMaxSize().statusBarsPadding(),
+                modifier = Modifier.fillMaxSize().padding(top = stableStatusTop),
                 enterTransition = {
                     if (reduceMotion) EnterTransition.None
                     else if (isFull(targetState.destination.route)) fadeIn(tween(220)) + slideInVertically(tween(260)) { it / 16 }

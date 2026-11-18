@@ -112,3 +112,15 @@ object Migration11To12 {
 val MIGRATION_11_12 = object : Migration(11, 12) {
     override fun migrate(db: SupportSQLiteDatabase) { Migration11To12.statements.forEach(db::execSQL) }
 }
+
+/** The v12 -> v13 statements as plain SQL (JVM-testable). Only a NEW table: no existing table or row is touched. */
+object Migration12To13 {
+    val statements = listOf(
+        "CREATE TABLE IF NOT EXISTS `diary_photo` (`name` TEXT NOT NULL, `entryId` INTEGER NOT NULL, `frame` TEXT NOT NULL, `cornerDp` INTEGER NOT NULL, `width` INTEGER NOT NULL, `height` INTEGER NOT NULL, `bytes` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`name`))",
+        "CREATE INDEX IF NOT EXISTS `index_diary_photo_entryId` ON `diary_photo` (`entryId`)",
+    )
+}
+
+val MIGRATION_12_13 = object : Migration(12, 13) {
+    override fun migrate(db: SupportSQLiteDatabase) { Migration12To13.statements.forEach(db::execSQL) }
+}

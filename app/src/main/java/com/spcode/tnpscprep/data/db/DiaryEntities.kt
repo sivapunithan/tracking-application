@@ -53,3 +53,33 @@ interface DiaryDao {
     @Query("SELECT * FROM diary_entry WHERE localDate = :date ORDER BY createdAt")
     fun observeForDate(date: String): Flow<List<DiaryEntryEntity>>
 }
+
+/**
+ * A photo placed in a diary entry (schema v13). The entry text holds the token `[[photo:<name>]]` on its own line where the photo sits;
+ * [name] is a random id (NOT a local row id) so it stays the same on another phone after a restore. The pictures live as files
+ * (see data/PhotoStore), never in the database. No foreign key, like every user-data table.
+ * [frame] = PhotoFrame name (ORIGINAL, ROUNDED, CIRCLE, HEART, STAR...), [cornerDp] = roundness for ROUNDED.
+ */
+@Entity(tableName = "diary_photo", indices = [Index("entryId")])
+data class DiaryPhotoEntity(
+    @PrimaryKey val name: String,
+    val entryId: Long,
+    val frame: String,
+    val cornerDp: Int,
+    val width: Int,
+    val height: Int,
+    val bytes: Long,
+    val createdAt: Long,
+)
+
+@Dao
+interface DiaryPhotoDao {
+    @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun put(p: DiaryPhotoEntity)
+    @Query("SELECT * FROM diary_photo WHERE entryId = :entryId ORDER BY createdAt") suspend fun forEntry(entryId: Long): List<DiaryPhotoEntity>
+    @Query("SELECT * FROM diary_photo WHERE entryId = :entryId ORDER BY createdAt") fun observeForEntry(entryId: Long): Flow<List<DiaryPhotoEntity>>
+    @Query("SELECT * FROM diary_photo ORDER BY createdAt") suspend fun all(): List<DiaryPhotoEntity>
+    @Query("DELETE FROM diary_photo WHERE name = :name") suspend fun delete(name: String)
+    @Query("DELETE FROM diary_photo WHERE entryId = :entryId") suspend fun deleteForEntry(entryId: Long)
+    @Query("SELECT COALESCE(SUM(bytes), 0) FROM diary_photo") fun observeTotalBytes(): Flow<Long>
+    @Query("SELECT COUNT(*) FROM diary_photo") fun observeCount(): Flow<Int>
+}
