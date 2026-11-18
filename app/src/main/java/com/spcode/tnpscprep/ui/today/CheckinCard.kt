@@ -162,8 +162,10 @@ private fun Tile(modifier: Modifier, title: String, sub: String?, onClick: () ->
 /** The seven mood pictures. Picking one sets today's mood (the latest pick wins); picking the chosen one again, or "Clear", removes it. */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun MoodPickSheet(current: Mood?, onPick: (Mood?) -> Unit) {
+fun MoodPickSheet(current: Mood?, onPick0: (Mood?) -> Unit) {
     val haptic = LocalHapticFeedback.current
+    val ctx = androidx.compose.ui.platform.LocalContext.current
+    val onPick: (Mood?) -> Unit = { m -> com.spcode.tnpscprep.ui.mood.MoodSounds.play(ctx, com.spcode.tnpscprep.domain.MoodSoundRules.forMood(m?.name)); onPick0(m) }
     Column(Modifier.padding(horizontal = 24.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         Text(stringResource(R.string.checkin_mood_title), style = MaterialTheme.typography.titleLarge)
         FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -190,8 +192,14 @@ fun MoodPickSheet(current: Mood?, onPick: (Mood?) -> Unit) {
 
 /** The three food states, as their pictures. Not a diet tool: no calories, no scores. */
 @Composable
-fun FoodPickSheet(current: FoodState?, onPick: (FoodState?) -> Unit) {
+fun FoodPickSheet(current: FoodState?, onPick0: (FoodState?) -> Unit) {
     val haptic = LocalHapticFeedback.current
+    val ctx = androidx.compose.ui.platform.LocalContext.current
+    val onPick: (FoodState?) -> Unit = { f ->
+        com.spcode.tnpscprep.ui.mood.MoodSounds.play(ctx, com.spcode.tnpscprep.domain.MoodSoundRules.forFood(f?.name))
+        if (f == FoodState.HEALTHY) com.spcode.tnpscprep.notify.Praise.notify(ctx, com.spcode.tnpscprep.domain.PraiseEvent.FOOD_HEALTHY)
+        onPick0(f)
+    }
     Column(Modifier.padding(horizontal = 24.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         Text(stringResource(R.string.food_question), style = MaterialTheme.typography.titleLarge)
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {

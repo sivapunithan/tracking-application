@@ -3,6 +3,7 @@ package com.spcode.tnpscprep.data
 import androidx.room.withTransaction
 import com.spcode.tnpscprep.data.db.AppDatabase
 import com.spcode.tnpscprep.data.db.DiaryEntryEntity
+import com.spcode.tnpscprep.data.db.DiaryPhotoEntity
 import com.spcode.tnpscprep.domain.ActivityType
 import com.spcode.tnpscprep.domain.DiaryItem
 import com.spcode.tnpscprep.domain.DiarySearch
@@ -19,7 +20,7 @@ class DiaryRepository(private val db: AppDatabase, private val now: () -> Long =
     private val dao = db.diaryDao()
 
     private fun rows(f: Flow<List<com.spcode.tnpscprep.data.db.DiaryPreviewRow>>): Flow<List<DiaryItem>> =
-        f.map { l -> l.mapNotNull { r -> runCatching { LocalDate.parse(r.localDate) }.getOrNull()?.let { DiaryItem(r.id, it, r.moodEmojiId, r.preview, r.pinned, r.isWrapup) } } }
+        f.map { l -> l.mapNotNull { r -> runCatching { LocalDate.parse(r.localDate) }.getOrNull()?.let { DiaryItem(r.id, it, r.moodEmojiId, com.spcode.tnpscprep.domain.DiaryPhotos.preview(r.preview, "📷"), r.pinned, r.isWrapup) } } }
 
     /** Timeline, or search results when [query] is not blank. */
     fun observe(query: String): Flow<List<DiaryItem>> {
@@ -52,7 +53,7 @@ class DiaryRepository(private val db: AppDatabase, private val now: () -> Long =
     suspend fun get(id: Long): DiaryEntryEntity? = dao.get(id)
 
     /** Creates (id == null) or updates an entry and refreshes its single DIARY event, all in one transaction. Returns the id. */
-    suspend fun save(id: Long?, date: LocalDate, text: String, mood: String?): Long = db.withTransaction {
+    suspend fun save(id: Long?, date: LocalDate, text: String, mood: String?, photos: Collection<DiaryPhotoEntity>? = null): Long = db.withTransaction {
         val t = now()
         val entryId = if (id == null) dao.insert(DiaryEntryEntity(localDate = date.toString(), text = text, moodEmojiId = mood, createdAt = t, updatedAt = t))
         else {
@@ -61,8 +62,20 @@ class DiaryRepository(private val db: AppDatabase, private val now: () -> Long =
             else { dao.update(old.copy(text = text, moodEmojiId = mood, updatedAt = t)); id }
         }
         writeEvent(entryId, date.toString(), text.length, t)
+        // photos: rows follow the tokens in the text (a null list = "do not touch", used by callers that know nothing about photos)
+        if (photos != null) {
+            val keep = com.spcode.tnpscprep.domain.DiaryPhotos.names(text).toSet()
+            val pd = db.diaryPhotoDao()
+            pd.forEntry(entryId).filter { it.name !in keep }.forEach { pd.delete(it.name) }
+            photos.filter { it.name in keep }.forEach { pd.put(it.copy(entryId = entryId)) }
+        }
         entryId
     }
+
+    suspend fun photosFor(entryId: Long): List<DiaryPhotoEntity> = db.diaryPhotoDao().forEntry(entryId)
+
+    /** Cold-start tidy: photo rows of entries that no longer exist are removed. Returns the names that are still used (files not listed are orphans). */
+    suspend fun sweepPhotoRows(): Set<String> { db.diaryPhotoDao().deleteOrphans(); return db.diaryPhotoDao().allNames().toSet() }
 
     /** Deletes an entry and its event. Returns the removed row so the caller can offer Undo. */
     suspend fun delete(id: Long): DiaryEntryEntity? = db.withTransaction {

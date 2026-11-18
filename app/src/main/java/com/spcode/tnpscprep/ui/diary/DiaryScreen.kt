@@ -38,6 +38,11 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.rounded.AddPhotoAlternate
+import com.spcode.tnpscprep.data.db.DiaryPhotoEntity
+import kotlinx.coroutines.withContext
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -468,12 +473,25 @@ private fun EditorPane(vm: DiaryViewModel, entryId: Long?, startDate: LocalDate,
     var saved by remember { mutableStateOf(false) }
     var confirmDelete by remember { mutableStateOf(false) }
     val focus = remember { FocusRequester() }
+    val ctx = LocalContext.current
+    val photos = remember { androidx.compose.runtime.mutableStateMapOf<String, DiaryPhotoEntity>() }
+    var pendingPhoto by remember { mutableStateOf<android.graphics.Bitmap?>(null) }
+    var removePhoto by remember { mutableStateOf<String?>(null) }
+    var cursorBlock by remember { mutableStateOf(-1) }   // display index of the text block that has the cursor
+    var cursorPos by remember { mutableStateOf(0) }
+    val picker = androidx.activity.compose.rememberLauncherForActivityResult(androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia()) { uri ->
+        if (uri != null) scope.launch {
+            val b = withContext(kotlinx.coroutines.Dispatchers.IO) { vm.store.decode(uri) }
+            if (b == null) android.widget.Toast.makeText(ctx, ctx.getString(R.string.photo_read_fail), android.widget.Toast.LENGTH_SHORT).show() else pendingPhoto = b
+        }
+    }
 
     LaunchedEffect(entryId) {
         if (entryId != null) {
             vm.load(entryId)?.let { e ->
                 session.id = e.id; session.savedText = e.text; session.savedMood = e.moodEmojiId
                 text = e.text; mood = e.moodEmojiId; date = runCatching { LocalDate.parse(e.localDate) }.getOrDefault(date)
+                vm.photosFor(e.id).forEach { photos[it.name] = it; session.photoFiles += it.name }
             }
             loaded = true
         } else focus.requestFocus()
@@ -483,13 +501,13 @@ private fun EditorPane(vm: DiaryViewModel, entryId: Long?, startDate: LocalDate,
         if (!loaded) return@LaunchedEffect
         lastEdit = System.currentTimeMillis()
         delay(com.spcode.tnpscprep.domain.Autosave.DEBOUNCE_MS)
-        val r = vm.persist(session, date, text, mood, msSinceEdit = com.spcode.tnpscprep.domain.Autosave.DEBOUNCE_MS, leaving = false)
+        val r = vm.persist(session, date, text, mood, msSinceEdit = com.spcode.tnpscprep.domain.Autosave.DEBOUNCE_MS, leaving = false, photos = photos.values.toList())
         if (r is Persisted.Saved) { if (r.first) haptic.performHapticFeedback(HapticFeedbackType.Confirm); saved = true }
     }
     LaunchedEffect(saved) { if (saved) { delay(1_800); saved = false } }
-    LifecycleEventEffect(Lifecycle.Event.ON_STOP) { if (loaded) vm.flush(session, date, text, mood) }
+    LifecycleEventEffect(Lifecycle.Event.ON_STOP) { if (loaded) vm.flush(session, date, text, mood, photos.values.toList()) }
 
-    fun leave() { scope.launch { val r = vm.persist(session, date, text, mood, 0, leaving = true); onDone((r as? Persisted.Deleted)?.entry) } }
+    fun leave() { scope.launch { val r = vm.persist(session, date, text, mood, 0, leaving = true, photos = photos.values.toList()); onDone((r as? Persisted.Deleted)?.entry) } }
     BackHandler(onBack = ::leave)
 
     val prompts = stringArrayResource(R.array.diary_prompts)
@@ -499,6 +517,24 @@ private fun EditorPane(vm: DiaryViewModel, entryId: Long?, startDate: LocalDate,
         lineHeightStyle = LineHeightStyle(LineHeightStyle.Alignment.Center, LineHeightStyle.Trim.None), // Tamil signs are not clipped
     )
 
+    // The entry = blocks: runs of text and photos. [display] adds empty text runs before/after photos so she can always type there;
+    // those are "virtual": dropped again when saving, so no stray blank lines appear in the stored text.
+    val real = remember(text) { com.spcode.tnpscprep.domain.DiaryPhotos.parse(text) }
+    class Disp(val block: com.spcode.tnpscprep.domain.DiaryBlock, val virtual: Boolean)
+    val display = remember(real) {
+        buildList {
+            if (real.first() is com.spcode.tnpscprep.domain.DiaryBlock.Photo) add(Disp(com.spcode.tnpscprep.domain.DiaryBlock.Text(""), true))
+            real.forEachIndexed { i, b ->
+                add(Disp(b, false))
+                if (b is com.spcode.tnpscprep.domain.DiaryBlock.Photo && real.getOrNull(i + 1) !is com.spcode.tnpscprep.domain.DiaryBlock.Text) add(Disp(com.spcode.tnpscprep.domain.DiaryBlock.Text(""), true))
+            }
+        }
+    }
+    fun commit(list: List<Disp>) {
+        val out = list.filterNot { it.virtual && (it.block as? com.spcode.tnpscprep.domain.DiaryBlock.Text)?.text.isNullOrEmpty() }.map { it.block }
+        val t = com.spcode.tnpscprep.domain.DiaryPhotos.join(out)
+        if (t.length <= DiaryLimits.MAX_CHARS) text = t
+    }
     val tint by androidx.compose.animation.animateColorAsState(com.spcode.tnpscprep.ui.wrapup.moodTint(mood), tween(500), label = "editorTint")
     Box(Modifier.fillMaxSize().background(tint)) {
     Column(Modifier.fillMaxSize().navigationBarsPadding().imePadding().padding(horizontal = 20.dp)) {
@@ -518,7 +554,7 @@ private fun EditorPane(vm: DiaryViewModel, entryId: Long?, startDate: LocalDate,
         // one writing page, two modes: free writing (this page) or the guided evening wrap-up
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             androidx.compose.material3.FilterChip(selected = true, onClick = {}, label = { Text(stringResource(R.string.editor_mode_free)) })
-            androidx.compose.material3.FilterChip(selected = false, onClick = { scope.launch { vm.persist(session, date, text, mood, 0, leaving = true); onWrapup() } }, label = { Text(stringResource(R.string.editor_mode_wrapup)) })
+            androidx.compose.material3.FilterChip(selected = false, onClick = { scope.launch { vm.persist(session, date, text, mood, 0, leaving = true, photos = photos.values.toList()); onWrapup() } }, label = { Text(stringResource(R.string.editor_mode_wrapup)) })
         }
         Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(vertical = 6.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             Mood.entries.forEach { m ->
@@ -527,7 +563,7 @@ private fun EditorPane(vm: DiaryViewModel, entryId: Long?, startDate: LocalDate,
                 Box(
                     Modifier.size(52.dp).graphicsLayer { scaleX = pop; scaleY = pop }.clip(CircleShape)
                         .border(BorderStroke(if (sel) 3.dp else 1.dp, if (sel) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant), CircleShape)
-                        .clickable { mood = if (sel) null else m.name },
+                        .clickable { mood = if (sel) null else m.name; com.spcode.tnpscprep.ui.mood.MoodSounds.play(ctx, com.spcode.tnpscprep.domain.MoodSoundRules.forMood(mood)) },
                     contentAlignment = Alignment.Center,
                 ) { DiaryMood(m.name, 44.dp) }
             }
@@ -539,22 +575,76 @@ private fun EditorPane(vm: DiaryViewModel, entryId: Long?, startDate: LocalDate,
             ) { Text(prompt, Modifier.padding(horizontal = 16.dp, vertical = 8.dp), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onPrimaryContainer) }
         }
         Spacer(Modifier.height(4.dp))
-        BasicTextField(
-            value = text, onValueChange = { if (it.length <= DiaryLimits.MAX_CHARS) text = it }, enabled = loaded,
-            textStyle = big, cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-            modifier = Modifier.fillMaxWidth().weight(1f).focusRequester(focus),
-            decorationBox = { inner ->
-                Box { if (text.isEmpty()) Text(stringResource(R.string.diary_write_hint), style = big.copy(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f))); inner() }
-            },
-        )
-        if (text.isNotBlank()) {
-            Text(
+        val scroll = rememberScrollState()
+        Column(Modifier.fillMaxWidth().weight(1f).verticalScroll(scroll)) {
+            display.forEachIndexed { i, d ->
+                when (val b = d.block) {
+                    is com.spcode.tnpscprep.domain.DiaryBlock.Text -> EditorTextBlock(
+                        b.text, big, if (display.size == 1) stringResource(R.string.diary_write_hint) else null,
+                        onText = { n -> commit(display.toMutableList().also { it[i] = Disp(com.spcode.tnpscprep.domain.DiaryBlock.Text(n), false) }) },
+                        onCursor = { cursorPos = it }, onFocus = { cursorBlock = i },
+                        modifier = (if (i == 0) Modifier.focusRequester(focus) else Modifier).let { m -> if (loaded) m else m },
+                    )
+                    is com.spcode.tnpscprep.domain.DiaryBlock.Photo -> PhotoBlockView(b.name, photos[b.name], vm.store) { removePhoto = b.name }
+                }
+            }
+        }
+        Row(Modifier.fillMaxWidth().padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+            TextButton(onClick = {
+                if (photos.size >= com.spcode.tnpscprep.domain.DiaryPhotos.MAX_PER_ENTRY) android.widget.Toast.makeText(ctx, ctx.getString(R.string.photo_limit, com.spcode.tnpscprep.domain.DiaryPhotos.MAX_PER_ENTRY), android.widget.Toast.LENGTH_SHORT).show()
+                else picker.launch(androidx.activity.result.PickVisualMediaRequest(androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia.ImageOnly))
+            }) {
+                Icon(Icons.Rounded.AddPhotoAlternate, null, Modifier.size(20.dp)); Spacer(Modifier.width(6.dp)); Text(stringResource(R.string.editor_add_photo))
+            }
+            Spacer(Modifier.weight(1f))
+            if (text.isNotBlank()) Text(
                 stringResource(R.string.diary_words, com.spcode.tnpscprep.domain.DiaryStats.words(text)),
                 style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.align(Alignment.End).padding(vertical = 6.dp),
             )
         }
     }
+    }
+
+    pendingPhoto?.let { bmp ->
+        PhotoCropDialog(bmp, onCancel = { pendingPhoto = null }) { out, frame, corner ->
+            pendingPhoto = null
+            scope.launch {
+                val name = com.spcode.tnpscprep.domain.DiaryPhotos.newName()
+                val saved = withContext(kotlinx.coroutines.Dispatchers.IO) { vm.store.write(name, out) }
+                if (saved == null) { android.widget.Toast.makeText(ctx, ctx.getString(R.string.photo_read_fail), android.widget.Toast.LENGTH_SHORT).show(); return@launch }
+                photos[name] = DiaryPhotoEntity(name, 0, frame, corner, saved.width, saved.height, saved.bytes, System.currentTimeMillis())
+                session.photoFiles += name
+                // place it at the cursor: split that text run in two (a newline at the cut is not kept), else at the end
+                val list = display.toMutableList()
+                val at = cursorBlock.takeIf { it in list.indices && list[it].block is com.spcode.tnpscprep.domain.DiaryBlock.Text }
+                val photo = Disp(com.spcode.tnpscprep.domain.DiaryBlock.Photo(name), false)
+                if (at == null) list += photo
+                else {
+                    val t = (list[at].block as com.spcode.tnpscprep.domain.DiaryBlock.Text).text
+                    val cut = cursorPos.coerceIn(0, t.length)
+                    val before = t.substring(0, cut).removeSuffix("\n"); val after = t.substring(cut).removePrefix("\n")
+                    list.removeAt(at)
+                    var k = at
+                    if (before.isNotEmpty()) list.add(k++, Disp(com.spcode.tnpscprep.domain.DiaryBlock.Text(before), false))
+                    list.add(k++, photo)
+                    if (after.isNotEmpty()) list.add(k, Disp(com.spcode.tnpscprep.domain.DiaryBlock.Text(after), false))
+                }
+                commit(list)
+            }
+        }
+    }
+    removePhoto?.let { name ->
+        AlertDialog(
+            onDismissRequest = { removePhoto = null },
+            title = { Text(stringResource(R.string.photo_remove_title)) },
+            text = { Text(stringResource(R.string.photo_remove_body)) },
+            confirmButton = { TextButton(onClick = {
+                val n = name; removePhoto = null
+                commit(display.filterNot { (it.block as? com.spcode.tnpscprep.domain.DiaryBlock.Photo)?.name == n })
+                PhotoBitmaps.forget(n)
+            }) { Text(stringResource(R.string.health_delete), color = MaterialTheme.colorScheme.error) } },
+            dismissButton = { TextButton(onClick = { removePhoto = null }) { Text(stringResource(R.string.cancel)) } },
+        )
     }
 
     if (confirmDelete) {

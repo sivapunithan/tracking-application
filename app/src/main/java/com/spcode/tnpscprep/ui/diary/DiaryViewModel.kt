@@ -26,7 +26,10 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
 /** What the editor has already stored. Mutated only inside [DiaryViewModel.persist] (under a lock) so two saves can never create two rows. */
-class EditorSession(var id: Long?, var savedText: String?, var savedMood: String?)
+class EditorSession(var id: Long?, var savedText: String?, var savedMood: String?) {
+    /** Photo files this editor wrote or loaded: after a save, any of them no longer in the text is deleted from storage. */
+    val photoFiles = HashSet<String>()
+}
 
 sealed interface Persisted {
     data object Nothing : Persisted
@@ -35,7 +38,7 @@ sealed interface Persisted {
 }
 
 @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
-class DiaryViewModel(private val repo: DiaryRepository) : ViewModel() {
+class DiaryViewModel(private val repo: DiaryRepository, private val photoStore: com.spcode.tnpscprep.data.PhotoStore) : ViewModel() {
     val query = MutableStateFlow("")
     val items: StateFlow<List<DiaryItem>> = query.debounce(150).flatMapLatest { repo.observe(it) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
@@ -49,9 +52,11 @@ class DiaryViewModel(private val repo: DiaryRepository) : ViewModel() {
     fun postNotice(text: String) { notice.value = text }
 
     suspend fun load(id: Long) = repo.get(id)
+    suspend fun photosFor(id: Long) = repo.photosFor(id)
+    val store get() = photoStore
 
     /** Applies the autosave rules (domain/Autosave) and stores the result. A mood change alone also counts as a change. */
-    suspend fun persist(s: EditorSession, date: LocalDate, text: String, mood: String?, msSinceEdit: Long, leaving: Boolean): Persisted = lock.withLock {
+    suspend fun persist(s: EditorSession, date: LocalDate, text: String, mood: String?, msSinceEdit: Long, leaving: Boolean, photos: Collection<com.spcode.tnpscprep.data.db.DiaryPhotoEntity>? = null): Persisted = lock.withLock {
         var action = Autosave.decide(text, s.savedText, s.id == null, msSinceEdit, leaving)
         if (action == Autosave.Action.NONE && s.id != null && mood != s.savedMood && text.isNotBlank() && (leaving || msSinceEdit >= Autosave.DEBOUNCE_MS)) {
             action = Autosave.Action.SAVE
@@ -60,7 +65,11 @@ class DiaryViewModel(private val repo: DiaryRepository) : ViewModel() {
             Autosave.Action.NONE -> Persisted.Nothing
             Autosave.Action.SAVE -> {
                 val first = s.id == null
-                s.id = repo.save(s.id, date, text, mood)
+                s.id = repo.save(s.id, date, text, mood, photos)
+                // a photo taken out of the text no longer needs its files
+                val used = com.spcode.tnpscprep.domain.DiaryPhotos.names(text).toSet()
+                (s.photoFiles - used).forEach { photoStore.delete(it) }
+                s.photoFiles.retainAll(used)
                 s.savedText = text; s.savedMood = mood
                 Persisted.Saved(first)
             }
@@ -73,8 +82,8 @@ class DiaryViewModel(private val repo: DiaryRepository) : ViewModel() {
     }
 
     /** Fire and forget (survives the screen): used when the app stops while an editor is open. */
-    fun flush(s: EditorSession, date: LocalDate, text: String, mood: String?) {
-        viewModelScope.launch { persist(s, date, text, mood, Long.MAX_VALUE, leaving = true) }
+    fun flush(s: EditorSession, date: LocalDate, text: String, mood: String?, photos: Collection<com.spcode.tnpscprep.data.db.DiaryPhotoEntity>? = null) {
+        viewModelScope.launch { persist(s, date, text, mood, Long.MAX_VALUE, leaving = true, photos = photos) }
     }
 
     suspend fun delete(id: Long) = repo.delete(id)

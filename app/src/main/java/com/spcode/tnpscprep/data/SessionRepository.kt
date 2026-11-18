@@ -18,5 +18,8 @@ class SessionRepository(private val db: AppDatabase, private val now: () -> Long
         db.activityDao().insert(ActivityEvents.build(ActivityType.FOCUS_SESSION, subjectId, now()) { put("minutes", minutes) })
     }
 
+    /** The last day with any focus minutes, or null if never. */
+    suspend fun lastStudyDate(): LocalDate? = dao.all().filter { it.minutes > 0 }.maxOfOrNull { it.date }?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
+
     fun observeDayTotals(): Flow<List<DayTotal>> = dao.observeDayTotals()
 }

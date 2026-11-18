@@ -36,7 +36,12 @@ class ReminderReceiver : BroadcastReceiver() {
             try {
                 val day = LogicalDay.of(System.currentTimeMillis(), ZoneId.systemDefault())
                 val wrapped = app.container.diaryRepository.wrapupFor(day) != null
-                if (ReminderTime.shouldNotify(true, wrapped)) show(localised(context))
+                if (ReminderTime.shouldNotify(true, wrapped)) {
+                    // her face follows how long she has been away (the avatar's own ladder); the words stay kind
+                    val last = app.container.sessionRepository.lastStudyDate()
+                    val away = last?.let { java.time.temporal.ChronoUnit.DAYS.between(it, day).toInt() }
+                    show(localised(context), com.spcode.tnpscprep.domain.PraiseRules.reminderMood(away, java.time.LocalTime.now().hour))
+                }
             } finally { pending.finish() }
         }
     }
@@ -49,7 +54,7 @@ class ReminderReceiver : BroadcastReceiver() {
         return ctx.createConfigurationContext(cfg)
     }
 
-    private fun show(ctx: Context) {
+    private fun show(ctx: Context, mood: com.spcode.tnpscprep.domain.Mood) {
         val nm = NotificationManagerCompat.from(ctx)
         if (!nm.areNotificationsEnabled()) return
         if (Build.VERSION.SDK_INT >= 33 && ContextCompat.checkSelfPermission(ctx, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) return
@@ -61,8 +66,10 @@ class ReminderReceiver : BroadcastReceiver() {
             .setContentTitle(ctx.getString(R.string.wrap_title))
             .setContentText(ctx.getString(R.string.reminder_text)) // generic on purpose: nothing private on the lock screen
             .setContentIntent(open).setAutoCancel(true).setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
-            .build()
-        nm.notify(NOTIF_ID, n)
+            .setPublicVersion(NotificationCompat.Builder(ctx, CHANNEL).setSmallIcon(R.drawable.ic_stat_wrapup).setContentTitle(ctx.getString(R.string.app_name)).build())
+        com.spcode.tnpscprep.notify.Praise.moodBitmap(ctx, mood)?.let { n.setLargeIcon(it) }
+        val built = n.build()
+        nm.notify(NOTIF_ID, built)
     }
 
     companion object { const val CHANNEL = "wrapup_reminder"; const val NOTIF_ID = 4102 }

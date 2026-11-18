@@ -80,6 +80,8 @@ interface DiaryPhotoDao {
     @Query("SELECT * FROM diary_photo ORDER BY createdAt") suspend fun all(): List<DiaryPhotoEntity>
     @Query("DELETE FROM diary_photo WHERE name = :name") suspend fun delete(name: String)
     @Query("DELETE FROM diary_photo WHERE entryId = :entryId") suspend fun deleteForEntry(entryId: Long)
+    @Query("DELETE FROM diary_photo WHERE entryId NOT IN (SELECT id FROM diary_entry)") suspend fun deleteOrphans()
+    @Query("SELECT name FROM diary_photo") suspend fun allNames(): List<String>
     @Query("SELECT COALESCE(SUM(bytes), 0) FROM diary_photo") fun observeTotalBytes(): Flow<Long>
     @Query("SELECT COUNT(*) FROM diary_photo") fun observeCount(): Flow<Int>
 }

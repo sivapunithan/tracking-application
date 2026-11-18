@@ -182,7 +182,10 @@ fun AppRoot(
     var seen by rememberSaveable { mutableIntStateOf(completions) }
     val haptic = LocalHapticFeedback.current
     LaunchedEffect(completions) {
-        if (completions != seen) { seen = completions; haptic.performHapticFeedback(HapticFeedbackType.LongPress) }
+        if (completions != seen) {
+            seen = completions; haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+            com.spcode.tnpscprep.notify.Praise.notify(activity ?: return@LaunchedEffect, com.spcode.tnpscprep.domain.PraiseEvent.FOCUS_DONE)
+        }
     }
 
     fun goTab(graph: String) = nav.navigate(graph) {

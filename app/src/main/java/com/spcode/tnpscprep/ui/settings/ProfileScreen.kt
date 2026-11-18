@@ -229,6 +229,7 @@ private fun LookPage(headlines: HeadlinesViewModel) {
         }
     }
     Text(stringResource(R.string.language_note), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    SoundsAndPraise()
     WidgetSection()
     // Developer tool: only in debug builds, never in the APK she gets.
     val ctx = androidx.compose.ui.platform.LocalContext.current
@@ -394,4 +395,33 @@ private fun ReminderSection(settings: com.spcode.tnpscprep.data.SettingsStore) {
             TextButton(onClick = dismiss, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.sheet_close)) }
         }
     }
+}
+
+
+/** Mood sounds + kind notifications. */
+@Composable
+private fun SoundsAndPraise() {
+    val ctx = androidx.compose.ui.platform.LocalContext.current
+    val settings = remember { (ctx.applicationContext as com.spcode.tnpscprep.TnpscApp).container.settingsStore }
+    val sounds by settings.moodSounds.collectAsStateWithLifecycle()
+    val praise by settings.praiseNotifs.collectAsStateWithLifecycle()
+    var allowed by remember { mutableStateOf(com.spcode.tnpscprep.notify.Praise.canPost(ctx)) }
+    val ask = androidx.activity.compose.rememberLauncherForActivityResult(androidx.activity.result.contract.ActivityResultContracts.RequestPermission()) { allowed = com.spcode.tnpscprep.notify.Praise.canPost(ctx) }
+    Spacer(Modifier.height(12.dp))
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(stringResource(R.string.profile_sounds), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+        Switch(checked = sounds, onCheckedChange = settings::setMoodSounds)
+    }
+    Text(stringResource(R.string.profile_sounds_note), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    if (sounds) OutlinedButton(onClick = { com.spcode.tnpscprep.ui.mood.MoodSounds.play(ctx, "fail", force = true) }) { Text(stringResource(R.string.profile_sounds_test)) }
+    Spacer(Modifier.height(12.dp))
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(stringResource(R.string.profile_praise), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+        Switch(checked = praise, onCheckedChange = { settings.setPraiseNotifs(it) })
+    }
+    Text(stringResource(R.string.profile_praise_note), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    if (praise && !allowed) OutlinedButton(onClick = {
+        if (android.os.Build.VERSION.SDK_INT >= 33) ask.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+        else ctx.startActivity(android.content.Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(android.provider.Settings.EXTRA_APP_PACKAGE, ctx.packageName).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK))
+    }) { Text(stringResource(R.string.profile_praise_allow)) }
 }

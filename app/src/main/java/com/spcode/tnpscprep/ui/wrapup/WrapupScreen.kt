@@ -131,7 +131,8 @@ fun WrapupScreen(todayVm: TodayViewModel, onClose: () -> Unit) {
     val haptic = LocalHapticFeedback.current
     val reduce = rememberReduceMotion()
     val day = remember { LogicalDay.of(System.currentTimeMillis(), ZoneId.systemDefault()) }
-    LaunchedEffect(Unit) { vm.load(day) }
+    val wctx = androidx.compose.ui.platform.LocalContext.current
+    LaunchedEffect(Unit) { vm.load(day); com.spcode.tnpscprep.ui.mood.MoodSounds.play(wctx, com.spcode.tnpscprep.domain.MoodSoundRules.RECAP) }
     val status = viewModel<WrapupStatusViewModel>(
         factory = viewModelFactory { initializer { WrapupStatusViewModel(app.container.diaryRepository, app.container.plannedTaskRepository) } },
     )
@@ -181,7 +182,7 @@ fun WrapupScreen(todayVm: TodayViewModel, onClose: () -> Unit) {
                     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 24.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
                         when (step) {
                             0 -> RecapStep(s.recap, s.editing)
-                            1 -> MoodStep(s.mood, s.intensity, vm::setMood, vm::setIntensity)
+                            1 -> MoodStep(s.mood, s.intensity, { m -> com.spcode.tnpscprep.ui.mood.MoodSounds.play(wctx, com.spcode.tnpscprep.domain.MoodSoundRules.forMood(m)); vm.setMood(m) }, vm::setIntensity)
                             2 -> WriteStep(R.string.wrap_well_title, R.string.wrap_well_hint, listOf(R.string.wrap_well_c1, R.string.wrap_well_c2, R.string.wrap_well_c3, R.string.wrap_well_c4, R.string.wrap_well_c5), s.well, vm::setWell)
                             3 -> WriteStep(R.string.wrap_hard_title, R.string.wrap_hard_hint, listOf(R.string.wrap_hard_c1, R.string.wrap_hard_c2, R.string.wrap_hard_c3, R.string.wrap_hard_c4), s.hard, vm::setHard)
                             4 -> TomorrowStep(s.tomorrow, suggestions, vm::addTomorrow, vm::removeTomorrow, vm::moveTomorrow)
@@ -198,12 +199,12 @@ fun WrapupScreen(todayVm: TodayViewModel, onClose: () -> Unit) {
                     s.step == STEPS - 1 -> Button(onClick = onClose, modifier = Modifier.height(52.dp)) { Text(stringResource(R.string.wrap_done)) }
                     else -> {
                         if (s.step in 1..4) TextButton(onClick = {
-                            if (s.step == 4) vm.finish(headings) { vm.go(5) } else vm.go(s.step + 1)
+                            if (s.step == 4) vm.finish(headings) { com.spcode.tnpscprep.notify.Praise.notify(wctx, com.spcode.tnpscprep.domain.PraiseEvent.WRAPUP_DONE); vm.go(5) } else vm.go(s.step + 1)
                         }) { Text(stringResource(R.string.wrap_skip)) }
                         Button(
                             onClick = {
                                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                if (s.step == 4) vm.finish(headings) { haptic.performHapticFeedback(HapticFeedbackType.Confirm); vm.go(5) } else vm.go(s.step + 1)
+                                if (s.step == 4) vm.finish(headings) { haptic.performHapticFeedback(HapticFeedbackType.Confirm); com.spcode.tnpscprep.notify.Praise.notify(wctx, com.spcode.tnpscprep.domain.PraiseEvent.WRAPUP_DONE); vm.go(5) } else vm.go(s.step + 1)
                             },
                             modifier = Modifier.height(52.dp),
                         ) { Text(stringResource(if (s.step == 4) R.string.wrap_save else R.string.wrap_next)) }

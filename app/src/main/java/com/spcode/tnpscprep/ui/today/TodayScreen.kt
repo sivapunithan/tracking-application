@@ -161,8 +161,19 @@ fun TodayScreen(vm: TodayViewModel, onOpenProfile: () -> Unit, onOpenDiary: (Str
     LaunchedEffect(gsComplete) { if (gsComplete && !gsDone) settings.setGettingStartedDone(true) } // once done, never shown again
     val showGs = !gsDone && !gsComplete
     // today's plan = only what she added herself (or picked in last night's wrap-up): nothing is made up for her
+    // Kind notifications need the phone's notification permission: ask ONCE (the system dialog is hers to answer; Profile > Look can ask again).
+    val askNotif = androidx.activity.compose.rememberLauncherForActivityResult(androidx.activity.result.contract.ActivityResultContracts.RequestPermission()) { }
+    LaunchedEffect(Unit) {
+        delay(1500)
+        if (android.os.Build.VERSION.SDK_INT >= 33 && settings.praiseNotifs.value && !settings.praiseAsked.value && !com.spcode.tnpscprep.notify.Praise.canPost(appCtx)) {
+            settings.setPraiseAsked(true)
+            askNotif.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }
     val tickPlan: (com.spcode.tnpscprep.data.db.PlannedTaskEntity) -> Unit = { t ->
         wvm.setDone(t.id, true)
+        val left = plannedToday.count { it.id != t.id && !(it.done || (it.refId != null && it.refId in extras.doneRefs)) }
+        com.spcode.tnpscprep.notify.Praise.notify(appCtx, if (left == 0) com.spcode.tnpscprep.domain.PraiseEvent.PLAN_COMPLETE else com.spcode.tnpscprep.domain.PraiseEvent.TASK_DONE)
         t.refId?.let { id -> when (t.refType) { "TOPIC", "REVISION" -> vm.readTopic(id); "CURRENT_AFFAIRS" -> vm.reviseAffair(id) } }
     }
     val waterToday = healthEntries.filter { it.kind == com.spcode.tnpscprep.data.HealthKind.WATER && it.date == foodDay.toString() }.sumOf { it.value }.toInt()

@@ -577,4 +577,76 @@
     <string name="plan_add_cancel">Cancel</string>
     <string name="plan_remove">Remove task</string>
     <string name="story_plan">Plan</string>
+    <string name="editor_add_photo">Photo</string>
+    <string name="photo_crop_title">Crop photo</string>
+    <string name="photo_original">Original</string>
+    <string name="photo_sq">1:1</string>
+    <string name="photo_43">4:3</string>
+    <string name="photo_34">3:4</string>
+    <string name="photo_169">16:9</string>
+    <string name="photo_done">Done</string>
+    <string name="photo_round">Rounded corners</string>
+    <string name="photo_missing">This photo is not on this phone</string>
+    <string name="photo_remove">Remove photo</string>
+    <string name="photo_remove_title">Remove this photo?</string>
+    <string name="photo_remove_body">It is taken out of this entry and deleted from the phone.</string>
+    <string name="photo_limit">Up to %1$d photos in one entry</string>
+    <string name="photo_read_fail">Could not read that picture</string>
+    <string-array name="praise_task_done_title">
+        <item>Nice one!</item>
+        <item>Well done!</item>
+        <item>Look at you go!</item>
+    </string-array>
+    <string-array name="praise_task_done_body">
+        <item>That\'s one more done. Keep that rhythm going.</item>
+        <item>One step closer. You\'re doing it.</item>
+        <item>Another task ticked. Small steps add up.</item>
+    </string-array>
+    <string-array name="praise_plan_complete_title">
+        <item>Everything done today!</item>
+        <item>Plan complete!</item>
+        <item>What a day!</item>
+    </string-array>
+    <string-array name="praise_plan_complete_body">
+        <item>You finished your whole plan. Be proud of yourself.</item>
+        <item>Every task ticked. Rest well, you earned it.</item>
+        <item>All done. Tomorrow\'s you will say thank you.</item>
+    </string-array>
+    <string-array name="praise_focus_done_title">
+        <item>Focus session complete</item>
+        <item>That was a solid session</item>
+        <item>You did it!</item>
+    </string-array>
+    <string-array name="praise_focus_done_body">
+        <item>Great concentration. Take a short break and drink some water.</item>
+        <item>You showed up and stayed with it. Well done.</item>
+        <item>Time well spent. A little rest, then keep going.</item>
+    </string-array>
+    <string-array name="praise_wrapup_done_title">
+        <item>Wrapped up for the day</item>
+        <item>Lovely evening wrap-up</item>
+        <item>Day closed, gently</item>
+    </string-array>
+    <string-array name="praise_wrapup_done_body">
+        <item>You looked back and planned ahead. Sleep well.</item>
+        <item>Good days are built like this. See you tomorrow.</item>
+        <item>Thank you for taking a moment for yourself.</item>
+    </string-array>
+    <string-array name="praise_food_healthy_title">
+        <item>Healthy choice!</item>
+        <item>Good food day</item>
+        <item>That\'s the way!</item>
+    </string-array>
+    <string-array name="praise_food_healthy_body">
+        <item>Your body will thank you. Nice work.</item>
+        <item>Taking care of yourself helps your studying too.</item>
+        <item>A healthy day is a strong day.</item>
+    </string-array>
+    <string name="praise_channel">Kind words</string>
+    <string name="profile_sounds">Mood sounds</string>
+    <string name="profile_sounds_note">A short sound when you pick Crying, Angry or Worried, and a few playful ones. Follows your phone\'s silent mode.</string>
+    <string name="profile_sounds_test">Test sound</string>
+    <string name="profile_praise">Kind notifications</string>
+    <string name="profile_praise_note">A small banner with your mood picture when you finish something: a task, a focus session, the wrap-up.</string>
+    <string name="profile_praise_allow">Allow notifications</string>
 </resources>

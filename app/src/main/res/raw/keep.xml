@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- These pictures are looked up BY NAME at runtime (getIdentifier), so the resource shrinker must not drop them in the release build. -->
 <resources xmlns:tools="http://schemas.android.com/tools"
-    tools:keep="@drawable/mood_*,@drawable/login_*,@drawable/food_*,@drawable/app_logo"
+    tools:keep="@drawable/mood_*,@drawable/login_*,@drawable/food_*,@drawable/app_logo,@raw/snd_*,@array/praise_*"
     tools:shrinkMode="safe" />

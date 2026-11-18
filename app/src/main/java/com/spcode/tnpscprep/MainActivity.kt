@@ -84,7 +84,7 @@ class MainActivity : AppCompatActivity() {
                             },
                         )
                         val diaryVm = viewModel<com.spcode.tnpscprep.ui.diary.DiaryViewModel>(
-                            factory = viewModelFactory { initializer { com.spcode.tnpscprep.ui.diary.DiaryViewModel(c.diaryRepository) } },
+                            factory = viewModelFactory { initializer { com.spcode.tnpscprep.ui.diary.DiaryViewModel(c.diaryRepository, c.photoStore) } },
                         )
                         AppRoot(todayVm, syllabusVm, affairsVm, headlinesVm, authVm, timerVm, diaryVm, twoPane = widthClass != WindowWidthSizeClass.Compact)
                     }

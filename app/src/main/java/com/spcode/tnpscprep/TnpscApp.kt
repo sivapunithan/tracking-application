@@ -20,6 +20,8 @@ class TnpscApp : Application() {
         com.spcode.tnpscprep.reminder.ReminderScheduler.sync(this, container.settingsStore.reminderEnabled.value, container.settingsStore.reminderMinutes.value)
         // Decode the small mood pictures in the background so no screen decodes them on the main thread.
         appScope.launch { runCatching { com.spcode.tnpscprep.ui.mood.MoodBitmaps.warm(this@TnpscApp) } }
+        // Tidy photo files: rows of deleted entries go, then any file no row points to (a cold start has no open editor).
+        appScope.launch { runCatching { container.photoStore.deleteExcept(container.diaryRepository.sweepPhotoRows()) } }
         // Seeds on first launch; later launches (or an older asset version) are a cheap no-op.
         // Independent: a problem in one file must not stop the other from loading.
         appScope.launch {
