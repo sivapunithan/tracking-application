@@ -674,4 +674,21 @@
     <string name="photos_note">Photos live only on this phone. A backup with photos is one .mathi file.</string>
     <string name="photos_clean">Clean up unused photo files</string>
     <string name="photos_cleaned">Done. Unused photo files removed: %1$d.</string>
+    <string name="guide_skip">Skip</string>
+    <string name="guide_next">Next</string>
+    <string name="guide_done">Got it</string>
+    <string name="guide_again">Show the Journal guide again</string>
+    <string name="guide_again_done">Open the Journal to see it.</string>
+    <string name="guide_j1_title">Evening wrap-up</string>
+    <string name="guide_j1_body">Two minutes at night to look back on your day and plan tomorrow. It is saved as a diary entry.</string>
+    <string name="guide_j2_title">Your days at a glance</string>
+    <string name="guide_j2_body">Tap a day to see what you did, how you felt and what you wrote. Switch between week and month.</string>
+    <string name="guide_j3_title">Write anything</string>
+    <string name="guide_j3_body">Tap New entry. It saves by itself. You can add photos, links and how you feel.</string>
+    <string name="guide_e1_title">How are you feeling?</string>
+    <string name="guide_e1_body">Pick a face for this entry. It reacts to your choice.</string>
+    <string name="guide_e2_title">Add photos anywhere</string>
+    <string name="guide_e2_body">A photo goes where your cursor is. Crop it, round the corners, or use a heart, star or circle. Tap a photo later to change or move it.</string>
+    <string name="guide_e3_title">Add a link</string>
+    <string name="guide_e3_body">Add a web link. Tap it to open it, long-press it to change it.</string>
 </resources>

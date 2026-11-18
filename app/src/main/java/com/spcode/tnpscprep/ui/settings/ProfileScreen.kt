@@ -230,6 +230,7 @@ private fun LookPage(headlines: HeadlinesViewModel) {
     }
     Text(stringResource(R.string.language_note), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     SoundsAndPraise()
+    GuideAgain()
     WidgetSection()
     // Developer tool: only in debug builds, never in the APK she gets.
     val ctx = androidx.compose.ui.platform.LocalContext.current
@@ -474,4 +475,16 @@ private fun PhotoStorageSection() {
         }
     }) { Text(stringResource(R.string.photos_clean)) }
     msg?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary) }
+}
+
+
+/** Plays the first-time Journal tours again. */
+@Composable
+private fun GuideAgain() {
+    val ctx = androidx.compose.ui.platform.LocalContext.current
+    val settings = remember { (ctx.applicationContext as com.spcode.tnpscprep.TnpscApp).container.settingsStore }
+    var done by remember { mutableStateOf(false) }
+    Spacer(Modifier.height(12.dp))
+    OutlinedButton(onClick = { settings.setJournalGuideDone(false); settings.setEditorGuideDone(false); done = true }) { Text(stringResource(R.string.guide_again)) }
+    if (done) Text(stringResource(R.string.guide_again_done), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
 }

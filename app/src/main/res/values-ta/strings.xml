@@ -674,4 +674,21 @@
     <string name="photos_note">படங்கள் இந்த போனில் மட்டுமே இருக்கும். படங்களுடன் காப்புப்பிரதி ஒரே .mathi கோப்பு.</string>
     <string name="photos_clean">பயன்படாத பட கோப்புகளை சுத்தம் செய்</string>
     <string name="photos_cleaned">முடிந்தது. நீக்கப்பட்ட பயன்படாத கோப்புகள்: %1$d.</string>
+    <string name="guide_skip">தவிர்</string>
+    <string name="guide_next">அடுத்து</string>
+    <string name="guide_done">புரிந்தது</string>
+    <string name="guide_again">நாட்குறிப்பு வழிகாட்டியை மீண்டும் காட்டு</string>
+    <string name="guide_again_done">பார்க்க நாட்குறிப்பைத் திற.</string>
+    <string name="guide_j1_title">மாலை முடிப்பு</string>
+    <string name="guide_j1_body">இரவில் இரண்டு நிமிடம்: இன்றைய நாளைத் திரும்பிப் பார்த்து நாளையைத் திட்டமிடு. அது ஒரு நாட்குறிப்பு பதிவாகச் சேமிக்கப்படும்.</string>
+    <string name="guide_j2_title">உன் நாட்கள் ஒரே பார்வையில்</string>
+    <string name="guide_j2_body">ஒரு நாளைத் தொட்டால் அன்று நீ செய்தது, உன் மனநிலை, எழுதியவை தெரியும். வாரம் அல்லது மாதம் என மாற்றலாம்.</string>
+    <string name="guide_j3_title">எதையும் எழுது</string>
+    <string name="guide_j3_body">புதிய பதிவைத் தொடு. தானாகவே சேமிக்கும். படங்கள், இணைப்புகள், மனநிலையையும் சேர்க்கலாம்.</string>
+    <string name="guide_e1_title">இன்று எப்படி இருக்கிறாய்?</string>
+    <string name="guide_e1_body">இந்தப் பதிவுக்கு ஒரு முகத்தைத் தேர்ந்தெடு. அது உன் தேர்வுக்கு எதிர்வினை செய்யும்.</string>
+    <string name="guide_e2_title">எங்கும் படம் சேர்</string>
+    <string name="guide_e2_body">கர்சர் இருக்கும் இடத்தில் படம் சேரும். வெட்டலாம், மூலைகளை வளைக்கலாம், இதயம், நட்சத்திரம், வட்டம் என வைக்கலாம். பின்னர் படத்தைத் தொட்டு மாற்றலாம், நகர்த்தலாம்.</string>
+    <string name="guide_e3_title">இணைப்பைச் சேர்</string>
+    <string name="guide_e3_body">இணைய இணைப்பைச் சேர். தொட்டால் திறக்கும், நீண்ட நேரம் தொட்டால் மாற்றலாம்.</string>
 </resources>

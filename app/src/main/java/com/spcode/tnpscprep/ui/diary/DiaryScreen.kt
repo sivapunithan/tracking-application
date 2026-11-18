@@ -123,6 +123,8 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.Locale
 import kotlinx.coroutines.delay
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.boundsInWindow
 import kotlinx.coroutines.launch
 
 @Composable
@@ -221,6 +223,11 @@ private fun TimelinePane(
 ) {
     val onNotice: (String) -> Unit = vm::postNotice
     val ctx = LocalContext.current
+    // first-time tour: targets report their window bounds; the tour starts a moment after the page is up
+    val gBounds = remember { androidx.compose.runtime.mutableStateMapOf<String, androidx.compose.ui.geometry.Rect>() }
+    val jGuideDone by (ctx.applicationContext as com.spcode.tnpscprep.TnpscApp).container.settingsStore.journalGuideDone.collectAsStateWithLifecycle()
+    var guideReady by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { delay(900); guideReady = true }
     val items by vm.items.collectAsStateWithLifecycle()
     val query by vm.query.collectAsStateWithLifecycle()
     val pinned = remember(items, query) { if (query.isBlank()) items.filter { it.pinned } else emptyList() }
@@ -255,12 +262,16 @@ private fun TimelinePane(
                 Text(stringResource(R.string.nav_journal), style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold), modifier = Modifier.padding(top = 4.dp))
             }
             item(key = "wrapup-btn") {
-                com.spcode.tnpscprep.ui.wrapup.WrapupCardView(if (wrapped) com.spcode.tnpscprep.domain.WrapupCardState.DONE else com.spcode.tnpscprep.domain.WrapupCardState.INVITE, onWrapup, lastSeven)
+                Box(Modifier.onGloballyPositioned { gBounds["wrapup"] = it.boundsInWindow() }) {
+                    com.spcode.tnpscprep.ui.wrapup.WrapupCardView(if (wrapped) com.spcode.tnpscprep.domain.WrapupCardState.DONE else com.spcode.tnpscprep.domain.WrapupCardState.INVITE, onWrapup, lastSeven)
+                }
             }
             if (query.isBlank()) {
                 val memories = DiaryMemories.onThisDay(items, today)
                 if (memories.isNotEmpty()) item(key = "memories") { MemoryCard(memories, onOpen) }
-                item(key = "calendar") { JournalCalendarCard(weeks, food, moods, items.map { it.date }.toSet(), today, selected, onSelect) }
+                item(key = "calendar") {
+                    Box(Modifier.onGloballyPositioned { gBounds["calendar"] = it.boundsInWindow() }) { JournalCalendarCard(weeks, food, moods, items.map { it.date }.toSet(), today, selected, onSelect) }
+                }
                 item(key = "daystory") {
                     DayStory(selected, today, items.filter { it.date == selected }, onOpen = onOpen, onWrite = { onNewOn(it.toString()) }, onWrapup = onWrapup, wrapped = wrapped)
                 }
@@ -313,8 +324,16 @@ private fun TimelinePane(
             }
         }
         ExtendedFloatingActionButton(
-            onClick = onNew, modifier = Modifier.align(Alignment.BottomEnd).padding(end = 20.dp, bottom = 12.dp + LocalBottomBarInset.current),
+            onClick = onNew, modifier = Modifier.align(Alignment.BottomEnd).padding(end = 20.dp, bottom = 12.dp + LocalBottomBarInset.current).onGloballyPositioned { gBounds["new"] = it.boundsInWindow() },
             icon = { Icon(Icons.Rounded.Add, null) }, text = { Text(stringResource(R.string.diary_new)) },
+        )
+        if (!jGuideDone && guideReady && query.isBlank()) com.spcode.tnpscprep.ui.guide.CoachOverlay(
+            listOf(
+                com.spcode.tnpscprep.ui.guide.CoachStep("wrapup", stringResource(R.string.guide_j1_title), stringResource(R.string.guide_j1_body)),
+                com.spcode.tnpscprep.ui.guide.CoachStep("calendar", stringResource(R.string.guide_j2_title), stringResource(R.string.guide_j2_body)),
+                com.spcode.tnpscprep.ui.guide.CoachStep("new", stringResource(R.string.guide_j3_title), stringResource(R.string.guide_j3_body)),
+            ),
+            gBounds, onFinish = { (ctx.applicationContext as com.spcode.tnpscprep.TnpscApp).container.settingsStore.setJournalGuideDone(true) },
         )
     }
 }
@@ -496,6 +515,12 @@ private fun EditorPane(vm: DiaryViewModel, entryId: Long?, startDate: LocalDate,
     var confirmDelete by remember { mutableStateOf(false) }
     val focus = remember { FocusRequester() }
     val ctx = LocalContext.current
+    val eBounds = remember { androidx.compose.runtime.mutableStateMapOf<String, androidx.compose.ui.geometry.Rect>() }
+    val eGuideDone by (ctx.applicationContext as com.spcode.tnpscprep.TnpscApp).container.settingsStore.editorGuideDone.collectAsStateWithLifecycle()
+    var eGuideReady by remember { mutableStateOf(false) }
+    val focusMgr = androidx.compose.ui.platform.LocalFocusManager.current
+    LaunchedEffect(Unit) { delay(1100); eGuideReady = true }
+    LaunchedEffect(eGuideReady, eGuideDone) { if (eGuideReady && !eGuideDone) focusMgr.clearFocus() }   // hides the keyboard while the tour is up
     val photos = remember { androidx.compose.runtime.mutableStateMapOf<String, DiaryPhotoEntity>() }
     var pendingPhoto by remember { mutableStateOf<android.graphics.Bitmap?>(null) }
     var removePhoto by remember { mutableStateOf<String?>(null) }
@@ -582,7 +607,7 @@ private fun EditorPane(vm: DiaryViewModel, entryId: Long?, startDate: LocalDate,
             androidx.compose.material3.FilterChip(selected = true, onClick = {}, label = { Text(stringResource(R.string.editor_mode_free)) })
             androidx.compose.material3.FilterChip(selected = false, onClick = { scope.launch { vm.persist(session, date, text, mood, 0, leaving = true, photos = photos.values.toList()); onWrapup() } }, label = { Text(stringResource(R.string.editor_mode_wrapup)) })
         }
-        Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(vertical = 6.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        Row(Modifier.fillMaxWidth().onGloballyPositioned { eBounds["mood"] = it.boundsInWindow() }.horizontalScroll(rememberScrollState()).padding(vertical = 6.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             Mood.entries.forEach { m ->
                 val sel = mood == m.name
                 val pop by androidx.compose.animation.core.animateFloatAsState(if (sel) 1.2f else 1f, androidx.compose.animation.core.spring(dampingRatio = 0.35f, stiffness = Spring.StiffnessMedium), label = "moodPop")
@@ -619,14 +644,14 @@ private fun EditorPane(vm: DiaryViewModel, entryId: Long?, startDate: LocalDate,
                 }
             }
         }
-        Row(Modifier.fillMaxWidth().padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
-            TextButton(onClick = {
+        Row(Modifier.fillMaxWidth().padding(top = 6.dp, bottom = 16.dp), verticalAlignment = Alignment.CenterVertically) {
+            TextButton(modifier = Modifier.onGloballyPositioned { eBounds["photo"] = it.boundsInWindow() }, onClick = {
                 if (photos.size >= com.spcode.tnpscprep.domain.DiaryPhotos.MAX_PER_ENTRY) android.widget.Toast.makeText(ctx, ctx.getString(R.string.photo_limit, com.spcode.tnpscprep.domain.DiaryPhotos.MAX_PER_ENTRY), android.widget.Toast.LENGTH_SHORT).show()
                 else picker.launch(androidx.activity.result.PickVisualMediaRequest(androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia.ImageOnly))
             }) {
                 Icon(Icons.Rounded.AddPhotoAlternate, null, Modifier.size(20.dp)); Spacer(Modifier.width(6.dp)); Text(stringResource(R.string.editor_add_photo))
             }
-            TextButton(onClick = { linkEdit = LinkEdit(-1, null) }) {
+            TextButton(modifier = Modifier.onGloballyPositioned { eBounds["link"] = it.boundsInWindow() }, onClick = { linkEdit = LinkEdit(-1, null) }) {
                 Icon(Icons.Rounded.Link, null, Modifier.size(20.dp)); Spacer(Modifier.width(6.dp)); Text(stringResource(R.string.link_add))
             }
             Spacer(Modifier.weight(1f))
@@ -636,6 +661,14 @@ private fun EditorPane(vm: DiaryViewModel, entryId: Long?, startDate: LocalDate,
             )
         }
     }
+        if (!eGuideDone && eGuideReady && loaded) com.spcode.tnpscprep.ui.guide.CoachOverlay(
+            listOf(
+                com.spcode.tnpscprep.ui.guide.CoachStep("mood", stringResource(R.string.guide_e1_title), stringResource(R.string.guide_e1_body)),
+                com.spcode.tnpscprep.ui.guide.CoachStep("photo", stringResource(R.string.guide_e2_title), stringResource(R.string.guide_e2_body)),
+                com.spcode.tnpscprep.ui.guide.CoachStep("link", stringResource(R.string.guide_e3_title), stringResource(R.string.guide_e3_body)),
+            ),
+            eBounds, onFinish = { (ctx.applicationContext as com.spcode.tnpscprep.TnpscApp).container.settingsStore.setEditorGuideDone(true) },
+        )
     }
 
     pendingPhoto?.let { bmp ->

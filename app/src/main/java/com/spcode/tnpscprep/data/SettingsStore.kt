@@ -88,6 +88,12 @@ class SettingsStore(context: Context) {
     private val _praiseAsked = MutableStateFlow(prefs.getBoolean(K_PRAISE_ASKED, false))
     val praiseAsked: StateFlow<Boolean> = _praiseAsked.asStateFlow()
     fun setPraiseAsked(v: Boolean) { prefs.edit().putBoolean(K_PRAISE_ASKED, v).apply(); _praiseAsked.value = v }
+    private val _jGuide = MutableStateFlow(prefs.getBoolean(K_J_GUIDE, false))
+    val journalGuideDone: StateFlow<Boolean> = _jGuide.asStateFlow()
+    fun setJournalGuideDone(v: Boolean) { prefs.edit().putBoolean(K_J_GUIDE, v).apply(); _jGuide.value = v }
+    private val _eGuide = MutableStateFlow(prefs.getBoolean(K_E_GUIDE, false))
+    val editorGuideDone: StateFlow<Boolean> = _eGuide.asStateFlow()
+    fun setEditorGuideDone(v: Boolean) { prefs.edit().putBoolean(K_E_GUIDE, v).apply(); _eGuide.value = v }
     private var praiseCounter = prefs.getInt(K_PRAISE_N, 0)
     fun nextPraiseCounter(): Int { praiseCounter++; prefs.edit().putInt(K_PRAISE_N, praiseCounter).apply(); return praiseCounter }
     private val _foodAlert = MutableStateFlow(prefs.getString(K_FOOD_ALERT, "") ?: "")
@@ -165,7 +171,7 @@ class SettingsStore(context: Context) {
         _wrapHour.value = com.spcode.tnpscprep.domain.TodayGuide.EVENING_HOUR; _remOn.value = false; _remMin.value = com.spcode.tnpscprep.domain.ReminderTime.DEFAULT_MINUTES; _targetExam.value = "ALL"; _examMask.value = com.spcode.tnpscprep.domain.Exam.ALL_MASK; _examDay.value = NO_DATE
         _newsEnabled.value = true; _newsLast.value = 0L; _lastBackup.value = 0L; _bkRemind.value = true; _bkSnooze.value = 0L; _bkBase.value = 0L
         _theme.value = "LIGHT"; _name.value = ""; _account.value = false
-        _health.value = HealthProfile(); _usage.value = false; _gsDone.value = false; _strictFood.value = false; _foodAlert.value = ""; _moodSounds.value = true; _praise.value = true; _praiseAsked.value = false; praiseCounter = 0
+        _health.value = HealthProfile(); _usage.value = false; _gsDone.value = false; _strictFood.value = false; _foodAlert.value = ""; _moodSounds.value = true; _praise.value = true; _praiseAsked.value = false; _jGuide.value = false; _eGuide.value = false; praiseCounter = 0
     }
 
     val focusMinutes: StateFlow<Int> = _focus.asStateFlow()
@@ -202,6 +208,8 @@ class SettingsStore(context: Context) {
         private const val K_MOOD_SOUNDS = "mood_sounds"
         private const val K_PRAISE = "praise_notifs"
         private const val K_PRAISE_N = "praise_n"
+        private const val K_J_GUIDE = "journal_guide_done"
+        private const val K_E_GUIDE = "editor_guide_done"
         private const val K_PRAISE_ASKED = "praise_asked"
         private const val K_FOOD_ALERT = "food_alert_start"
         private const val K_GS_DONE = "getting_started_done"
