@@ -20,6 +20,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import com.spcode.tnpscprep.ui.guide.guideTarget
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ExpandLess
 import androidx.compose.material.icons.rounded.ExpandMore
@@ -115,17 +116,20 @@ fun CareScreen() {
     val lastGlass = health.filter { it.kind == HealthKind.WATER && it.date == today.toString() }.maxByOrNull { it.createdAt }
     val stepsToday = if (stepSensor) steps.firstOrNull { it.date == today.toString() }?.steps else null
 
+    val cb = com.spcode.tnpscprep.ui.guide.rememberGuideBounds()
+    val careScroll = rememberScrollState()
+    Box(Modifier.fillMaxSize()) {
     Column(
-        Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 16.dp + LocalBottomBarInset.current),
+        Modifier.fillMaxSize().verticalScroll(careScroll).padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 16.dp + LocalBottomBarInset.current),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         ScreenTitle(stringResource(R.string.care_title))
 
         // ---------------- hero ----------------
-        PopIn(0) { Hero(moods[today], food[today], waterToday, target, stepsToday) { sheet = "mood:$today" } }
+        PopIn(0, Modifier.guideTarget(cb, "hero")) { Hero(moods[today], food[today], waterToday, target, stepsToday) { sheet = "mood:$today" } }
 
         // ---------------- mood ----------------
-        PopIn(1) {
+        PopIn(1, Modifier.guideTarget(cb, "mood")) {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 SectionTitle(stringResource(R.string.care_mood))
                 SoftCard(Modifier.fillMaxWidth()) {
@@ -165,7 +169,7 @@ fun CareScreen() {
         }
 
         // ---------------- water ----------------
-        PopIn(3) {
+        PopIn(3, Modifier.guideTarget(cb, "water")) {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 SectionTitle(stringResource(R.string.checkin_water))
                 SoftCard(Modifier.fillMaxWidth()) {
@@ -205,7 +209,7 @@ fun CareScreen() {
         if (stepSensor) PopIn(4) { StepsCard() }
 
         // ---------------- private body + cycle ----------------
-        PopIn(5) {
+        PopIn(5, Modifier.guideTarget(cb, "body")) {
             SoftCard(Modifier.fillMaxWidth(), onClick = { bodyOpen = !bodyOpen }) {
                 Column(Modifier.padding(16.dp).animateContentSize()) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -221,6 +225,17 @@ fun CareScreen() {
                 }
             }
         }
+    }
+    com.spcode.tnpscprep.ui.guide.PageTour(
+        "care",
+        listOf(
+            com.spcode.tnpscprep.ui.guide.CoachStep("hero", stringResource(R.string.guide_c1_title), stringResource(R.string.guide_c1_body)),
+            com.spcode.tnpscprep.ui.guide.CoachStep("mood", stringResource(R.string.guide_c2_title), stringResource(R.string.guide_c2_body)),
+            com.spcode.tnpscprep.ui.guide.CoachStep("water", stringResource(R.string.guide_c3_title), stringResource(R.string.guide_c3_body)),
+            com.spcode.tnpscprep.ui.guide.CoachStep("body", stringResource(R.string.guide_c4_title), stringResource(R.string.guide_c4_body)),
+        ),
+        cb, scrollable = careScroll, enabled = sheet == null,
+    )
     }
 
     // ---------------- pick sheets (mood / food for any day) ----------------

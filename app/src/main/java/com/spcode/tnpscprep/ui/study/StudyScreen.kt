@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.Box
+import com.spcode.tnpscprep.ui.guide.guideTarget
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -95,14 +96,17 @@ private fun StudyHome(vm: SyllabusViewModel, todayVm: com.spcode.tnpscprep.ui.to
     val due = ui.progress.due.size
     val resume = last?.let { t -> subjects.firstOrNull { it.id == t.subjectId }?.let { t to it } }
 
+    val sb = com.spcode.tnpscprep.ui.guide.rememberGuideBounds()
+    val listState = androidx.compose.foundation.lazy.rememberLazyListState()
+    Box(Modifier.fillMaxSize()) {
     LazyColumn(
-        Modifier.fillMaxSize(),
+        Modifier.fillMaxSize(), state = listState,
         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 16.dp + LocalBottomBarInset.current),
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
         item { ScreenTitle(stringResource(R.string.study_title)) }
         item {
-            Card(colors = CardDefaults.cardColors(containerColor = Color.Transparent), modifier = Modifier.fillMaxWidth()) {
+            Card(colors = CardDefaults.cardColors(containerColor = Color.Transparent), modifier = Modifier.fillMaxWidth().guideTarget(sb, "progress")) {
                 Column(
                     Modifier.fillMaxWidth().background(Brush.linearGradient(listOf(Color(0xFFC8102E), Color(0xFF800020)))).padding(18.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -124,19 +128,30 @@ private fun StudyHome(vm: SyllabusViewModel, todayVm: com.spcode.tnpscprep.ui.to
             }
         }
         item {
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(Modifier.fillMaxWidth().guideTarget(sb, "tiles"), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 LinkTile("🔁", stringResource(R.string.nav_revise), if (due > 0) stringResource(R.string.study_due_fmt, due) else stringResource(R.string.study_due_none), due > 0, Modifier.weight(1f)) { open("revise", null) }
                 LinkTile("📰", stringResource(R.string.nav_news), stringResource(R.string.study_news_sub), false, Modifier.weight(1f)) { open("news", null) }
             }
         }
-        item { OutlinedButton(onClick = { open("syllabus", null) }, modifier = Modifier.fillMaxWidth()) { Text("🔎  " + stringResource(R.string.syllabus_search_hint)) } }
+        item { OutlinedButton(onClick = { open("syllabus", null) }, modifier = Modifier.fillMaxWidth().guideTarget(sb, "search")) { Text("🔎  " + stringResource(R.string.syllabus_search_hint)) } }
         item { Text(stringResource(R.string.study_subjects), style = MaterialTheme.typography.titleMedium) }
         items(subjects.chunked(2), key = { it.first().id }) { row ->
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(Modifier.fillMaxWidth().let { m -> if (row.first().id == subjects.first().id) m.guideTarget(sb, "subjects") else m }, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 row.forEach { s -> SubjectTile(s, Modifier.weight(1f)) { open("syllabus", s.id) } }
                 if (row.size == 1) Spacer(Modifier.weight(1f))
             }
         }
+    }
+    com.spcode.tnpscprep.ui.guide.PageTour(
+        "study",
+        listOf(
+            com.spcode.tnpscprep.ui.guide.CoachStep("progress", stringResource(R.string.guide_s1_title), stringResource(R.string.guide_s1_body), reveal = { listState.animateScrollToItem(1) }),
+            com.spcode.tnpscprep.ui.guide.CoachStep("tiles", stringResource(R.string.guide_s2_title), stringResource(R.string.guide_s2_body), reveal = { listState.animateScrollToItem(2) }),
+            com.spcode.tnpscprep.ui.guide.CoachStep("search", stringResource(R.string.guide_s3_title), stringResource(R.string.guide_s3_body), reveal = { listState.animateScrollToItem(3) }),
+            com.spcode.tnpscprep.ui.guide.CoachStep("subjects", stringResource(R.string.guide_s4_title), stringResource(R.string.guide_s4_body), reveal = { listState.animateScrollToItem(5) }),
+        ),
+        sb, scrollable = listState,
+    )
     }
 }
 

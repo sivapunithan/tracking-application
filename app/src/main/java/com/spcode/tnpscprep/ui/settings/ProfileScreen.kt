@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import com.spcode.tnpscprep.ui.guide.guideTarget
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
@@ -81,8 +82,11 @@ fun ProfileScreen(headlines: HeadlinesViewModel, auth: AuthViewModel, studyByDat
         "study" to R.string.profile_pg_study, "evening" to R.string.profile_pg_evening, "food" to R.string.profile_pg_food,
         "look" to R.string.profile_pg_look, "privacy" to R.string.profile_pg_privacy, "data" to R.string.profile_pg_data,
     )
+    val pb = com.spcode.tnpscprep.ui.guide.rememberGuideBounds()
+    val profileScroll = rememberScrollState()
+    androidx.compose.foundation.layout.Box(Modifier.fillMaxSize()) {
     Column(
-        Modifier.fillMaxSize().verticalScroll(rememberScrollState())
+        Modifier.fillMaxSize().verticalScroll(profileScroll)
             .padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 16.dp + LocalBottomBarInset.current),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
@@ -97,13 +101,23 @@ fun ProfileScreen(headlines: HeadlinesViewModel, auth: AuthViewModel, studyByDat
             "look" -> LookPage(headlines)
             "privacy" -> PrivacyPage(headlines, auth, studyByDate)
             "data" -> DataPage(auth)
-            else -> Hub(headlines, settings) { page = it }
+            else -> Hub(headlines, settings, pb) { page = it }
         }
+    }
+    com.spcode.tnpscprep.ui.guide.PageTour(
+        "profile",
+        listOf(
+            com.spcode.tnpscprep.ui.guide.CoachStep("top", stringResource(R.string.guide_p1_title), stringResource(R.string.guide_p1_body)),
+            com.spcode.tnpscprep.ui.guide.CoachStep("rows", stringResource(R.string.guide_p2_title), stringResource(R.string.guide_p2_body)),
+            com.spcode.tnpscprep.ui.guide.CoachStep("data", stringResource(R.string.guide_p3_title), stringResource(R.string.guide_p3_body)),
+        ),
+        pb, scrollable = profileScroll, enabled = page == "hub",
+    )
     }
 }
 
 @Composable
-private fun Hub(headlines: HeadlinesViewModel, settings: com.spcode.tnpscprep.data.SettingsStore, open: (String) -> Unit) {
+private fun Hub(headlines: HeadlinesViewModel, settings: com.spcode.tnpscprep.data.SettingsStore, pb: MutableMap<String, androidx.compose.ui.geometry.Rect>, open: (String) -> Unit) {
     val name by headlines.userName.collectAsStateWithLifecycle()
     val mask by settings.examMask.collectAsStateWithLifecycle()
     val goal by settings.dailyGoalMinutes.collectAsStateWithLifecycle()
@@ -112,7 +126,7 @@ private fun Hub(headlines: HeadlinesViewModel, settings: com.spcode.tnpscprep.da
     val strict by settings.strictFood.collectAsStateWithLifecycle()
     val themeMode by headlines.themeMode.collectAsStateWithLifecycle()
     val exams = ExamSelection.codes(mask).joinToString(" · ")
-    Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)), modifier = Modifier.fillMaxWidth()) {
+    Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)), modifier = Modifier.fillMaxWidth().guideTarget(pb, "top")) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(Modifier.size(64.dp).background(MaterialTheme.colorScheme.primaryContainer, CircleShape), contentAlignment = Alignment.Center) {
@@ -133,12 +147,14 @@ private fun Hub(headlines: HeadlinesViewModel, settings: com.spcode.tnpscprep.da
         }
     }
     val on = stringResource(R.string.state_on); val off = stringResource(R.string.state_off)
+    Column(Modifier.guideTarget(pb, "rows"), verticalArrangement = Arrangement.spacedBy(12.dp)) {
     HubRow(Icons.Rounded.School, stringResource(R.string.profile_pg_study), stringResource(R.string.profile_sub_study, exams.ifEmpty { stringResource(R.string.exam_all) }, goal)) { open("study") }
     HubRow(Icons.Rounded.NightsStay, stringResource(R.string.profile_pg_evening), stringResource(R.string.profile_sub_evening, wrapHour, if (reminderOn) on else off)) { open("evening") }
     HubRow(Icons.Rounded.Restaurant, stringResource(R.string.profile_pg_food), stringResource(R.string.profile_sub_food, if (strict) on else off)) { open("food") }
     HubRow(Icons.Rounded.Palette, stringResource(R.string.profile_pg_look), stringResource(R.string.profile_sub_look, themeLabel(themeMode), languageLabel(AppLocale.current()))) { open("look") }
     HubRow(Icons.Rounded.Lock, stringResource(R.string.profile_pg_privacy), stringResource(R.string.profile_sub_privacy)) { open("privacy") }
-    HubRow(Icons.Rounded.Storage, stringResource(R.string.profile_pg_data), stringResource(R.string.profile_sub_data)) { open("data") }
+    Box(Modifier.guideTarget(pb, "data")) { HubRow(Icons.Rounded.Storage, stringResource(R.string.profile_pg_data), stringResource(R.string.profile_sub_data)) { open("data") } }
+    }
 }
 
 @Composable
@@ -468,13 +484,13 @@ private fun PhotoStorageSection() {
 }
 
 
-/** Plays the first-time Journal tours again. */
+/** Plays every first-time tour again (Today, Study, Care, Focus, Profile and the Journal ones). */
 @Composable
 private fun GuideAgain() {
     val ctx = androidx.compose.ui.platform.LocalContext.current
     val settings = remember { (ctx.applicationContext as com.spcode.tnpscprep.TnpscApp).container.settingsStore }
     var done by remember { mutableStateOf(false) }
     Spacer(Modifier.height(12.dp))
-    OutlinedButton(onClick = { settings.setJournalGuideDone(false); settings.setEditorGuideDone(false); done = true }) { Text(stringResource(R.string.guide_again)) }
+    OutlinedButton(onClick = { settings.resetGuides(); done = true }) { Text(stringResource(R.string.guide_again)) }
     if (done) Text(stringResource(R.string.guide_again_done), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
 }

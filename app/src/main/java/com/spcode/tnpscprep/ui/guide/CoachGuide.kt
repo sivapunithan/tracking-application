@@ -40,6 +40,9 @@ import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.foundation.gestures.animateScrollBy
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
@@ -51,7 +54,7 @@ import com.spcode.tnpscprep.ui.diary.DiaryMood
 import kotlin.math.roundToInt
 
 /** One tip: [target] = the key of the element to light up (null or unknown = just the card in the middle). */
-data class CoachStep(val target: String?, val title: String, val body: String)
+data class CoachStep(val target: String?, val title: String, val body: String, val reveal: (suspend () -> Unit)? = null)
 
 /**
  * A first-time tour: the screen is dimmed with a rounded "spotlight" around the element being explained and a card beside it
@@ -59,7 +62,7 @@ data class CoachStep(val target: String?, val title: String, val body: String)
  * can be triggered), and it ends only on Skip or the last Done. [bounds] are in WINDOW coordinates (use boundsInWindow).
  */
 @Composable
-fun CoachOverlay(steps: List<CoachStep>, bounds: Map<String, Rect>, onFinish: () -> Unit) {
+fun CoachOverlay(steps: List<CoachStep>, bounds: Map<String, Rect>, onFinish: () -> Unit, scrollable: androidx.compose.foundation.gestures.ScrollableState? = null) {
     if (steps.isEmpty()) return
     var index by remember { mutableIntStateOf(0) }
     val step = steps[index.coerceIn(0, steps.lastIndex)]
@@ -67,18 +70,36 @@ fun CoachOverlay(steps: List<CoachStep>, bounds: Map<String, Rect>, onFinish: ()
     var height by remember { mutableIntStateOf(0) }
     val d = LocalDensity.current
 
+    // bring the element on screen: a coarse jump for lazy lists (step.reveal), then a smooth scroll that puts it in the upper-middle
+    LaunchedEffect(index) {
+        step.reveal?.invoke()
+        val key = step.target ?: return@LaunchedEffect
+        var tries = 0
+        while (bounds[key] == null && tries < 30) { kotlinx.coroutines.delay(50); tries++ }
+        val r = bounds[key] ?: return@LaunchedEffect
+        val sc = scrollable ?: return@LaunchedEffect
+        val top = origin.y + height * 0.12f; val bottom = origin.y + height * 0.78f
+        if (r.top < top || r.bottom > bottom) sc.animateScrollBy(r.top - (origin.y + height * 0.16f))
+    }
     // the spotlight glides from one element to the next
     val target = step.target?.let { bounds[it] }?.translate(-origin.x, -origin.y)
     val l = remember { Animatable(0f) }; val t = remember { Animatable(0f) }; val r = remember { Animatable(0f) }; val b = remember { Animatable(0f) }
     val a = remember { Animatable(0f) }
-    LaunchedEffect(target, index) {
-        if (target == null) { a.animateTo(0f, tween(200)); return@LaunchedEffect }
-        if (a.value == 0f) { l.snapTo(target.left); t.snapTo(target.top); r.snapTo(target.right); b.snapTo(target.bottom); a.animateTo(1f, tween(300)) }
-        else {
+    var placed by remember { mutableStateOf(false) }          // the spotlight has been put somewhere at least once
+    var glideFrom by remember { mutableIntStateOf(-1) }        // the step the spotlight is already gliding to / sitting on
+    // the hole fades in/out on its own (independent of the rectangle, which keeps changing while the page scrolls)
+    LaunchedEffect(target != null) { a.animateTo(if (target != null) 1f else 0f, tween(250)) }
+    // the rectangle glides ONCE to a new step's element, and afterwards simply follows it (so a scrolling page never leaves the ring behind)
+    LaunchedEffect(target) {
+        val tg = target ?: return@LaunchedEffect
+        if (!placed || glideFrom == index) {
+            l.snapTo(tg.left); t.snapTo(tg.top); r.snapTo(tg.right); b.snapTo(tg.bottom); placed = true; glideFrom = index
+        } else {
+            glideFrom = index
             val spec = tween<Float>(320)
             kotlinx.coroutines.coroutineScope {
-                launch { l.animateTo(target.left, spec) }; launch { t.animateTo(target.top, spec) }
-                launch { r.animateTo(target.right, spec) }; launch { b.animateTo(target.bottom, spec) }
+                launch { l.animateTo(tg.left, spec) }; launch { t.animateTo(tg.top, spec) }
+                launch { r.animateTo(tg.right, spec) }; launch { b.animateTo(tg.bottom, spec) }
             }
         }
     }
@@ -132,4 +153,25 @@ fun CoachOverlay(steps: List<CoachStep>, bounds: Map<String, Rect>, onFinish: ()
             }
         }
     }
+}
+
+
+/** Marks an element as a tour target: its window bounds are kept in [bounds] under [key]. */
+fun Modifier.guideTarget(bounds: MutableMap<String, Rect>, key: String): Modifier = this.onGloballyPositioned { bounds[key] = it.boundsInWindow() }
+
+@Composable
+fun rememberGuideBounds(): androidx.compose.runtime.snapshots.SnapshotStateMap<String, Rect> = remember { androidx.compose.runtime.mutableStateMapOf() }
+
+/**
+ * A page's first-time tour: shown once (the finished page keys are in [com.spcode.tnpscprep.data.SettingsStore.guides]), [startDelayMs] after the page appears.
+ * Put it in a Box on top of the page content. [scrollable] = the page's scroll state, so off-screen targets are scrolled into view.
+ */
+@Composable
+fun PageTour(key: String, steps: List<CoachStep>, bounds: Map<String, Rect>, scrollable: androidx.compose.foundation.gestures.ScrollableState? = null, enabled: Boolean = true, startDelayMs: Long = 1000) {
+    val ctx = androidx.compose.ui.platform.LocalContext.current
+    val settings = remember { (ctx.applicationContext as com.spcode.tnpscprep.TnpscApp).container.settingsStore }
+    val done by settings.guides.collectAsStateWithLifecycle()
+    var ready by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { kotlinx.coroutines.delay(startDelayMs); ready = true }
+    if (key !in done && ready && enabled) CoachOverlay(steps, bounds, onFinish = { settings.markGuideDone(key) }, scrollable = scrollable)
 }

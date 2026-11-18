@@ -43,6 +43,7 @@ import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import com.spcode.tnpscprep.ui.guide.guideTarget
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -163,8 +164,10 @@ fun TodayScreen(vm: TodayViewModel, onOpenProfile: () -> Unit, onOpenDiary: (Str
     // today's plan = only what she added herself (or picked in last night's wrap-up): nothing is made up for her
     // Kind notifications need the phone's notification permission: ask ONCE (the system dialog is hers to answer; Profile > Look can ask again).
     val askNotif = androidx.activity.compose.rememberLauncherForActivityResult(androidx.activity.result.contract.ActivityResultContracts.RequestPermission()) { }
-    LaunchedEffect(Unit) {
-        delay(1500)
+    val todayTourDone by settings.guides.collectAsStateWithLifecycle()
+    LaunchedEffect("today" in todayTourDone) {
+        if ("today" !in todayTourDone) return@LaunchedEffect
+        delay(800)
         if (android.os.Build.VERSION.SDK_INT >= 33 && settings.praiseNotifs.value && !settings.praiseAsked.value && !com.spcode.tnpscprep.notify.Praise.canPost(appCtx)) {
             settings.setPraiseAsked(true)
             askNotif.launch(android.Manifest.permission.POST_NOTIFICATIONS)
@@ -182,6 +185,8 @@ fun TodayScreen(vm: TodayViewModel, onOpenProfile: () -> Unit, onOpenDiary: (Str
     val checkinsIndex = 2 + (if (showGs) 1 else 0) + (if (wrapState != com.spcode.tnpscprep.domain.WrapupCardState.HIDDEN) 1 else 0) + 1
     fun toCheckins() { scope.launch { listState.animateScrollToItem(checkinsIndex) } }
 
+    val tb = com.spcode.tnpscprep.ui.guide.rememberGuideBounds()
+    Box(Modifier.fillMaxSize()) {
     LazyColumn(
         Modifier.fillMaxSize(),
         state = listState,
@@ -194,6 +199,7 @@ fun TodayScreen(vm: TodayViewModel, onOpenProfile: () -> Unit, onOpenDiary: (Str
         if (wrapState == com.spcode.tnpscprep.domain.WrapupCardState.INVITE) item(key = "wrapup") { com.spcode.tnpscprep.ui.wrapup.WrapupCardView(wrapState, onOpenWrapup, lastSeven, plannedTomorrow.map { it.title }.take(3)) }
 
         item {
+          Box(Modifier.guideTarget(tb, "next")) {
             NextActionCard(action, ui.progress.due.firstOrNull(), extras.nextTopic?.let { localized(it.nameEn, it.nameTa) }, ui.streak, ui.todayMinutes, ui.goalMinutes) {
                 when (action) {
                     com.spcode.tnpscprep.domain.NextAction.SetExamDate -> sheet = "date"
@@ -205,6 +211,7 @@ fun TodayScreen(vm: TodayViewModel, onOpenProfile: () -> Unit, onOpenDiary: (Str
                     com.spcode.tnpscprep.domain.NextAction.AllCaughtUp -> Unit
                 }
             }
+          }
         }
 
         if (showGs) item {
@@ -219,7 +226,7 @@ fun TodayScreen(vm: TodayViewModel, onOpenProfile: () -> Unit, onOpenDiary: (Str
         }
 
 
-        item(key = "plan") { PlanCard(plannedToday, extras.doneRefs, hour, tickPlan, { wvm.addManual(foodDay, it) }, { wvm.delete(it.id) }) }
+        item(key = "plan") { Box(Modifier.guideTarget(tb, "plan")) { PlanCard(plannedToday, extras.doneRefs, hour, tickPlan, { wvm.addManual(foodDay, it) }, { wvm.delete(it.id) }) } }
 
         if (showBackup) item(key = "backup-nudge") {
             BackupNudgeCard(
@@ -230,7 +237,7 @@ fun TodayScreen(vm: TodayViewModel, onOpenProfile: () -> Unit, onOpenDiary: (Str
             )
         }
 
-        item(key = "checkins") {
+        item(key = "checkins") { Box(Modifier.guideTarget(tb, "checkins")) {
             val evening = com.spcode.tnpscprep.domain.FoodCheckin.eveningPrompt(System.currentTimeMillis(), java.time.ZoneId.systemDefault(), foodLogged)
             val weightKg = healthEntries.filter { it.kind == com.spcode.tnpscprep.data.HealthKind.WEIGHT }.maxByOrNull { it.createdAt }?.value
             val waterTarget = weightKg?.let { com.spcode.tnpscprep.domain.Health.waterMl(it) } ?: 2000
@@ -241,7 +248,7 @@ fun TodayScreen(vm: TodayViewModel, onOpenProfile: () -> Unit, onOpenDiary: (Str
                 onWaterAdd = { hvm.add(com.spcode.tnpscprep.data.HealthKind.WATER, 250.0) },
                 onWaterUndo = lastGlass?.let { g -> { hvm.delete(g.id) } },
             )
-        }
+        } }
 
         item {
             // last 7 days of study minutes (oldest first) for the study tile's mini chart, from the same heatmap data
@@ -252,9 +259,28 @@ fun TodayScreen(vm: TodayViewModel, onOpenProfile: () -> Unit, onOpenDiary: (Str
             TileRow(ui, stepsToday, week)
         }
 
-        item { HeatmapSection(heat, food, onDay = { sheet = "day:" + it }) }
+        item { Box(Modifier.guideTarget(tb, "heat")) { HeatmapSection(heat, food, onDay = { sheet = "day:" + it }) } }
 
         if (wrapState == com.spcode.tnpscprep.domain.WrapupCardState.DONE) item(key = "wrapup") { com.spcode.tnpscprep.ui.wrapup.WrapupCardView(wrapState, onOpenWrapup, lastSeven, plannedTomorrow.map { it.title }.take(3)) }
+    }
+    // first-time tour (the notification permission prompt waits until it is over)
+    run {
+        val wrapInvite = wrapState == com.spcode.tnpscprep.domain.WrapupCardState.INVITE
+        val iNext = 1 + (if (wrapInvite) 1 else 0)
+        val iPlan = iNext + 1 + (if (showGs) 1 else 0)
+        val iCheck = iPlan + 1 + (if (showBackup) 1 else 0)
+        val iHeat = iCheck + 2
+        com.spcode.tnpscprep.ui.guide.PageTour(
+            "today",
+            listOf(
+                com.spcode.tnpscprep.ui.guide.CoachStep("next", stringResource(R.string.guide_t1_title), stringResource(R.string.guide_t1_body), reveal = { listState.animateScrollToItem(iNext) }),
+                com.spcode.tnpscprep.ui.guide.CoachStep("plan", stringResource(R.string.guide_t2_title), stringResource(R.string.guide_t2_body), reveal = { listState.animateScrollToItem(iPlan) }),
+                com.spcode.tnpscprep.ui.guide.CoachStep("checkins", stringResource(R.string.guide_t3_title), stringResource(R.string.guide_t3_body), reveal = { listState.animateScrollToItem(iCheck) }),
+                com.spcode.tnpscprep.ui.guide.CoachStep("heat", stringResource(R.string.guide_t4_title), stringResource(R.string.guide_t4_body), reveal = { listState.animateScrollToItem(iHeat) }),
+            ),
+            tb, scrollable = listState, enabled = sheet == null,
+        )
+    }
     }
 
     // Strict mode: shown ONCE per chain of 3 junk days (the chain's start date is remembered), and only when nothing else is open.
